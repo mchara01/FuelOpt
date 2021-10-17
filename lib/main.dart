@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fuel_opt/screens/login_screen.dart';
+import '../utils/appColors.dart' as appColors;
 
 void main() {
   runApp(const MyApp());
@@ -14,7 +15,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Email and Password Login',
       theme: ThemeData(
-        primarySwatch: Colors.red,
+        primaryColor: appColors.PrimaryBlue,
       ),
       home: const LoginScreen(),
     );
