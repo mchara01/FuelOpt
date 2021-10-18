@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:fuel_opt/screens/login_screen.dart';
+import 'package:fuel_opt/screens/home_screen.dart';
 import '../utils/appColors.dart' as appColors;
 
 void main() {
@@ -17,7 +17,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primaryColor: appColors.PrimaryBlue,
       ),
-      home: const LoginScreen(),
+      home: HomeScreen(),
     );
   }
 }
