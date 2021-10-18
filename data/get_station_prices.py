@@ -6,7 +6,9 @@ from selenium.webdriver.common.keys import Keys
 from time import time
 import pandas as pd
 
-
+from dotenv import load_dotenv
+import os 
+load_dotenv()
 
 start = time()
 # options to run the chrome browser headless
@@ -16,8 +18,8 @@ options = Options()
 
 # signing in
 data = {
-    "email": "johnbravie7@gmail.com",
-    "password": "CaFfft6asnq.5j3",
+    "email": os.getenv("PETROL_USERNAME"),
+    "password": os.getenv("PETROL_PASSWORD"),
     "url_login": "https://app.petrolprices.com/login",
     "url_station": "https://app.petrolprices.com/petrolstation"
 }
