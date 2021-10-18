@@ -3,6 +3,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:fuel_opt/screens/home_screen.dart';
 import 'package:fuel_opt/screens/registration_screen.dart';
 import '../utils/appColors.dart' as appColors;
 
@@ -164,8 +165,8 @@ class _LoginScreenState extends State<LoginScreen> {
           .signInWithEmailAndPassword(email: email, password: password)
           .then((uid) => {
                 Fluttertoast.showToast(msg: "Login Successfully"),
-                Navigator.of(context).pushReplacement(
-                    MaterialPageRoute(builder: (context) => LoginScreen())),
+                Navigator.push(context,
+                    MaterialPageRoute(builder: (context) => HomeScreen())),
               })
           .catchError((e) {
         Fluttertoast.showToast(msg: e!.message);
