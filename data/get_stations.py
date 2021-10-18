@@ -46,12 +46,12 @@ counter = 0
 
 
 # exit()
-# for latitude in [51.3, 51.3, 51.4, 51.5, 51.6, 51.7]:
-#     for longitude in [-0.4, -0.3, -0.2, -0.1, 0.0, 0.1, 0.2]:
+for latitude in [51.3, 51.3, 51.4, 51.5, 51.6, 51.7]:
+    for longitude in [-0.4, -0.3, -0.2, -0.1, 0.0, 0.1, 0.2]:
 
         
-for latitude in [51.3]:
-    for longitude in [-0.4]:
+# for latitude in [51.3]:
+#     for longitude in [-0.4]:
 
         # arguments to put in the url
         # distance is in miles
@@ -118,8 +118,8 @@ for latitude in [51.3]:
             browser.switch_to.window(browser.window_handles[0])
             counter += 1
             print(counter)
-            if counter == 5:
-                break
+            # if counter == 5:
+            #     break
 
 
 # convert the list to a pandas dataframe

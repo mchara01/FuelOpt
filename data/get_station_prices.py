@@ -89,6 +89,7 @@ for row_index in range(len(station_info)):
             By.XPATH, '/html/body/div/main/div/section[1]/div/div/div/div[4]/div/p').text.split(" ")[2][0:-3])
     else:
         station_premium_diesel_date.append("")
+    print(row_index)
 
 # put all the new information to the dataframe
 station_info["unleaded"] = station_unleaded
