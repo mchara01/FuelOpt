@@ -1,6 +1,8 @@
 // ignore_for_file: prefer_const_constructors
 
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:fuel_opt/screens/registration_screen.dart';
 import '../utils/appColors.dart' as appColors;
 
@@ -17,6 +19,9 @@ class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController emailController = new TextEditingController();
   final TextEditingController passwordController = new TextEditingController();
 
+  // firebase
+  final _auth = FirebaseAuth.instance;
+
   @override
   Widget build(BuildContext context) {
     // Email field
@@ -24,6 +29,15 @@ class _LoginScreenState extends State<LoginScreen> {
       autofocus: false,
       controller: emailController,
       keyboardType: TextInputType.emailAddress,
+      validator: (value) {
+        if (value!.isEmpty) {
+          return ("Please Enter Your Email");
+        }
+        // reg expression for email validation
+        if (!RegExp("[a-zA-Z0-9+_.-]+@[a-zA-Z0-9.-]+.[a-z]").hasMatch(value)) {
+          return ("Please Enter a Valid Email");
+        }
+      },
       onSaved: (value) {
         emailController.text = value!;
       },
@@ -40,6 +54,11 @@ class _LoginScreenState extends State<LoginScreen> {
       autofocus: false,
       controller: passwordController,
       obscureText: true,
+      validator: (value) {
+        if (value!.isEmpty) {
+          return ("Password is required for login");
+        }
+      },
       onSaved: (value) {
         passwordController.text = value!;
       },
@@ -58,7 +77,9 @@ class _LoginScreenState extends State<LoginScreen> {
         child: MaterialButton(
           padding: EdgeInsets.fromLTRB(20, 15, 20, 15),
           minWidth: MediaQuery.of(context).size.width,
-          onPressed: () {},
+          onPressed: () {
+            signIn(emailController.text, passwordController.text);
+          },
           child: Text(
             "Login",
             textAlign: TextAlign.center,
@@ -134,5 +155,21 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                   ))),
         ));
+  }
+
+  // login function
+  void signIn(String email, String password) async {
+    if (_formKey.currentState!.validate()) {
+      await _auth
+          .signInWithEmailAndPassword(email: email, password: password)
+          .then((uid) => {
+                Fluttertoast.showToast(msg: "Login Successfully"),
+                Navigator.of(context).pushReplacement(
+                    MaterialPageRoute(builder: (context) => LoginScreen())),
+              })
+          .catchError((e) {
+        Fluttertoast.showToast(msg: e!.message);
+      });
+    }
   }
 }

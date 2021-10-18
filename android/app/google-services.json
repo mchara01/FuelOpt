@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "177235930726",
+    "project_id": "maximal-mason-328621",
+    "storage_bucket": "maximal-mason-328621.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:177235930726:android:50591e7dab05fc415947a7",
+        "android_client_info": {
+          "package_name": "uk.ac.imperial.fuel_opt"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "177235930726-nsv4tbc4cejtt3i8ilfn8q3up735iorm.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA9mzmWGaFDGWOjT9IUlVjTCGdit58m7ec"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "177235930726-nsv4tbc4cejtt3i8ilfn8q3up735iorm.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
