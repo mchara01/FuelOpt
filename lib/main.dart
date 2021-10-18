@@ -1,8 +1,13 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:fuel_opt/screens/login_screen.dart';
 import '../utils/appColors.dart' as appColors;
 
-void main() {
+Future<void> main() async {
+  // create Firebase
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
+
   runApp(const MyApp());
 }
 
