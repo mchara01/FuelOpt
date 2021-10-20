@@ -20,7 +20,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Email and Password Login',
       theme: ThemeData(
-        primaryColor: appColors.PrimaryBlue,
+        primaryColor: appColors.PrimaryAssentColor,
       ),
       home: const LoginScreen(),
     );

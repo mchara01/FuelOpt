@@ -1,0 +1,6 @@
+io/flutter/plugins/GeneratedPluginRegistrant.java
+ io.flutter.plugins.GeneratedPluginRegistrant
+uk/ac/imperial/fuel_opt/MainActivity.java
+ uk.ac.imperial.fuel_opt.MainActivity
+uk/ac/imperial/fuel_opt/BuildConfig.java
+ uk.ac.imperial.fuel_opt.BuildConfig
