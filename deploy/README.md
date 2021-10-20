@@ -20,7 +20,7 @@ The OS used on the VM is Linux, and the user also has root access, so be careful
 
 You can connect directly to MariaDB with the following steps:
 1.	For convenience, you can download an RDBMS Client, such as DBeaver, for your connection or through the command line via the mysql command.
-2.	The following credentials should be used to connect to the database from the application
+2.	The following credentials should be used to connect to the database from the application <br/>
   ***Hostnam***e:  ec2-3-8-3-44.eu-west-2.compute.amazonaws.com <br/>
   ***IPv4***: 3.8.3.44 <br/>
   ***DB Use***r: user <br/>
