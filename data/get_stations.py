@@ -14,7 +14,7 @@ start = time()
 # options to run the chrome browser headless
 # so no window is showing
 options = Options()
-# options.add_argument("--headless")
+options.add_argument("--headless")
 
 # signing in
 data = {
@@ -30,9 +30,6 @@ browser.find_element(By.NAME, "email").send_keys(data['email'])
 browser.find_element(By.NAME, "password").send_keys(data['password'])
 browser.find_element(By.ID, 'account-submit').click()
 
-
-latitude = 51.3
-
 # go through each result and put it on a list
 stationDF = []
 station_names_set = set()
@@ -44,8 +41,6 @@ browser.switch_to.window(browser.window_handles[0])
 
 counter = 0
 
-
-# exit()
 for latitude in [51.3, 51.3, 51.4, 51.5, 51.6, 51.7]:
     for longitude in [-0.4, -0.3, -0.2, -0.1, 0.0, 0.1, 0.2]:
 
@@ -63,9 +58,6 @@ for latitude in [51.3, 51.3, 51.4, 51.5, 51.6, 51.7]:
             "latitude": str(latitude),
             "longitude": str(longitude)
         }
-        print(
-            f'For location with latitude:{arguments["latitude"]}, longitude:{arguments["longitude"]}')
-
         browser.get('https://app.petrolprices.com/map?' +
                     arguments['fuelType']+'=2&brandType=0&resultLimit=0&offset=0&sortType=' +
                     arguments['sortType']+'&lat=' +
@@ -86,7 +78,11 @@ for latitude in [51.3, 51.3, 51.4, 51.5, 51.6, 51.7]:
 
         # browser.find_element(By.ID, 'continue-button').click()
 
+        print(
+            f'For location with latitude:{arguments["latitude"]}, longitude:{arguments["longitude"]}')
+
         for station in stations_results:
+            print(counter, end=" ")
             # station_price_date = station.find_elements(By.TAG_NAME, "h5")[
             #     2].text
             # get the name of the station from the stations page
@@ -98,6 +94,7 @@ for latitude in [51.3, 51.3, 51.4, 51.5, 51.6, 51.7]:
                 print("--------------------skip--------------------")
                 continue
             else:
+                print()
                 station_names_set.add(station_name)
             # get petrol station id
             station_id = station.get_attribute("data-id")
@@ -117,9 +114,6 @@ for latitude in [51.3, 51.3, 51.4, 51.5, 51.6, 51.7]:
             # switch focus back to main window
             browser.switch_to.window(browser.window_handles[0])
             counter += 1
-            print(counter)
-            # if counter == 5:
-            #     break
 
 
 # convert the list to a pandas dataframe
@@ -132,7 +126,7 @@ stationDF.to_csv("stations.csv")
 # ...dev
 # makes it so the window is not closed
 
-print(time()-start)
+print("Run in ",time()-start,"seconds.")
 
 # if not in headless mode
 # don't close the window after running everything
