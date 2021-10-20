@@ -50,6 +50,36 @@ class _LoginScreenState extends State<LoginScreen> {
           border: OutlineInputBorder(borderRadius: BorderRadius.circular(10))),
     );
 
+    Future<bool> showExitPopup() async {
+      return await showDialog( //show confirm dialogue
+        //the return value will be from "Yes" or "No" options
+        context: context,
+        builder: (context) => AlertDialog(
+          //title: Text(),
+          content: Text('Do you want to exit FuelOpt?'),
+          actions:[
+            ElevatedButton(
+              onPressed: () => Navigator.of(context).pop(true),
+              //return true when click on "Yes"
+              child:Text('Yes'),
+              style: ElevatedButton.styleFrom(
+                primary: appColors.PrimaryBlue),
+            ),
+
+            ElevatedButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              //return false when click on "No"
+              child:Text('No'),
+              style: ElevatedButton.styleFrom(
+                  primary: appColors.PrimaryBlue),
+            ),
+
+          ],
+        ),
+      )??false; //if showDialouge had returned null, then return false
+    }
+
+
     // password field
     final passwordField = TextFormField(
       autofocus: false,
@@ -92,70 +122,74 @@ class _LoginScreenState extends State<LoginScreen> {
           ),
         ));
 
-    return Scaffold(
-        backgroundColor: Colors.white,
-        body: Center(
-          child: SingleChildScrollView(
-              child: Container(
-                  color: Colors.white,
-                  child: Padding(
-                    padding: const EdgeInsets.all(36.0),
-                    child: Form(
-                      key: _formKey,
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: <Widget>[
-                          Row(
+    return WillPopScope(
+        onWillPop: showExitPopup, //call function on back button press
+        child:Scaffold(
+          backgroundColor: Colors.white,
+          body: Center(
+            child: SingleChildScrollView(
+                child: Container(
+                    color: Colors.white,
+                    child: Padding(
+                      padding: const EdgeInsets.all(36.0),
+                      child: Form(
+                        key: _formKey,
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: <Widget>[
+                            Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: <Widget>[
+                                  SizedBox.fromSize(
+                                      size: Size.fromRadius(30),
+                                      child: FittedBox(
+                                        child: Icon(Icons.directions_car_filled),
+                                      )),
+                                  Text(
+                                    " FuelOpt",
+                                    style: TextStyle(
+                                        color: appColors.PrimaryBlue,
+                                        fontWeight: FontWeight.w800,
+                                        fontSize: 30),
+                                  ),
+                                ]),
+                            SizedBox(height: 20),
+                            emailField,
+                            SizedBox(height: 20),
+                            passwordField,
+                            SizedBox(height: 20),
+                            loginButton,
+                            SizedBox(height: 20),
+                            Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: <Widget>[
-                                SizedBox.fromSize(
-                                    size: Size.fromRadius(30),
-                                    child: FittedBox(
-                                      child: Icon(Icons.directions_car_filled),
-                                    )),
-                                Text(
-                                  " FuelOpt",
-                                  style: TextStyle(
-                                      color: appColors.PrimaryBlue,
-                                      fontWeight: FontWeight.w800,
-                                      fontSize: 30),
-                                ),
-                              ]),
-                          SizedBox(height: 20),
-                          emailField,
-                          SizedBox(height: 20),
-                          passwordField,
-                          SizedBox(height: 20),
-                          loginButton,
-                          SizedBox(height: 20),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: <Widget>[
-                              Text("Don't have an account? "),
-                              GestureDetector(
-                                onTap: () {
-                                  Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                          builder: (context) =>
-                                              RegistrationScreen()));
-                                },
-                                child: Text(
-                                  "Sign Up",
-                                  style: TextStyle(
-                                      color: appColors.PrimaryBlue,
-                                      fontWeight: FontWeight.w600,
-                                      fontSize: 15),
-                                ),
-                              )
-                            ],
-                          )
-                        ],
+                                Text("Don't have an account? "),
+                                GestureDetector(
+                                  onTap: () {
+                                    Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                            builder: (context) =>
+                                                RegistrationScreen()));
+                                  },
+                                  child: Text(
+                                    "Sign Up",
+                                    style: TextStyle(
+                                        color: appColors.PrimaryBlue,
+                                        fontWeight: FontWeight.w600,
+                                        fontSize: 15),
+                                  ),
+                                )
+                              ],
+                            )
+                          ],
+                        ),
                       ),
-                    ),
-                  ))),
-        ));
+                    ))),
+          ),
+        )
+    );
   }
 
   // login function
