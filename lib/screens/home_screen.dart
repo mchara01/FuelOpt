@@ -47,7 +47,6 @@ class MapState extends State<Map> {
 
   @override
   Widget build(BuildContext context) {
-    // TODO: implement build
     return Scaffold(
       body: GoogleMap(
         mapType: MapType.normal,
@@ -63,5 +62,32 @@ class MapState extends State<Map> {
         },
       ),
     );
+  }
+    final logOutButton = Material(
+        elevation: 5,
+        borderRadius: BorderRadius.circular(30),
+        color: appColors.PrimaryBlue,
+        child: MaterialButton(
+          padding: EdgeInsets.fromLTRB(20, 15, 20, 15),
+          minWidth: MediaQuery.of(context).size.width,
+          onPressed: () {
+            logout(context);
+          },
+          child: Text(
+            "Logout",
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: 20,
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ));
+  }
+
+  Future<void> logout(BuildContext context) async {
+    await FirebaseAuth.instance.signOut();
+    Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (context) => LoginScreen()));
   }
 }
