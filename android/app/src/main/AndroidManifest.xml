@@ -3,6 +3,10 @@
    <application
         android:label="fuel_opt"
         android:icon="@mipmap/ic_launcher">
+
+       <meta-data android:name="com.google.android.geo.API_KEY"
+           android:value="AIzaSyAt5yqA51Z4B2buXb_WWrjJJCeuQ2m3qBs"/>
+
         <activity
             android:name=".MainActivity"
             android:launchMode="singleTop"
