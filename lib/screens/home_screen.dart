@@ -1,36 +1,68 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/material.dart';
-import 'package:fuel_opt/model/user_model.dart';
-import 'package:fuel_opt/screens/login_screen.dart';
-import '../utils/appColors.dart' as appColors;
+import 'dart:async';
 
-class HomeScreen extends StatefulWidget {
+import 'package:flutter/material.dart';
+import 'package:fuel_opt/utils/location_manager.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:location/location.dart';
+
+class HomeScreen extends StatelessWidget {
   const HomeScreen({Key? key}) : super(key: key);
 
   @override
-  _HomeScreenState createState() => _HomeScreenState();
+  Widget build(BuildContext context) {
+    return const Map();
+  }
 }
 
-class _HomeScreenState extends State<HomeScreen> {
-  User? user = FirebaseAuth.instance.currentUser;
-  UserModel loggedInUser = UserModel();
+class Map extends StatefulWidget {
+  const Map({Key? key}) : super(key: key);
+
+  @override
+  State<StatefulWidget> createState() => MapState();
+}
+
+class MapState extends State<Map> {
+  final Completer<GoogleMapController> _controller = Completer();
+
+  late GoogleMapController mapController;
+  final LocationManager _locationManager = LocationManager();
+
+  final CameraPosition _initialCameraPosition = const CameraPosition(
+    target: LatLng(51.5074, 0.1278),
+    zoom: 14.4746,
+  );
 
   @override
   void initState() {
     super.initState();
-    FirebaseFirestore.instance
-        .collection("users")
-        .doc(user!.uid)
-        .get()
-        .then((value) {
-      this.loggedInUser = UserModel.fromMap(value.data());
-      setState(() {});
-    });
+    getLocation();
+  }
+
+  void getLocation() async {
+    LocationManager _locationManager = LocationManager();
+    await _locationManager.checkAndRequestService();
+    await _locationManager.checkAndRequestPermission();
+    await _locationManager.getLocation();
   }
 
   @override
   Widget build(BuildContext context) {
+    return Scaffold(
+      body: GoogleMap(
+        mapType: MapType.normal,
+        initialCameraPosition: _initialCameraPosition,
+        onMapCreated: (GoogleMapController controller) {
+          mapController = controller;
+          _locationManager.setOnLocationChanged((LocationData newLocation) {
+            mapController.animateCamera(CameraUpdate.newCameraPosition(
+                CameraPosition(target: LatLng(newLocation.latitude as double,
+                    newLocation.longitude as double), zoom: 15)));
+          });
+          _controller.complete(controller);
+        },
+      ),
+    );
+  }
     final logOutButton = Material(
         elevation: 5,
         borderRadius: BorderRadius.circular(30),
@@ -51,42 +83,6 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ),
         ));
-
-    return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: appColors.PrimaryBlue),
-          onPressed: () {
-            // passing this to our root
-            Navigator.of(context).pop();
-          },
-        ),
-      ),
-      body: Center(
-        child: SingleChildScrollView(
-          child: Container(
-            color: Colors.white,
-            child: Padding(
-              padding: const EdgeInsets.all(36.0),
-              child: Form(
-                // key: _formKey,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: <Widget>[
-                    logOutButton,
-                    SizedBox(height: 15),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
   }
 
   Future<void> logout(BuildContext context) async {
