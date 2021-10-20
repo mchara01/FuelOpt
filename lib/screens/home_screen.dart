@@ -1,97 +1,56 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/material.dart';
-import 'package:fuel_opt/model/user_model.dart';
-import 'package:fuel_opt/screens/login_screen.dart';
-import '../utils/appColors.dart' as appColors;
+import 'dart:async';
 
-class HomeScreen extends StatefulWidget {
+import 'package:flutter/material.dart';
+import 'package:fuel_opt/utils/location_manager.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:location/location.dart';
+
+class HomeScreen extends StatelessWidget {
   const HomeScreen({Key? key}) : super(key: key);
 
   @override
-  _HomeScreenState createState() => _HomeScreenState();
+  Widget build(BuildContext context) {
+    return const Map();
+  }
 }
 
-class _HomeScreenState extends State<HomeScreen> {
-  User? user = FirebaseAuth.instance.currentUser;
-  UserModel loggedInUser = UserModel();
+class Map extends StatefulWidget {
+  const Map({Key? key}) : super(key: key);
 
   @override
-  void initState() {
-    super.initState();
-    FirebaseFirestore.instance
-        .collection("users")
-        .doc(user!.uid)
-        .get()
-        .then((value) {
-      this.loggedInUser = UserModel.fromMap(value.data());
-      setState(() {});
-    });
-  }
+  State<StatefulWidget> createState() => MapState();
+}
+
+class MapState extends State<Map> {
+  final Completer<GoogleMapController> _controller = Completer();
+
+  late GoogleMapController mapController;
+  final LocationManager _locationManager = LocationManager();
+
+  final CameraPosition _initialCameraPosition = const CameraPosition(
+    target: LatLng(51.5074, 0.1278),
+    zoom: 14.4746,
+  );
 
   @override
   Widget build(BuildContext context) {
-    final logOutButton = Material(
-        elevation: 5,
-        borderRadius: BorderRadius.circular(30),
-        color: appColors.PrimaryBlue,
-        child: MaterialButton(
-          padding: EdgeInsets.fromLTRB(20, 15, 20, 15),
-          minWidth: MediaQuery.of(context).size.width,
-          onPressed: () {
-            logout(context);
-          },
-          child: Text(
-            "Logout",
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: 20,
-              color: Colors.white,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ));
-
     return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: appColors.PrimaryBlue),
-          onPressed: () {
-            // passing this to our root
-            Navigator.of(context).pop();
-          },
-        ),
-      ),
-      body: Center(
-        child: SingleChildScrollView(
-          child: Container(
-            color: Colors.white,
-            child: Padding(
-              padding: const EdgeInsets.all(36.0),
-              child: Form(
-                // key: _formKey,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: <Widget>[
-                    logOutButton,
-                    SizedBox(height: 15),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        ),
+      body: GoogleMap(
+        mapType: MapType.normal,
+        initialCameraPosition: _initialCameraPosition,
+        onMapCreated: (GoogleMapController controller) async {
+          mapController = controller;
+          await _locationManager.checkAndRequestService();
+          await _locationManager.checkAndRequestPermission();
+          _locationManager.setOnLocationChanged((LocationData newLocation) {
+            mapController.animateCamera(CameraUpdate.newCameraPosition(
+                CameraPosition(target: LatLng(newLocation.latitude as double,
+                    newLocation.longitude as double), zoom: 15)));
+          });
+          _controller.complete(controller);
+        },
       ),
     );
   }
-
-  Future<void> logout(BuildContext context) async {
-    await FirebaseAuth.instance.signOut();
-    Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (context) => LoginScreen()));
-  }
 }
+
