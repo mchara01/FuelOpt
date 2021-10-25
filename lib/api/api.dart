@@ -18,7 +18,12 @@ class StationsProvider with ChangeNotifier {
   }
 
   fetchTasks() async {
-    final url = Uri.parse('http://10.0.2.2:8000/apis/v1/?format=json');
+    // Android Emulator
+    //final url = Uri.parse('http://10.0.2.2:8000/apis/v1/?format=json');
+
+    // Chrome Emulator
+    final url = Uri.parse('http://localhost:8000/apis/v1/?format=json');
+
     final response = await http.get(url);
 
     if (response.statusCode == 200) {
