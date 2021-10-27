@@ -5,6 +5,9 @@ class StationSerializer(serializers.ModelSerializer):
     class Meta:
         fields = (
             'id',
-            'title',
+            'name',
+            'location',
+            'lat',
+            'lng',
         )
         model = models.Station
