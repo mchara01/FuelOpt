@@ -29,9 +29,6 @@ data_id = data["station_id"]
 data_prices = data[["unleaded","super unleaded","diesel","premium_diesel"]].replace({np.nan:None})
 data_dates = data[["station_unleaded_date","station_super_unleaded_date","station_diesel_date","station_premium_diesel_date"]].replace({np.nan:None}).applymap(reverse_date)
 
-print(data_dates)
-# print(data_id)
-
 # exit()
 # insert the station information to the database
 print("Inserting station information to database:")
