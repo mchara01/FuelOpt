@@ -5,7 +5,7 @@ from math import sin, cos, sqrt
 
 
 def get_data_by_preference():
-    df = pd.read_csv("Data/stations_all_info.csv")
+    df = pd.read_csv("data/stations_all_info.csv")
 
     # get location,fuel and preference by App UI
     def get_user_location():
