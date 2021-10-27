@@ -21,7 +21,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController passwordController = new TextEditingController();
 
   // firebase
-  final _auth = FirebaseAuth.instance;
+  //final _auth = FirebaseAuth.instance;
 
   @override
   Widget build(BuildContext context) {
@@ -160,6 +160,9 @@ class _LoginScreenState extends State<LoginScreen> {
 
   // login function
   void signIn(String email, String password) async {
+    /**
+     * 
+
     if (_formKey.currentState!.validate()) {
       await _auth
           .signInWithEmailAndPassword(email: email, password: password)
@@ -172,5 +175,6 @@ class _LoginScreenState extends State<LoginScreen> {
         Fluttertoast.showToast(msg: e!.message);
       });
     }
+    */
   }
 }

@@ -14,7 +14,7 @@ class StationsScreen extends StatelessWidget {
           itemCount: stationsP.stations.length,
           itemBuilder: (BuildContext context, int index) {
             return ListTile(
-              title: Text(stationsP.stations[index].title),
+              title: Text(stationsP.stations[index].name),
               subtitle: Text(stationsP.stations[index].id.toString()),
             );
           }),

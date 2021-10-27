@@ -1,13 +1,13 @@
 class Station {
   final int id;
-  final String title;
+  final String name;
 
-  Station({required this.id, required this.title});
+  Station({required this.id, required this.name});
 
   factory Station.fromJson(Map<String, dynamic> json) {
     return Station(
       id: json['id'],
-      title: json['title'],
+      name: json['name'],
     );
   }
 }
