@@ -5,7 +5,7 @@ FINISH README AT THE END OF PROJECT
 A new Flutter project.
 
 ## Architecture
-![alt text](./Architecture_FuelOpt.jpg/?raw=true "FuelOpt Architecture")
+![alt text](./Architecture_FuelOpt.jpg/?raw=true&style=centerme "FuelOpt Architecture")
 
 ## Getting Started
 
