@@ -34,3 +34,4 @@ def home(request):
     
     # returns a Json list of stations within that page
     return JsonResponse([station.serialize() for station in stations_near_me], safe=False)
+

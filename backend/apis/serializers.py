@@ -6,9 +6,10 @@ class StationSerializer(serializers.ModelSerializer):
         fields = (
             'id',
             'name',
-            'location',
+            'street',
+            'postcode',
             'lat',
             'lng',
-            'postcode',
+            'station_ref',
         )
         model = models.Station
