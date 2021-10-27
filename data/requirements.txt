@@ -2,3 +2,5 @@ selenium
 webdriver_manager
 pandas
 dotenv
+mariadb
+numpy
