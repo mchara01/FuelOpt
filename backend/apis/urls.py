@@ -1,8 +1,12 @@
 from django.urls import path
+from . import views
 
-from .views import ListStation, DetailStation
-
+app_name = 'apis'
 urlpatterns = [
-    path('', ListStation.as_view()),
-    path('<int:pk>/', DetailStation.as_view())
+    path('', views.ListStation.as_view()),
+    path('<int:pk>/', views.DetailStation.as_view()),
+    
+    # API Routes
+    path('home/',views.home, name='home'), # home page
 ]
+
