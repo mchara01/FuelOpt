@@ -9,5 +9,6 @@ class StationSerializer(serializers.ModelSerializer):
             'location',
             'lat',
             'lng',
+            'postcode',
         )
         model = models.Station

@@ -7,6 +7,7 @@ class Station(models.Model):
     location = models.CharField(max_length=200,default="Default")
     lat = models.DecimalField(decimal_places=7, max_digits=10,default=0.0)
     lng = models.DecimalField(decimal_places=7, max_digits=10, default=0.0)
+    postcode = models.CharField(max_length=12,default="")
 
     def serialize(self):
         return {
@@ -15,5 +16,6 @@ class Station(models.Model):
             "location": self.location,
             "latitude": self.lat,
             "longitude":self.lng,
+            "postcode": self.postcode
             }
     
