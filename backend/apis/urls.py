@@ -1,8 +1,11 @@
 from django.urls import path
 
-from .views import ListStation, DetailStation
+from . import views
+app_name= 'apis'
 
 urlpatterns = [
-    path('', ListStation.as_view()),
-    path('<int:pk>/', DetailStation.as_view())
+    path('', views.ListStation.as_view()),
+    path('<int:pk>/', views.DetailStation.as_view()),
+    path('temp_admin', views.temp_admin, name="temp_admin"),
+
 ]
