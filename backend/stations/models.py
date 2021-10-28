@@ -20,19 +20,21 @@ class Station(models.Model):
             "longitude":self.lng,
             "station_ref": self.station_ref,
             }
-    
+    def __str__(self):
+        return 'Station: {}, Id: {}, Ref: {}'.format(self.name, self.id,self.station_ref)
+
 class FuelPrice(models.Model):
     station = models.ForeignKey(Station, on_delete=models.CASCADE)
 
-    unleaded_price = models.DecimalField(decimal_places=2, max_digits=10,default=0.00)
-    diesel_price = models.DecimalField(decimal_places=2, max_digits=10,default=0.00)
-    super_unleaded_price = models.DecimalField(decimal_places=2, max_digits=10,default=0.00)
-    premium_unleaded_price = models.DecimalField(decimal_places=2, max_digits=10,default=0.00)
+    unleaded_price = models.DecimalField(decimal_places=2, max_digits=10,default=None, null=True)
+    diesel_price = models.DecimalField(decimal_places=2, max_digits=10,default=None, null=True)
+    super_unleaded_price = models.DecimalField(decimal_places=2, max_digits=10,default=None, null=True)
+    premium_diesel_price = models.DecimalField(decimal_places=2, max_digits=10,default=None, null=True)
 
     unleaded_date = models.DateField(default=datetime.date.today)
     diesel_date = models.DateField(default=datetime.date.today)
     super_unleaded_date = models.DateField(default=datetime.date.today)
-    premium_unleaded_date = models.DateField(default=datetime.date.today)
+    premium_diesel_date = models.DateField(default=datetime.date.today)
 
     def serialize(self):
         return {
@@ -40,9 +42,12 @@ class FuelPrice(models.Model):
             "unleaded_price": self.unleaded_price,
             "diesel_price": self.diesel_price,
             "super_unleaded_price": self.super_unleaded_price,
-            "premium_unleaded_price": self.premium_unleaded_price,
+            "premium_diesel_price": self.premium_diesel_price,
             "unleaded_date":self.unleaded_date,
             "diesel_date": self.diesel_date,
             "super_unleaded_date": self.super_unleaded_date,
-            "premium_unleaded_date": self.premium_unleaded_date,
+            "premium_diesel_date": self.premium_diesel_date,
             }
+
+    def __str__(self):
+        return 'Station: {},Id: {}, Ref: {}'.format(self.station.name, self.id,self.station.station_ref)
