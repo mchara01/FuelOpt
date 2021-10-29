@@ -6,3 +6,5 @@ Variables in the .env file
 - GOOGLE_MAPS_KEY=
 - PETROL_USERNAME=
 - PETROL_PASSWORD=
+
+Install requirements with `pip3 install -r ./requirements.txt`
