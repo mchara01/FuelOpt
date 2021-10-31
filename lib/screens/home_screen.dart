@@ -1,6 +1,8 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:fuel_opt/api/api.dart';
+import 'package:fuel_opt/model/stations_model.dart';
 import 'package:fuel_opt/utils/location_manager.dart';
 import 'package:fuel_opt/utils/map_marker_generator.dart';
 import 'package:fuel_opt/widgets/fuel_stations_bottom_sheet.dart';
@@ -31,10 +33,12 @@ class MapState extends State<Map> {
 
   final CameraPosition _initialCameraPosition = const CameraPosition(
     target: LatLng(51.5074, 0.1278),
-    zoom: 14.4746,
+    zoom: 10,
   );
 
   final Set<Marker> _markers = <Marker>{};
+
+  int _markerIdCounter = 1;
 
   late BitmapDescriptor fuelStationIcon;
 
@@ -64,8 +68,8 @@ class MapState extends State<Map> {
             initialCameraPosition: _initialCameraPosition,
             onMapCreated: (GoogleMapController controller) async {
               mapController = controller;
-              await _locationManager.checkAndRequestService();
-              await _locationManager.checkAndRequestPermission();
+              // await _locationManager.checkAndRequestService();
+              // await _locationManager.checkAndRequestPermission();
               // _locationManager.setOnLocationChanged((LocationData newLocation) {
               //   print('location changed');
               //   print('lat' + newLocation.latitude.toString());
@@ -74,13 +78,30 @@ class MapState extends State<Map> {
               //       CameraPosition(target: LatLng(newLocation.latitude as double,
               //           newLocation.longitude as double), zoom: 15)));
               // });
-              LocationData? locationData = await _locationManager.getLocation();
-              if (locationData != null) {
-                mapController.animateCamera(CameraUpdate.newCameraPosition(
-                    CameraPosition(
-                        target: LatLng(locationData.latitude as double,
-                            locationData.longitude as double),
-                        zoom: 15)));
+              // LocationData? locationData = await _locationManager.getLocation();
+              // if (locationData != null) {
+              //   mapController.animateCamera(CameraUpdate.newCameraPosition(
+              //       CameraPosition(
+              //           target: LatLng(locationData.latitude as double,
+              //               locationData.longitude as double),
+              //           zoom: 15)));
+              // }
+              FuelStationDataService fuelStationDataService =
+                  FuelStationDataService();
+              LatLngBounds mapBounds = await mapController.getVisibleRegion();
+              List<Station>? stations =
+                  await fuelStationDataService.getStations(mapBounds);
+              if (stations != null) {
+                stations.forEach((station) {
+                  final String _markerIdValue = 'marker_id_$_markerIdCounter';
+                  _markerIdCounter++;
+                  _markers.add(Marker(
+                      markerId: MarkerId(_markerIdValue),
+                      position: LatLng(station.latitude, station.longitude),
+                      icon: fuelStationIcon));
+                });
+                print(stations.length);
+                setState(() {});
               }
               _controller.complete(controller);
             },
