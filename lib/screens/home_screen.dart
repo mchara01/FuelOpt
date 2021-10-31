@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:fuel_opt/utils/location_manager.dart';
+import 'package:fuel_opt/utils/map_marker_generator.dart';
 import 'package:fuel_opt/widgets/fuel_stations_bottom_sheet.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
@@ -33,7 +34,24 @@ class MapState extends State<Map> {
     zoom: 14.4746,
   );
 
+  final Set<Marker> _markers = <Marker>{};
 
+  late BitmapDescriptor fuelStationIcon;
+
+  @override
+  void initState() {
+    super.initState();
+    createFuelStationIcon('assets/gas_station.png', const Color(0xFF002060))
+        .then((BitmapDescriptor icon) {
+      fuelStationIcon = icon;
+      setState(() {
+        _markers.add(Marker(
+            markerId: MarkerId('0'),
+            position: LatLng(51.5074, 0.1278),
+            icon: fuelStationIcon));
+      });
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -48,13 +66,25 @@ class MapState extends State<Map> {
               mapController = controller;
               await _locationManager.checkAndRequestService();
               await _locationManager.checkAndRequestPermission();
-              _locationManager.setOnLocationChanged((LocationData newLocation) {
+              // _locationManager.setOnLocationChanged((LocationData newLocation) {
+              //   print('location changed');
+              //   print('lat' + newLocation.latitude.toString());
+              //   print('long' + newLocation.longitude.toString());
+              //   mapController.animateCamera(CameraUpdate.newCameraPosition(
+              //       CameraPosition(target: LatLng(newLocation.latitude as double,
+              //           newLocation.longitude as double), zoom: 15)));
+              // });
+              LocationData? locationData = await _locationManager.getLocation();
+              if (locationData != null) {
                 mapController.animateCamera(CameraUpdate.newCameraPosition(
-                    CameraPosition(target: LatLng(newLocation.latitude as double,
-                        newLocation.longitude as double), zoom: 15)));
-              });
+                    CameraPosition(
+                        target: LatLng(locationData.latitude as double,
+                            locationData.longitude as double),
+                        zoom: 15)));
+              }
               _controller.complete(controller);
             },
+            markers: _markers,
           ),
           const FuelStationsBottomSheet()
         ],
@@ -62,4 +92,3 @@ class MapState extends State<Map> {
     );
   }
 }
-
