@@ -1,4 +1,4 @@
-,name,station_id,station_location,lat,lng,unleaded,super unleaded,diesel,premium_diesel,station_unleaded_date,station_super_unleaded_date,station_diesel_date,station_premium_diesel_date
+,name,station_id,station_location,lat,lng,unleaded,super_unleaded,diesel,premium_diesel,station_unleaded_date,station_super_unleaded_date,station_diesel_date,station_premium_diesel_date
 0,M25 COBHAM MOTORWAY SERVICE AREA,25918,"M25 J9-10, KT11 3DB",51.3042081,-0.4057422,151.9,164.9,153.9,169.9,13.10.2021,13.10.2021,13.10.2021,13.10.2021
 1,ESSO LEATHERHEAD ROAD (HYLANDS GARAGE),9635,"LEATHERHEAD ROAD, KT23 4RQ",51.277581,-0.365992,140.9,,144.9,,17.10.2021,,17.10.2021,
 2,SAINSBURYS COBHAM,880,"PORTSMOUTH ROAD, KT11 1JF",51.33358399999999,-0.4222703,135.9,142.9,138.9,,17.10.2021,13.10.2021,13.10.2021,
