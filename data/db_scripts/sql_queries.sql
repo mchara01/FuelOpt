@@ -34,5 +34,5 @@ VALUES(1, 'GODSTONE ROAD', 'CR3 0EG', 51.3135, -0.0819079, 'BP WHYTELEAFE (GODST
 -- instert into fuel_prices table: example
 INSERT INTO db_fuelopt.fuel_prices
 (unleaded, diesel, super_unleaded, premium_diesel, unleaded_date, diesel_date, super_unleaded_date, premium_unleaded_date, station_id)
-VALUES(151.9, 153.9, 164.9, 169.9, '2021-10-13', '2021-10-13', '2021-10-13', '2021-10-13', 25918);
+VALUES(151.9, 153.9, 164.9, 169.9, '2021-10-13', '2021-10-13', '2021-10-13', '2021-10-13', 1);
 
