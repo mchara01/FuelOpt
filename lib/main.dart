@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fuel_opt/api/api.dart';
 import 'package:fuel_opt/screens/home_screen.dart';
-import '../utils/appColors.dart' as appColors;
 import 'package:provider/provider.dart';
 
 Future<void> main() async {
@@ -19,7 +18,7 @@ class MyApp extends StatelessWidget {
       child: MaterialApp(
         title: 'FuelOpt',
         theme: ThemeData(
-          primaryColor: appColors.PrimaryBlue,
+          primaryColor: const Color(0xFF002060),
         ),
         home: const HomeScreen(),
       ),

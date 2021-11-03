@@ -1,0 +1,2 @@
+0 0 * * * /home/ec2-user/FuelOpt/data/data_scripts/get_station_prices.py
+0 0 * * * /home/ec2-user/FuelOpt/data/data_scripts/fuel_prices_to_database.py
