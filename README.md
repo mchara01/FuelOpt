@@ -6,7 +6,7 @@ A new Flutter project.
 
 ## Architecture
 <p align="center">
-  <img src="./Architecture_FuelOpt.jpg">
+  <img src="./fuelopt_arch.jpg">
 </p>
 
 ## Getting Started
