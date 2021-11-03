@@ -71,11 +71,11 @@ class _FilterState extends State<Filter> {
     return Scaffold(
         key: _scaffoldKey,
         appBar: PreferredSize(
-          child: AppBar(
-            backgroundColor: Colors.white,
-            elevation: 0,
+          child: Visibility(
+            visible: false,
+            child: AppBar(),
           ),
-          preferredSize: Size.fromHeight(-45),
+          preferredSize: Size(0.0, 0.0),
         ),
         backgroundColor: Colors.white,
         endDrawer: Container(
