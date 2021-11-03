@@ -1,11 +1,12 @@
 from django.shortcuts import render,redirect
-from stations.models import FuelPrice
+from stations.models import FuelPrice, Station
 from rest_framework import generics
 from django.contrib import messages
 import pandas as pd
 import time
-from stations.models import Station
 import math
+import urllib.request
+import json
 from django.db import connection
 from django.http import JsonResponse
 
@@ -44,7 +45,7 @@ def temp_admin(request):
 def restartStationEntries():
     Station.objects.all().delete()
 
-    data = pd.read_csv('../data/stations_with_coordinates.csv')
+    data = pd.read_csv('../data/db_scripts/stations_with_coordinates.csv')
 
     postcodes = []
     streets = []
@@ -75,7 +76,7 @@ def restartStationEntries():
     return
 
 def updateEntries():
-    data = pd.read_csv('../data/stations_all_info.csv')
+    data = pd.read_csv('../data/db_scripts/stations_all_info.csv')
 
     print("Updating fuel prices information to database:")
     for index, row in data.iterrows():
@@ -119,10 +120,71 @@ def home(request):
         lng_min = request.GET['lng_min']
 
         # Show stations within the page view
-        stations_near_me = models.Station.objects.filter(
+        stations_near_me = Station.objects.filter(
             lat__lte=lat_max, lat__gte=lat_min, lng__lte=lng_max, lng__gte=lng_min
         )
     
     # returns a Json list of stations within that page
     return JsonResponse([station.serialize() for station in stations_near_me], safe=False)
 
+def nearestStation(request):
+    if request.method == 'GET':
+        user_preference = request.GET['user_preference']
+        user_lat = float(request.GET['lat'])
+        user_lng = float(request.GET['lng'])
+        fuel_type = request.GET['fuel_type']
+
+        # Limit search range, check distances only for stations that:
+        # (i)  are within ~5km radius of the location
+        # (ii) have the available fuel type
+        preferences_list = []
+        stations_near_me = Station.objects.filter(
+            lat__lte=user_lat+0.1, lat__gte=user_lat-0.1, lng__lte=user_lng+0.1, lng__gte=user_lng-0.1
+        )
+        preferences_list = stations_near_me
+
+        # if fuel_type is specified filter stations that has that type of fuel
+        if fuel_type:
+            fuel_preference = fuel_type+'_price'
+            kwargs = {
+                '{0}__{1}'.format(fuel_preference, 'isnull'): True,
+            }
+            fuel_prices = FuelPrice.objects.filter(station__in=preferences_list).exclude(**kwargs)
+            preferences_list = [fuel_price.station for fuel_price in fuel_prices]
+
+        if user_preference == 'duration':
+            # get travel duration and store in { station_pk : duration } pair
+            travel_durations = {}
+            for station in preferences_list:
+                travel_durations[station.pk] = get_travel_duration(user_lat, user_lng, station.lat, station.lng)
+
+            # sort by duration and query station in the correct order
+            sorted_duration = {k: v for k, v in sorted(travel_durations.items(), key=lambda item: item[1])}
+            sorted_station_pks = sorted_duration.keys()
+
+            preferences_list = []
+            for pk in list(sorted_station_pks)[:10]:
+                preferences_list.append(Station.objects.get(pk=pk))
+
+        response = []
+        for station in preferences_list:
+            station_response = station.serialize()
+            station_response['prices'] = FuelPrice.objects.get(station=station.pk).serialize()
+            response.append(station_response)
+
+    return JsonResponse(response, safe=False)
+
+# calculate the travel distance to this station
+def get_travel_duration(lat1, lng1, lat2, lng2):
+    bingMapsKey = "Aiiv3MUtA8Fq3gGOuwLYLrzz_FRSm1xXUEgDZxO6-R8wg73PKwV50hxqwSrbBhXY"
+    routeUrl = "http://dev.virtualearth.net/REST/V1/Routes/Driving?wp.0=" + str(lat1) + "," + str(
+        lng1) + "&wp.1=" + str(lat2) + "," + str(lng2) + "&key=" + bingMapsKey
+
+    request = urllib.request.Request(routeUrl)
+    response = urllib.request.urlopen(request)
+
+    r = response.read().decode(encoding="utf-8")
+    result = json.loads(r)
+    duration = result['resourceSets'][0]['resources'][0]['routeLegs'][0]['travelDuration']
+    # return the duration
+    return duration
