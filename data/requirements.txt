@@ -1,6 +1,6 @@
-selenium
-webdriver_manager
-pandas
-dotenv
-mariadb
-numpy
+selenium==4.0.0
+webdriver-manager==3.5.1
+pandas==1.3.4
+python-dotenv==0.19.1
+mariadb==1.0.8
+numpy==1.21.3
