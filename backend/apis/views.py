@@ -110,10 +110,14 @@ def deleteFuelPrices():
     FuelPrice.objects.all().delete()
 
 def home(request):
-    # When user opens app, show locations
+    """
+    home API returns the client a json list of all petrol stations visible within a user's viewport when the 
+    app is first opened (homepage).
+    API called via a GET Request.
+    Example API call: http://127.0.0.1:8000/apis/home/?lat_max=51.5&lat_min=51.4&lng_max=-0.06&lng_min=-0.09
+    """
     if request.method == 'GET':
         # Get the bounding box, sent via query string issued by flutter
-        # eg url to call: http://127.0.0.1:8000/apis/home/?lat_max=51.5&lat_min=51.4&lng_max=-0.06&lng_min=-0.09
         lat_max = request.GET['lat_max']
         lat_min = request.GET['lat_min']
         lng_max = request.GET['lng_max']
@@ -128,44 +132,54 @@ def home(request):
     return JsonResponse([station.serialize() for station in stations_near_me], safe=False)
 
 def nearestStation(request):
+    """
+    nearestStation API returns the client a json list of all the petrol stations nearest to the user-specified location
+    according to user preference selection.
+    API called via a GET Request.
+    Example API call: http://127.0.0.1:8000/apis/nearestStation/
+    """
     if request.method == 'GET':
+        # Get user specifications/ preferences
         user_preference = request.GET['user_preference']
         user_lat = float(request.GET['lat'])
         user_lng = float(request.GET['lng'])
         fuel_type = request.GET['fuel_type']
 
-        # Limit search range, check distances only for stations that:
-        # (i)  are within ~5km radius of the location
-        # (ii) have the available fuel type
+        # Limit search range, check only for stations that are within ~5km radius of the location
         preferences_list = []
         stations_near_me = Station.objects.filter(
             lat__lte=user_lat+0.1, lat__gte=user_lat-0.1, lng__lte=user_lng+0.1, lng__gte=user_lng-0.1
         )
+        # (i) If user has not provide any specification/ preferences, return this:
         preferences_list = stations_near_me
 
-        # if fuel_type is specified filter stations that has that type of fuel
+        # (ii) If fuel_type is specified, show only stations that have said fuel.
         if fuel_type:
             fuel_preference = fuel_type+'_price'
             kwargs = {
                 '{0}__{1}'.format(fuel_preference, 'isnull'): True,
             }
+            # Exclude stations where fuel price is not available
             fuel_prices = FuelPrice.objects.filter(station__in=preferences_list).exclude(**kwargs)
             preferences_list = [fuel_price.station for fuel_price in fuel_prices]
 
+        # (iii) If user's optimisation criteria is duration
         if user_preference == 'duration':
-            # get travel duration and store in { station_pk : duration } pair
+            # Get travel durations and store in { station_pk : duration } pair
             travel_durations = {}
             for station in preferences_list:
                 travel_durations[station.pk] = get_travel_duration(user_lat, user_lng, station.lat, station.lng)
 
-            # sort by duration and query station in the correct order
+            # Sort travel durations. 
             sorted_duration = {k: v for k, v in sorted(travel_durations.items(), key=lambda item: item[1])}
             sorted_station_pks = sorted_duration.keys()
 
+            # Sort stations according to sorted durations, querying stations in the correct order
             preferences_list = []
             for pk in list(sorted_station_pks)[:10]:
                 preferences_list.append(Station.objects.get(pk=pk))
 
+        # Append prices with the station information
         response = []
         for station in preferences_list:
             station_response = station.serialize()
