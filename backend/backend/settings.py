@@ -79,7 +79,7 @@ if DEBUG:
             'NAME': 'db_fuelopt',
             'USER': 'user',
             'PASSWORD': 'password',
-            'HOST': '3.8.3.44',
+            'HOST': 'localhost',
             'PORT': '3306',
         }
     }
@@ -90,7 +90,7 @@ else:
             'NAME': 'db_fuelopt',
             'USER': 'user',
             'PASSWORD': 'password',
-            'HOST': '3.8.3.44',
+            'HOST': 'localhost',
             'PORT': '3306',
         }
     }
