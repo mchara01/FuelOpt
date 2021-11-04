@@ -1,3 +1,4 @@
+from django.http.response import HttpResponse
 from django.shortcuts import render,redirect
 from stations.models import FuelPrice, Station
 from rest_framework import generics
@@ -9,7 +10,7 @@ import urllib.request
 import json
 from django.db import connection
 from django.http import JsonResponse
-
+from decimal import Decimal
 # Create your views here.
 from stations import models
 from .serializers import StationSerializer
@@ -141,14 +142,15 @@ def nearestStation(request):
     if request.method == 'GET':
         # Get user specifications/ preferences
         user_preference = request.GET['user_preference']
-        user_lat = float(request.GET['lat'])
-        user_lng = float(request.GET['lng'])
+        user_location = request.GET['location']
         fuel_type = request.GET['fuel_type']
 
-        # Limit search range, check only for stations that are within ~5km radius of the location
+        user_lat, user_lng = geocoding(user_location)
+
+        # Limit search range, check only for stations that are within ~10km radius of the location
         preferences_list = []
         stations_near_me = Station.objects.filter(
-            lat__lte=user_lat+0.1, lat__gte=user_lat-0.1, lng__lte=user_lng+0.1, lng__gte=user_lng-0.1
+            lat__lte=user_lat+0.05, lat__gte=user_lat-0.05, lng__lte=user_lng+0.05, lng__gte=user_lng-0.05
         )
         # (i) If user has not provide any specification/ preferences, return this:
         preferences_list = stations_near_me
@@ -160,36 +162,54 @@ def nearestStation(request):
                 '{0}__{1}'.format(fuel_preference, 'isnull'): True,
             }
             # Exclude stations where fuel price is not available
-            fuel_prices = FuelPrice.objects.filter(station__in=preferences_list).exclude(**kwargs)
-            preferences_list = [fuel_price.station for fuel_price in fuel_prices]
+            fuel_prices_all = FuelPrice.objects.filter(station__in=preferences_list).exclude(**kwargs)
+            fuel_prices_preference = fuel_prices_all.values_list(fuel_preference, flat=True)
+            preferences_list = [fuel_price.station for fuel_price in fuel_prices_all]
+
+        # Get travel durations and distances and store as a dictionary: { station_pk : duration } pair
+        # Duration units: seconds   Distance units: km
+        travel_durations, travel_distance = dict(), dict()
+        for station in preferences_list:
+            travel_durations[station.pk], travel_distance[station.pk] = get_duration_distance(user_lat, user_lng, station.lat, station.lng)
 
         # (iii) If user's optimisation criteria is duration
         if user_preference == 'duration':
-            # Get travel durations and store in { station_pk : duration } pair
-            travel_durations = {}
-            for station in preferences_list:
-                travel_durations[station.pk] = get_travel_duration(user_lat, user_lng, station.lat, station.lng)
 
             # Sort travel durations. 
             sorted_duration = {k: v for k, v in sorted(travel_durations.items(), key=lambda item: item[1])}
             sorted_station_pks = sorted_duration.keys()
 
             # Sort stations according to sorted durations, querying stations in the correct order
-            preferences_list = []
-            for pk in list(sorted_station_pks)[:10]:
-                preferences_list.append(Station.objects.get(pk=pk))
+            preferences_list = query_sorted_order(sorted_station_pks)
+
+        # (iv) If user's optimisation criteria is price
+        # Assuming 0.057litre per km x £1.442/litre = £0.082/km distance
+        if user_preference == 'price':
+            if not fuel_type:
+                return JsonResponse({'status':'false', 'message': 'Fuel type not specified.'}, status=500)
+
+            weighted_prices = dict()
+            for index, station in enumerate(preferences_list):
+                weighted_prices[station.pk] = fuel_prices_preference[index] + Decimal(travel_distance[station.pk]*0.082)
+            
+            sorted_weighted_prices = {k: v for k, v in sorted(weighted_prices.items(), key=lambda item: item[1])}
+            sorted_station_pks = list(sorted_weighted_prices.keys())
+
+            # Sort stations according to sorted durations, querying stations in the correct order
+            preferences_list = query_sorted_order(sorted_station_pks[:10])
 
         # Append prices with the station information
         response = []
         for station in preferences_list:
             station_response = station.serialize()
             station_response['prices'] = FuelPrice.objects.get(station=station.pk).serialize()
+            station_response['duration'] = str(int(travel_durations[station.pk]/60)) + 'mins'
             response.append(station_response)
 
     return JsonResponse(response, safe=False)
 
-# calculate the travel distance to this station
-def get_travel_duration(lat1, lng1, lat2, lng2):
+# calculate the travel duration to this station
+def get_duration_distance(lat1, lng1, lat2, lng2):
     bingMapsKey = "Aiiv3MUtA8Fq3gGOuwLYLrzz_FRSm1xXUEgDZxO6-R8wg73PKwV50hxqwSrbBhXY"
     routeUrl = "http://dev.virtualearth.net/REST/V1/Routes/Driving?wp.0=" + str(lat1) + "," + str(
         lng1) + "&wp.1=" + str(lat2) + "," + str(lng2) + "&key=" + bingMapsKey
@@ -199,6 +219,28 @@ def get_travel_duration(lat1, lng1, lat2, lng2):
 
     r = response.read().decode(encoding="utf-8")
     result = json.loads(r)
-    duration = result['resourceSets'][0]['resources'][0]['routeLegs'][0]['travelDuration']
-    # return the duration
-    return duration
+    duration = result['resourceSets'][0]['resources'][0]['routeLegs'][0]['travelDuration'] # units: km
+    distance = result['resourceSets'][0]['resources'][0]['routeLegs'][0]['travelDistance'] # units: seconds
+
+    # return the duration and distance
+    return duration, distance
+
+def geocoding(location):
+    location_iq_key = "pk.bd315221041f3e0a99e6464f9de0157a"
+    routeUrl = "https://eu1.locationiq.com/v1/search.php?key=" + location_iq_key + "&q=" + str(location.replace(' ','%20')) + "&format=json"
+
+    request = urllib.request.Request(routeUrl)
+    response = urllib.request.urlopen(request)
+
+    r = response.read().decode(encoding="utf-8")
+    result = json.loads(r)
+
+    return float(result[0]['lat']), float(result[0]['lon'])
+
+def query_sorted_order(pk_list):
+    """ Query stations in sorted order and append into a list. """
+    preferences_list = []
+    for pk in pk_list:
+        preferences_list.append(Station.objects.get(pk=pk))
+    
+    return preferences_list
