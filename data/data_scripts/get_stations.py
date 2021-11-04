@@ -2,7 +2,6 @@ from selenium import webdriver
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.common.keys import Keys
 from time import time
 import pandas as pd
 
@@ -78,8 +77,7 @@ for latitude in [51.3, 51.3, 51.4, 51.5, 51.6, 51.7]:
 
         # browser.find_element(By.ID, 'continue-button').click()
 
-        print(
-            f'For location with latitude:{arguments["latitude"]}, longitude:{arguments["longitude"]}')
+        print("For location with latitude:",arguments["latitude"], "longitude:",arguments["longitude"])
 
         for station in stations_results:
             print(counter, end=" ")
