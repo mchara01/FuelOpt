@@ -1,11 +1,11 @@
 import time
-import mariadb
+import pymysql
 import pandas as pd
 import numpy as np
 
 
 # Connect to MariaDB database
-connection = mariadb.connect(
+connection = pymysql.connect(
     user="user",
     password="password",
     host="127.0.0.1",
@@ -36,7 +36,7 @@ for index, row in data.iterrows():
     print("\t",index, "/ 777")
     cursor.execute("""INSERT INTO db_fuelopt.stations_fuelprice
 (unleaded_price, diesel_price, super_unleaded_price, premium_diesel_price, unleaded_date, diesel_date, super_unleaded_date, premium_diesel_date, station_id)
-VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?);""",(data_prices["unleaded"][index],data_prices["diesel"][index],data_prices["super_unleaded"][index],data_prices["premium_diesel"][index],
+VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s);""",(data_prices["unleaded"][index],data_prices["diesel"][index],data_prices["super_unleaded"][index],data_prices["premium_diesel"][index],
 data_dates["station_unleaded_date"][index],data_dates["station_diesel_date"][index],data_dates["station_super_unleaded_date"][index], data_dates["station_premium_diesel_date"][index],int(data_id[index])))
     # add a second delay to not overwhelm the database
     if (index % 150 == 0):
