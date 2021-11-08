@@ -34,7 +34,7 @@ data = data.drop("Unnamed: 0", axis=1)
 print("Inserting station information to database:")
 for index, row in data.iterrows():
     print("\t",index, "/ 777")
-    cursor.execute("""INSERT INTO db_fuelopt.stations
+    cursor.execute("""INSERT INTO db_fuelopt.stations_station
     (station_id, street, postcode, lat, lng, name)
     VALUES(?, ?, ?, ?, ?, ?);""", (row["station_id"], row["street"].strip(), row["postcode"].strip(), row["lat"], row["lng"], row["name"].strip(),))
     # add a second delay to not overwhelm the database
