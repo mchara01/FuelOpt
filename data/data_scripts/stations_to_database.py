@@ -4,7 +4,7 @@ import pandas as pd
 
 
 # Connect to MariaDB database
-connection = mariadb.connect(
+connection = pymysql.connect(
     user="user",
     password="password",
     host="127.0.0.1",
