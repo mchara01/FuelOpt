@@ -144,13 +144,15 @@ def nearestStation(request):
         user_preference = request.GET['user_preference']
         user_location = request.GET['location']
         fuel_type = request.GET['fuel_type']
+        max_radius_km = request.GET['distance']
 
         user_lat, user_lng = geocoding(user_location)
 
         # Limit search range, check only for stations that are within ~10km radius of the location
+        max_radius_degree = max_radius_km/110.574 # 110.574km = 1deg lat/lng
         preferences_list = []
         stations_near_me = Station.objects.filter(
-            lat__lte=user_lat+0.05, lat__gte=user_lat-0.05, lng__lte=user_lng+0.05, lng__gte=user_lng-0.05
+            lat__lte=user_lat+max_radius_degree, lat__gte=user_lat-max_radius_degree, lng__lte=user_lng+max_radius_degree, lng__gte=user_lng-max_radius_degree
         )
         # (i) If user has not provide any specification/ preferences, return this:
         preferences_list = stations_near_me
