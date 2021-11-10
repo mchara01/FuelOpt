@@ -7,5 +7,6 @@ urlpatterns = [
     path('<int:pk>/', views.DetailStation.as_view()),
     path('temp_admin', views.temp_admin, name="temp_admin"),
     path('home/',views.home, name='home'), # home page
+    path('nearest/', views.nearestStation, name='nearest'),
 ]
 
