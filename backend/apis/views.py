@@ -28,6 +28,18 @@ class DetailStation(generics.RetrieveUpdateDestroyAPIView):
     queryset = models.Station.objects.all()
     serializer_class = StationSerializer
 
+
+def detailStation(request, station_id):
+    """Returns information regarding a specific station."""
+    if request.method == 'GET':
+        station = Station.objects.get(station_id=station_id)
+        prices = FuelPrice.objects.get(station=station.station_id)
+
+        response = station.serialize()
+        response['prices'] = prices.serialize()
+    
+    return JsonResponse(response, safe=False)
+
 def temp_admin(request):
 
     if request.method == 'POST':
