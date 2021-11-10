@@ -16,17 +16,17 @@ class FuelTypeOptions extends StatelessWidget {
               child: Wrap(
                 spacing: 10,
                 children: [
-                  ElevatedButton(onPressed: () {}, child: Text('Unleaded')),
-                  ElevatedButton(onPressed: () {}, child: Text('Super Unleaded')),
-                  ElevatedButton(onPressed: () {}, child: Text('Diesel')),
-                  ElevatedButton(onPressed: () {}, child: Text('Super Diesel')),
+                  ElevatedButton(onPressed: () {}, child: const Text('Unleaded')),
+                  ElevatedButton(onPressed: () {}, child: const Text('Super Unleaded')),
+                  ElevatedButton(onPressed: () {}, child: const Text('Diesel')),
+                  ElevatedButton(onPressed: () {}, child: const Text('Super Diesel')),
                 ],
               ),
             ),
           ),
           Align(
             alignment: Alignment.centerRight,
-            child: IconButton(onPressed: onTapClose, icon: Container(decoration: BoxDecoration(shape: BoxShape.circle, color: Colors.white),child: Icon(Icons.close, color: Theme.of(context).primaryColor,))),
+            child: IconButton(onPressed: onTapClose, icon: Container(decoration: const BoxDecoration(shape: BoxShape.circle, color: Colors.white),child: Icon(Icons.close, color: Theme.of(context).primaryColor,))),
           )
         ]
     );

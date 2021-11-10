@@ -14,15 +14,15 @@ class SortByOptions extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                Expanded(child: ElevatedButton(onPressed: () {}, child: Text('Price'))),
-                SizedBox(width: 10,),
-                Expanded(child: ElevatedButton(onPressed: () {}, child: Text('Distance'))),
+                Expanded(child: ElevatedButton(onPressed: () {}, child: const Text('Price'))),
+                const SizedBox(width: 10,),
+                Expanded(child: ElevatedButton(onPressed: () {}, child: const Text('Distance'))),
               ],
             ),
           ),
           Align(
             alignment: Alignment.centerRight,
-            child: IconButton(onPressed: onTapClose, icon: Container(decoration: BoxDecoration(shape: BoxShape.circle, color: Colors.white),child: Icon(Icons.close, color: Theme.of(context).primaryColor,))),
+            child: IconButton(onPressed: onTapClose, icon: Container(decoration: const BoxDecoration(shape: BoxShape.circle, color: Colors.white),child: Icon(Icons.close, color: Theme.of(context).primaryColor,))),
           )
         ]
     );
