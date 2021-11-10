@@ -154,12 +154,12 @@ def home(request):
     # returns a Json list of stations within that page
     return JsonResponse([station.serialize() for station in stations_near_me], safe=False)
 
-def nearestStation(request):
+def search(request):
     """
     nearestStation API returns the client a json list of all the petrol stations nearest to the user-specified location
     according to user preference selection.
     API called via a GET Request.
-    Example API call: http://127.0.0.1:8000/apis/nearestStation/
+    Example API call: http://127.0.0.1:8000/apis/search
     """
     if request.method == 'GET':
         # Get user specifications/ preferences
@@ -170,7 +170,14 @@ def nearestStation(request):
 
         user_lat, user_lng = geocoding(user_location)
 
-        # Limit search range, check only for stations that are within user specified radius of the location
+        if max_radius_km == None:
+            max_radius_km = 50
+
+        if user_preference == None and fuel_type == None:
+            user_preference = 'price'
+            fuel_type = 'unleaded'
+
+        # (i) Distance Limit: check only for stations that are within user specified radius of the location
         # Convert radius from km to degree [110.574km = 1deg lat/lng]
         max_radius_degree = float(max_radius_km)/110.574
         # Filter for stations within the radius
@@ -178,7 +185,7 @@ def nearestStation(request):
         stations_near_me = Station.objects.filter(
             lat__lte=user_lat+max_radius_degree, lat__gte=user_lat-max_radius_degree, lng__lte=user_lng+max_radius_degree, lng__gte=user_lng-max_radius_degree
         )
-        # (i) If user has not provide any specification/ preferences, return this:
+        # If user has not provide any specification/ preferences, return this:
         preferences_list = stations_near_me
 
         # (ii) If fuel_type is specified, show only stations that have said fuel.
@@ -196,7 +203,8 @@ def nearestStation(request):
         # Duration units: seconds   Distance units: km
         travel_durations, travel_distance = dict(), dict()
         for station in preferences_list:
-            travel_durations[station.pk], travel_distance[station.pk] = get_duration_distance(user_lat, user_lng, station.lat, station.lng)
+            # travel_durations[station.pk], travel_distance[station.pk] = get_duration_distance(user_lat, user_lng, station.lat, station.lng)
+            travel_durations[station.pk], travel_distance[station.pk] = 10, 10
 
         # (iii) If user's optimisation criteria is duration
         if user_preference == 'duration':
@@ -217,7 +225,7 @@ def nearestStation(request):
             weighted_prices = dict()
             for index, station in enumerate(preferences_list):
                 weighted_prices[station.pk] = fuel_prices_preference[index] + Decimal(travel_distance[station.pk]*0.082)
-            
+
             sorted_weighted_prices = {k: v for k, v in sorted(weighted_prices.items(), key=lambda item: item[1])}
             sorted_station_pks = list(sorted_weighted_prices.keys())
 
