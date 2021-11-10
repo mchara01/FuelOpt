@@ -24,7 +24,7 @@ def reverse_date(input_date):
     return f"{date_parts[2]}-{date_parts[1]}-{date_parts[0]}"
 
 # get the station information from the csv
-data = pd.read_csv('stations_all_info.csv')
+data = pd.read_csv('stations_fuel_prices.csv')
 data_id = data["station_id"]
 data_prices = data[["unleaded","super_unleaded","diesel","premium_diesel"]].replace({np.nan:None})
 data_dates = data[["station_unleaded_date","station_super_unleaded_date","station_diesel_date","station_premium_diesel_date"]].replace({np.nan:None}).applymap(reverse_date)
@@ -39,9 +39,9 @@ for index, row in data.iterrows():
 VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s);""",(data_prices["unleaded"][index],data_prices["diesel"][index],data_prices["super_unleaded"][index],data_prices["premium_diesel"][index],
 data_dates["station_unleaded_date"][index],data_dates["station_diesel_date"][index],data_dates["station_super_unleaded_date"][index], data_dates["station_premium_diesel_date"][index],int(data_id[index])))
     # add a second delay to not overwhelm the database
+    connection.commit()
     if (index % 150 == 0):
         time.sleep(1)
+        # commit the changes to the database
 
 print("Done inserting station information to database.")
-# commit the changes to the database
-connection.commit()
