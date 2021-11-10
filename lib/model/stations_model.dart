@@ -17,7 +17,7 @@ class Station {
 
   factory Station.fromJson(Map<String, dynamic> json) {
     return Station(
-        id: json['id'],
+        id: json['station_id'],
         name: json['name'],
         street: json['street'],
         latitude: double.parse(json['latitude']),
