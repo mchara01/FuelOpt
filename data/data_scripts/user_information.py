@@ -5,7 +5,7 @@ from datetime import datetime, timedelta
 # this file contains function of the information that the users provides to the App
 # the user can update the price and inform if there is a queue
 
-df = pd.read_csv("data/stations_all_info.csv")
+df = pd.read_csv("data/db_scripts/stations_all_info.csv")
 
 # function so the user let us know that this station has a queue
 def has_queue(station):
