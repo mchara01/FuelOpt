@@ -3,6 +3,8 @@ from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
 from selenium.common.exceptions import TimeoutException
+from selenium.common.exceptions import NoSuchElementException
+
 from time import time
 import pandas as pd
 
@@ -130,8 +132,19 @@ for latitude in [51.3, 51.3, 51.4, 51.5, 51.6, 51.7]:
             station_location = browser.find_element(
                 By.XPATH, '/html/body/div/main/div/div[2]/div/div/div[2]/p').text[9:]
 
+            # dictionary to store the information to be added
+            station_information = {"name": station_name, "station_id": station_id, "station_location": station_location}
+            try:
+                station_facilities = browser.find_element(
+                    By.XPATH, '/html/body/div/main/div/section[2]/div/div/div[1]/div[1]/section[1]/ul').text.split("\n")
+                for facility in station_facilities:
+                    station_information[facility] = True
+            # if there are no facilities
+            except NoSuchElementException:
+                pass
+            
             # add the station information to the to be dataframe
-            stationDF.append({"name": station_name, "station_id": station_id, "station_location": station_location})
+            stationDF.append(station_information)
 
             # switch focus back to main window
             browser.switch_to.window(browser.window_handles[0])
