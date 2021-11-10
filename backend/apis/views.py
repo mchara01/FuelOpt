@@ -148,8 +148,10 @@ def nearestStation(request):
 
         user_lat, user_lng = geocoding(user_location)
 
-        # Limit search range, check only for stations that are within ~10km radius of the location
-        max_radius_degree = max_radius_km/110.574 # 110.574km = 1deg lat/lng
+        # Limit search range, check only for stations that are within user specified radius of the location
+        # Convert radius from km to degree [110.574km = 1deg lat/lng]
+        max_radius_degree = max_radius_km/110.574 
+        # Filter for stations within the radius
         preferences_list = []
         stations_near_me = Station.objects.filter(
             lat__lte=user_lat+max_radius_degree, lat__gte=user_lat-max_radius_degree, lng__lte=user_lng+max_radius_degree, lng__gte=user_lng-max_radius_degree
