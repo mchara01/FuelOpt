@@ -4,12 +4,11 @@ from stations import models
 class StationSerializer(serializers.ModelSerializer):
     class Meta:
         fields = (
-            'id',
+            'station_id',
             'name',
             'street',
             'postcode',
             'lat',
             'lng',
-            'station_ref',
         )
         model = models.Station

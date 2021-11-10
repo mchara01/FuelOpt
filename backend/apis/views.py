@@ -2,6 +2,8 @@ from django.http.response import HttpResponse
 from django.shortcuts import render,redirect
 from stations.models import FuelPrice, Station
 from rest_framework import generics
+from rest_framework.decorators import api_view,permission_classes
+
 from django.contrib import messages
 import pandas as pd
 import time
@@ -15,7 +17,10 @@ from decimal import Decimal
 from stations import models
 from .serializers import StationSerializer
 
+from rest_framework.permissions import IsAuthenticated,AllowAny
+
 class ListStation(generics.ListCreateAPIView):
+    permission_classes = (IsAuthenticated,)
     queryset = models.Station.objects.all() 
     serializer_class = StationSerializer
 
@@ -110,6 +115,8 @@ def updateEntries():
 def deleteFuelPrices():
     FuelPrice.objects.all().delete()
 
+@api_view()
+@permission_classes([AllowAny])
 def home(request):
     """
     home API returns the client a json list of all petrol stations visible within a user's viewport when the 
@@ -117,6 +124,9 @@ def home(request):
     API called via a GET Request.
     Example API call: http://127.0.0.1:8000/apis/home/?lat_max=51.5&lat_min=51.4&lng_max=-0.06&lng_min=-0.09
     """
+
+    #permission_classes = (IsAuthenticated,) #Uncomment this later
+
     if request.method == 'GET':
         # Get the bounding box, sent via query string issued by flutter
         lat_max = request.GET['lat_max']
