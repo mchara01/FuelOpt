@@ -2,6 +2,7 @@ from selenium import webdriver
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
+from selenium.common.exceptions import TimeoutException
 from time import time
 import pandas as pd
 
@@ -23,11 +24,34 @@ data = {
 }
 # initialise browser and go to sign in url
 browser = webdriver.Chrome(ChromeDriverManager().install(), options=options)
-browser.get(data['url'])
+
+# try to reload page
+# it it is still loading after 10 seconds
+browser.set_page_load_timeout(10)
+while True:
+    try:
+        print("Loading signin Page")
+        browser.get(data['url'])
+        print("Signin Page Loaded")
+        break
+    except TimeoutException:
+        print("Page took too long to load. Reloading")
+
+
 # fill the account info and click sign in
 browser.find_element(By.NAME, "email").send_keys(data['email'])
 browser.find_element(By.NAME, "password").send_keys(data['password'])
-browser.find_element(By.ID, 'account-submit').click()
+
+# again try to reload page
+# it it is still loading after 10 seconds
+while True:
+    try:
+        print("Logging In")
+        browser.find_element(By.ID, 'account-submit').click()
+        print("Succesfuly Logged In")
+        break
+    except TimeoutException:
+        print("Page took too long to load. Reloading")
 
 # go through each result and put it on a list
 stationDF = []
