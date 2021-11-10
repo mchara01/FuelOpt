@@ -1,11 +1,11 @@
+import os
+import logging
 
 from pathlib import Path
-import os
 from django.contrib.messages import constants as messages
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
@@ -17,12 +17,11 @@ SECRET_KEY = 'django-insecure-=zkc7fzd#bk5m^ufe910_n%4r0daa=8!7!r=^za8bm+2c3k*#%
 DEBUG = True
 
 ALLOWED_HOSTS = [
-    '10.0.2.2', #needed for android emulator
+    '10.0.2.2',  # needed for android emulator
     'localhost',
     '127.0.0.1',
-    
+    '3.8.3.44',
 ]
-
 
 # Application definition
 
@@ -34,6 +33,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django.contrib.messages',
     'rest_framework',
+    'rest_framework.authtoken',
     'apis.apps.ApisConfig',
     'stations.apps.StationsConfig',
 ]
@@ -53,7 +53,7 @@ ROOT_URLCONF = 'backend.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [os.path.join(BASE_DIR,'templates')],
+        'DIRS': [os.path.join(BASE_DIR, 'templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -68,18 +68,20 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'backend.wsgi.application'
 
-
 # Database
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
 
-if DEBUG:
+env_var = os.environ['env']
+logging.info(env_var)
+
+if env_var and env_var == "PRODUCTION":
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.mysql',
             'NAME': 'db_fuelopt',
             'USER': 'user',
             'PASSWORD': 'password',
-            'HOST': 'localhost',
+            'HOST': '192.168.100.20',
             'PORT': '3306',
         }
     }
@@ -90,11 +92,10 @@ else:
             'NAME': 'db_fuelopt',
             'USER': 'user',
             'PASSWORD': 'password',
-            'HOST': 'localhost',
+            'HOST': '127.0.0.1',
             'PORT': '3306',
         }
     }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/3.2/ref/settings/#auth-password-validators
@@ -117,9 +118,12 @@ AUTH_PASSWORD_VALIDATORS = [
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.AllowAny',
+        'rest_framework.permissions.IsAuthenticated',
+    ],
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.TokenAuthentication',
     ]
 }
-
 
 # Internationalization
 # https://docs.djangoproject.com/en/3.2/topics/i18n/
@@ -133,7 +137,6 @@ USE_I18N = True
 USE_L10N = True
 
 USE_TZ = True
-
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.2/howto/static-files/

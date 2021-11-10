@@ -59,7 +59,7 @@ class Station(models.Model):
         }
 
     def __str__(self):
-        return 'Station: {}, Id: {}, Ref: {}'.format(self.name, self.station_id, self.station_ref)
+        return 'Station: {}, Id: {}, Ref: {}'.format(self.name, self.station_id)
 
 
 class FuelPrice(models.Model):
@@ -81,7 +81,7 @@ class FuelPrice(models.Model):
 
     def serialize(self):
         return {
-            "station": self.station.id,
+            "station": self.station.station_id,
             "unleaded_price": self.unleaded_price,
             "diesel_price": self.diesel_price,
             "super_unleaded_price": self.super_unleaded_price,
@@ -93,4 +93,4 @@ class FuelPrice(models.Model):
         }
 
     def __str__(self):
-        return 'Station: {},Id: {}, Ref: {}'.format(self.station.name, self.id, self.station.station_ref)
+        return 'Station: {},Id: {}, Ref: {}'.format(self.station.name, self.id, self.station.station_id)
