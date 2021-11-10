@@ -1,6 +1,6 @@
 from django.http.response import HttpResponse
 from django.shortcuts import render,redirect
-from stations.models import FuelPrice, Station
+from stations.models import FuelPrice, Station, UserReview
 from rest_framework import generics
 from rest_framework.decorators import api_view,permission_classes
 
@@ -10,6 +10,7 @@ import time
 import math
 import urllib.request
 import json
+import boto3
 from django.db import connection
 from django.http import JsonResponse
 from decimal import Decimal
@@ -292,6 +293,22 @@ def search(request):
                     response.append(station_response)
 
     return JsonResponse(response, safe=False)
+
+def review(request):
+    """API handles all user requests regarding station reviews."""
+    if request.method == 'POST':
+        station = request.POST['station'] # pk?
+        open_status = request.POST['open'] # Boolean
+        fuel_type = request.POST['fuel_type'] # Unleaded, diesel, super_unleaded, premium_diesel
+        fuel_price = request.POST['fuel_price'] # Decimal
+        congestion = request.POST['congestion'] # Integer
+        receipt = request.POST['receipt'] # Image File
+
+        fuel_preference = fuel_type+'_price'
+        # new_review = UserReview(station=station, getattr(UserReivew, fuel_preference)=fuel_price, opening=open_status,  congestion=congestion)
+        s3 = boto3.client('s3')
+        with open("FILE_NAME", "rb") as f:
+            s3.upload_fileobj(f, "BUCKET_NAME", "OBJECT_NAME")
 
 # calculate the travel duration to this station
 def get_duration_distance(lat1, lng1, lat2, lng2):
