@@ -14,7 +14,7 @@ class Station(models.Model):
     car_wash = models.IntegerField()
     air_and_water = models.IntegerField()
     car_vacuum = models.IntegerField()
-    number_24_7_opening_hours = models.IntegerField( db_column='24_7_opening_hours')
+    number_24_7_opening_hours = models.IntegerField(db_column='24_7_opening_hours')
     toilet = models.IntegerField()
     convenience_store = models.IntegerField()
     atm = models.IntegerField()
@@ -29,10 +29,6 @@ class Station(models.Model):
     electric_car_charging = models.IntegerField()
     repair_garage = models.IntegerField()
     shower_facilities = models.IntegerField()
-
-    class Meta:
-        managed = False
-        db_table = 'stations_station'
 
     def serialize(self):
         return {
@@ -67,7 +63,7 @@ class Station(models.Model):
 
 
 class FuelPrice(models.Model):
-    station = models.ForeignKey(Station, on_delete=models.CASCADE)
+    station = models.ForeignKey(Station, on_delete=models.CASCADE, to_field='station_id')
 
     unleaded_price = models.DecimalField(
         decimal_places=2, max_digits=10, default=None, null=True)
