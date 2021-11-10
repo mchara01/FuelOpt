@@ -208,6 +208,7 @@ def nearestStation(request):
             station_response = station.serialize()
             station_response['prices'] = FuelPrice.objects.get(station=station.pk).serialize()
             station_response['duration'] = str(int(travel_durations[station.pk]/60)) + 'mins'
+            station_response['distance'] = str(travel_distance[station.pk]) + 'km'
             response.append(station_response)
 
     return JsonResponse(response, safe=False)
