@@ -2,6 +2,7 @@ version: '3.3'
 
 services:
   mariadb:
+    container_name: db_fuelopt
     image: mariadb:10.6.4
     volumes:
       - /home/ec2-user/mariadb/data:/var/lib/mysql
@@ -12,11 +13,25 @@ services:
       MYSQL_DATABASE: db_fuelopt
       MYSQL_USER: user
       MYSQL_PASSWORD: password
+    networks:
+      fuelopt_net:
+        ipv4_address: 192.168.100.20
     restart: always
   djangoAPI:
+    container_name: api_fuelopt
     image: fueloptapi:latest
     volumes:
       - /home/ec2-user/FuelOpt:/usr/src/app
     ports:
       - 8000:8000
+    networks:
+      fuelopt_net:
+        ipv4_address: 192.168.100.10
     restart: always
+
+networks:
+  fuelopt_net:
+    ipam:
+      driver: bridge
+      config:
+        - subnet: 192.168.100.0/24
