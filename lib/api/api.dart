@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:fuel_opt/model/search_options.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import '../model/stations_model.dart';
 import 'package:http/http.dart' as http;
@@ -69,5 +70,29 @@ class FuelStationDataService {
     }
 
     return Future.value(null);
+  }
+
+  Future<List<Station>?> getSearchResults(
+      String address, FilterOptions filter) async {
+    String urlstring = 'http://3.8.3.44:8000/apis/nearest/?' +
+        'user_preference=' +
+        filter.sort_by +
+        '&location=' +
+        address +
+        '&fuel_type=' +
+        filter.fuel_type +
+        '&distance=' +
+        filter.distance.toString();
+
+    final url = Uri.parse(urlstring);
+
+    final response = await http.get(url);
+
+    if (response.statusCode == 200) {
+      var data = json.decode(response.body) as List;
+      List<Station> stations =
+          data.map<Station>((json) => Station.fromJson(json)).toList();
+      return stations;
+    }
   }
 }

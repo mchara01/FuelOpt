@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:fuel_opt/model/search_options.dart';
+import 'package:provider/provider.dart';
 
 class FuelTypeOptions extends StatelessWidget {
   final void Function() onTapClose;
@@ -7,6 +9,8 @@ class FuelTypeOptions extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final state = Provider.of<SearchOptions>(context);
+
     return Stack(children: [
       Padding(
         padding: const EdgeInsets.only(left: 10.0, right: 40.0),
@@ -15,12 +19,26 @@ class FuelTypeOptions extends StatelessWidget {
           child: Wrap(
             spacing: 10,
             children: [
-              ElevatedButton(onPressed: () {}, child: const Text('Unleaded')),
               ElevatedButton(
-                  onPressed: () {}, child: const Text('Super Unleaded')),
-              ElevatedButton(onPressed: () {}, child: const Text('Diesel')),
+                  onPressed: () {
+                    state.filterOptions.fuel_type = 'Unleaded';
+                  },
+                  child: const Text('Unleaded')),
               ElevatedButton(
-                  onPressed: () {}, child: const Text('Super Diesel')),
+                  onPressed: () {
+                    state.filterOptions.fuel_type = 'Super Unleaded';
+                  },
+                  child: const Text('Super Unleaded')),
+              ElevatedButton(
+                  onPressed: () {
+                    state.filterOptions.fuel_type = 'Diesel';
+                  },
+                  child: const Text('Diesel')),
+              ElevatedButton(
+                  onPressed: () {
+                    state.filterOptions.fuel_type = 'Super Diesel';
+                  },
+                  child: const Text('Super Diesel')),
             ],
           ),
         ),

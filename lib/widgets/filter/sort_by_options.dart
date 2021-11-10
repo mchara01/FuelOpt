@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:fuel_opt/model/search_options.dart';
+import 'package:provider/provider.dart';
 
 class SortByOptions extends StatelessWidget {
   final void Function() onTapClose;
@@ -7,6 +9,8 @@ class SortByOptions extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final state = Provider.of<SearchOptions>(context);
+
     return Stack(children: [
       Padding(
         padding: const EdgeInsets.only(left: 8.0, right: 40.0),
@@ -15,13 +19,19 @@ class SortByOptions extends StatelessWidget {
           children: [
             Expanded(
                 child: ElevatedButton(
-                    onPressed: () {}, child: const Text('Price'))),
+                    onPressed: () {
+                      state.filterOptions.sort_by = 'Price';
+                    },
+                    child: const Text('Price'))),
             const SizedBox(
               width: 10,
             ),
             Expanded(
                 child: ElevatedButton(
-                    onPressed: () {}, child: const Text('Distance'))),
+                    onPressed: () {
+                      state.filterOptions.sort_by = 'Distance';
+                    },
+                    child: const Text('Distance'))),
           ],
         ),
       ),

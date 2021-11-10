@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:fuel_opt/model/search_options.dart';
+import 'package:provider/provider.dart';
 
 class DistanceOptions extends StatefulWidget {
   final void Function() onTapClose;
@@ -14,6 +16,8 @@ class _DistanceOptionsState extends State<DistanceOptions> {
 
   @override
   Widget build(BuildContext context) {
+    final state = Provider.of<SearchOptions>(context);
+
     return Stack(children: [
       Padding(
         padding: const EdgeInsets.only(right: 40.0),
@@ -25,6 +29,7 @@ class _DistanceOptionsState extends State<DistanceOptions> {
           onChanged: (newDistance) {
             setState(() {
               distance = newDistance;
+              state.filterOptions.distance = newDistance;
             });
           },
           label: distance.round().toString(),

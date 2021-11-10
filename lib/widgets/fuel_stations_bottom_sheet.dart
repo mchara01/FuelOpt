@@ -5,6 +5,7 @@ import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 import 'package:fuel_opt/widgets/filter/filter_menu.dart';
 import 'package:fuel_opt/widgets/search_bar.dart';
 import 'package:snapping_sheet/snapping_sheet.dart';
+import 'package:fuel_opt/widgets/search_result.dart';
 
 class FuelStationsBottomSheet extends StatefulWidget {
   const FuelStationsBottomSheet({Key? key}) : super(key: key);
@@ -73,9 +74,7 @@ class _FuelStationsBottomSheetState extends State<FuelStationsBottomSheet> {
             width: 100,
             color: Colors.white,
             child: Column(
-              children: [
-                FilterMenu(),
-              ],
+              children: [FilterMenu(), SearchResult()],
             ),
             // child: Column(
             //   children: <Widget>[
