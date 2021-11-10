@@ -80,7 +80,7 @@ if env_var and env_var == "PRODUCTION":
             'NAME': 'db_fuelopt',
             'USER': 'user',
             'PASSWORD': 'password',
-            'HOST': 'localhost',
+            'HOST': '192.168.100.20',
             'PORT': '3306',
         }
     }
