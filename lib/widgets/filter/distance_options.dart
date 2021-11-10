@@ -10,33 +10,38 @@ class DistanceOptions extends StatefulWidget {
 }
 
 class _DistanceOptionsState extends State<DistanceOptions> {
-
   double distance = 50;
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        Padding(
-          padding: const EdgeInsets.only(right: 40.0),
-          child: Slider(
-            value: distance,
-            min: 0,
-            max: 100,
-            divisions: 100,
-            onChanged: (newDistance) {
-              setState(() {
-                distance = newDistance;
-              });
-            },
-            label: distance.round().toString(),
-          ),
+    return Stack(children: [
+      Padding(
+        padding: const EdgeInsets.only(right: 40.0),
+        child: Slider(
+          value: distance,
+          min: 0,
+          max: 100,
+          divisions: 100,
+          onChanged: (newDistance) {
+            setState(() {
+              distance = newDistance;
+            });
+          },
+          label: distance.round().toString(),
         ),
-        Align(
-          alignment: Alignment.centerRight,
-          child: IconButton(onPressed: widget.onTapClose, icon: Container(decoration: const BoxDecoration(shape: BoxShape.circle, color: Colors.white),child: Icon(Icons.close, color: Theme.of(context).primaryColor,))),
-        )
-    ]
-    );
+      ),
+      Align(
+        alignment: Alignment.centerRight,
+        child: IconButton(
+            onPressed: widget.onTapClose,
+            icon: Container(
+                decoration: const BoxDecoration(
+                    shape: BoxShape.circle, color: Colors.white),
+                child: Icon(
+                  Icons.close,
+                  color: Theme.of(context).primaryColor,
+                ))),
+      )
+    ]);
   }
 }

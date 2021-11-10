@@ -7,24 +7,36 @@ class SortByOptions extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-        children: [
-          Padding(
-            padding: const EdgeInsets.only(left: 8.0, right: 40.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                Expanded(child: ElevatedButton(onPressed: () {}, child: const Text('Price'))),
-                const SizedBox(width: 10,),
-                Expanded(child: ElevatedButton(onPressed: () {}, child: const Text('Distance'))),
-              ],
+    return Stack(children: [
+      Padding(
+        padding: const EdgeInsets.only(left: 8.0, right: 40.0),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            Expanded(
+                child: ElevatedButton(
+                    onPressed: () {}, child: const Text('Price'))),
+            const SizedBox(
+              width: 10,
             ),
-          ),
-          Align(
-            alignment: Alignment.centerRight,
-            child: IconButton(onPressed: onTapClose, icon: Container(decoration: const BoxDecoration(shape: BoxShape.circle, color: Colors.white),child: Icon(Icons.close, color: Theme.of(context).primaryColor,))),
-          )
-        ]
-    );
+            Expanded(
+                child: ElevatedButton(
+                    onPressed: () {}, child: const Text('Distance'))),
+          ],
+        ),
+      ),
+      Align(
+        alignment: Alignment.centerRight,
+        child: IconButton(
+            onPressed: onTapClose,
+            icon: Container(
+                decoration: const BoxDecoration(
+                    shape: BoxShape.circle, color: Colors.white),
+                child: Icon(
+                  Icons.close,
+                  color: Theme.of(context).primaryColor,
+                ))),
+      )
+    ]);
   }
 }
