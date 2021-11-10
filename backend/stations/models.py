@@ -94,3 +94,20 @@ class FuelPrice(models.Model):
 
     def __str__(self):
         return 'Station: {},Id: {}, Ref: {}'.format(self.station.name, self.id, self.station.station_id)
+
+class UserReview(models.Model):
+    station = models.ForeignKey(
+        Station, on_delete=models.CASCADE, to_field='station_id')
+
+    unleaded_price = models.DecimalField(
+        decimal_places=1, max_digits=4, default=None, null=True)
+    diesel_price = models.DecimalField(
+        decimal_places=1, max_digits=4, default=None, null=True)
+    super_unleaded_price = models.DecimalField(
+        decimal_places=1, max_digits=4, default=None, null=True)
+    premium_diesel_price = models.DecimalField(
+        decimal_places=1, max_digits=4, default=None, null=True)
+
+    receipt = models.ImageField(upload_to='receipts/', blank=True, null=True)
+    opening = models.BooleanField(null=True)
+    congestion = models.IntegerField(null=True)
