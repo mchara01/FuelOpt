@@ -150,7 +150,7 @@ def nearestStation(request):
 
         # Limit search range, check only for stations that are within user specified radius of the location
         # Convert radius from km to degree [110.574km = 1deg lat/lng]
-        max_radius_degree = max_radius_km/110.574 
+        max_radius_degree = float(max_radius_km)/110.574
         # Filter for stations within the radius
         preferences_list = []
         stations_near_me = Station.objects.filter(
