@@ -35,9 +35,17 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'rest_framework',
     'rest_framework.authtoken',
+    'rest_auth',
     'apis.apps.ApisConfig',
     'stations.apps.StationsConfig',
+
+    'django.contrib.sites',
+    'allauth',
+    'allauth.account',
+    'rest_auth.registration',
 ]
+SITE_ID = 1
+
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -157,3 +165,6 @@ MESSAGE_TAGS = {
     messages.WARNING: 'alert-warning',
     messages.ERROR: 'alert-danger',
 }
+
+
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
