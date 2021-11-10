@@ -16,7 +16,7 @@ services:
   djangoAPI:
     image: fueloptapi:latest
     volumes:
-      - /home/ec2-user/FuelOpt:/home/app
+      - /home/ec2-user/FuelOpt:/usr/src/app
     ports:
       - 8000:8000
     restart: always
