@@ -23,6 +23,24 @@ CREATE TABLE `stations_station` (
   `lat` decimal(10,7) NOT NULL,
   `lng` decimal(10,7) NOT NULL,
   `station_id` int(11) NOT NULL,
+  `car_wash` tinyint(1) NOT NULL DEFAULT 0,
+  `air_and_water` tinyint(1) NOT NULL DEFAULT 0,
+  `car_vacuum` tinyint(1) NOT NULL DEFAULT 0,
+  `24_7_opening_hours` tinyint(1) NOT NULL DEFAULT 0,
+  `toilet` tinyint(1) NOT NULL DEFAULT 0,
+  `convenience_store` tinyint(1) NOT NULL DEFAULT 0,
+  `atm` tinyint(1) NOT NULL DEFAULT 0,
+  `parking_facilities` tinyint(1) NOT NULL DEFAULT 0,
+  `disabled_toilet_baby_change` tinyint(1) NOT NULL DEFAULT 0,
+  `alcohol` tinyint(1) NOT NULL DEFAULT 0,
+  `wi_fi` tinyint(1) NOT NULL DEFAULT 0,
+  `hgv_psv_fueling` tinyint(1) NOT NULL DEFAULT 0,
+  `fuelservice` tinyint(1) NOT NULL DEFAULT 0,
+  `payphone` tinyint(1) NOT NULL DEFAULT 0,
+  `restaurant` tinyint(1) NOT NULL DEFAULT 0,
+  `electric_car_charging` tinyint(1) NOT NULL DEFAULT 0,
+  `repair_garage` tinyint(1) NOT NULL DEFAULT 0,
+  `shower_facilities` tinyint(1) NOT NULL DEFAULT 0,
   PRIMARY KEY (`station_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -32,7 +50,8 @@ INSERT INTO db_fuelopt.stations_station
 VALUES(1, 'GODSTONE ROAD', 'CR3 0EG', 51.3135, -0.0819079, 'BP WHYTELEAFE (GODSTONE ROAD SF CONNECT)');
 
 -- instert into fuel_prices table: example
-INSERT INTO db_fuelopt.stations_fuelprice
-(unleaded_price, diesel_price, super_unleaded_price, premium_diesel_price, unleaded_date, diesel_date, super_unleaded_date, premium_diesel_date, station_id)
-VALUES(151.9, 153.9, 164.9, 169.9, '2021-10-13', '2021-10-13', '2021-10-13', '2021-10-13', 1);
+INSERT INTO db_fuelopt.stations_station
+(name, street, postcode, lat, lng, station_id, car_wash, air_and_water, car_vacuum, `24_7_opening_hours`, toilet, convenience_store, atm, parking_facilities, disabled_toilet_baby_change, alcohol, wi_fi, hgv_psv_fueling, fuelservice, payphone, restaurant, electric_car_charging, repair_garage, shower_facilities)
+VALUES('BP WHYTELEAFE (GODSTONE ROAD SF CONNECT)', 'GODSTONE ROAD', 'CR3 0EG', 51.3134521, -0.0819079, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 0, 0, 0, 0, 0, 1, 0, 0);
+
 
