@@ -93,7 +93,7 @@ for row_index in range(len(station_info)):
 
 # put all the new information to the dataframe
 station_info["unleaded"] = station_unleaded
-station_info["super unleaded"] = station_super_unleaded
+station_info["super_unleaded"] = station_super_unleaded
 station_info["diesel"] = station_diesel
 station_info["premium_diesel"] = station_premium_diesel
 station_info["station_unleaded_date"] = station_unleaded_date
