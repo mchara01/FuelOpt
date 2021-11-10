@@ -31,6 +31,7 @@ services:
 
 networks:
   fuelopt_net:
+    driver: bridge
     ipam:
       driver: bridge
       config:
