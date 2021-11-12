@@ -74,10 +74,10 @@ class FuelPrice(models.Model):
     premium_diesel_price = models.DecimalField(
         decimal_places=2, max_digits=10, default=None, null=True)
 
-    unleaded_date = models.DateField(default=datetime.date.today)
-    diesel_date = models.DateField(default=datetime.date.today)
-    super_unleaded_date = models.DateField(default=datetime.date.today)
-    premium_diesel_date = models.DateField(default=datetime.date.today)
+    unleaded_date = models.DateField(null=True)
+    diesel_date = models.DateField(null=True)
+    super_unleaded_date = models.DateField(null=True)
+    premium_diesel_date = models.DateField(null=True)
 
     def serialize(self):
         return {
