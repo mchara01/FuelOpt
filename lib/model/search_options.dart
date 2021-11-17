@@ -18,6 +18,15 @@ class FilterOptions {
   FilterOptions({required this.sort_by, required this.fuel_type, required this.distance});
 }
 
+class SearchQueryModel extends ChangeNotifier {
+  String searchQuery = '';
+
+  void setSearchQuery(String searchQuery) {
+    this.searchQuery = searchQuery;
+    notifyListeners();
+  }
+}
+
 class SortByPreferenceModel extends ChangeNotifier {
   SortByPreference sortByPreference = SortByPreference.NONE;
 
