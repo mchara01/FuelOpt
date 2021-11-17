@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:fuel_opt/api/api.dart';
-import 'package:fuel_opt/screens/home_screen.dart';
+// import 'package:fuel_opt/screens/home_screen.dart';
 import 'package:fuel_opt/screens/login_screen.dart';
+import 'package:fuel_opt/screens/review_screen.dart';
 import 'package:provider/provider.dart';
 
 Future<void> main() async {
@@ -21,7 +22,7 @@ class MyApp extends StatelessWidget {
         theme: ThemeData(
           primaryColor: const Color(0xFF002060),
         ),
-        home: const LoginScreen(),
+        home: const ReviewScreen(),
       ),
     );
   }
