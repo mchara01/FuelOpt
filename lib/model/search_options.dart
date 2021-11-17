@@ -1,5 +1,5 @@
 class SearchOptions {
-  late String location;
+  late String location = 'Imperial College London';
   FilterOptions filterOptions = FilterOptions(
     sort_by: 'Price',
     fuel_type: 'Unleaded',

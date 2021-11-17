@@ -20,7 +20,7 @@ class SortByOptions extends StatelessWidget {
             Expanded(
                 child: ElevatedButton(
                     onPressed: () {
-                      state.filterOptions.sort_by = 'Price';
+                      state.filterOptions.sort_by = 'price';
                     },
                     child: const Text('Price'))),
             const SizedBox(
@@ -29,7 +29,7 @@ class SortByOptions extends StatelessWidget {
             Expanded(
                 child: ElevatedButton(
                     onPressed: () {
-                      state.filterOptions.sort_by = 'Distance';
+                      state.filterOptions.sort_by = 'duration';
                     },
                     child: const Text('Distance'))),
           ],

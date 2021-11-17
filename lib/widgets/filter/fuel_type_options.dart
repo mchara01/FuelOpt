@@ -21,22 +21,22 @@ class FuelTypeOptions extends StatelessWidget {
             children: [
               ElevatedButton(
                   onPressed: () {
-                    state.filterOptions.fuel_type = 'Unleaded';
+                    state.filterOptions.fuel_type = 'unleaded';
                   },
                   child: const Text('Unleaded')),
               ElevatedButton(
                   onPressed: () {
-                    state.filterOptions.fuel_type = 'Super Unleaded';
+                    state.filterOptions.fuel_type = 'super_unleaded';
                   },
                   child: const Text('Super Unleaded')),
               ElevatedButton(
                   onPressed: () {
-                    state.filterOptions.fuel_type = 'Diesel';
+                    state.filterOptions.fuel_type = 'diesel';
                   },
                   child: const Text('Diesel')),
               ElevatedButton(
                   onPressed: () {
-                    state.filterOptions.fuel_type = 'Super Diesel';
+                    state.filterOptions.fuel_type = 'premium_diesel';
                   },
                   child: const Text('Super Diesel')),
             ],

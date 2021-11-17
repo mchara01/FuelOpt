@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:fuel_opt/model/search_options.dart';
+import 'package:fuel_opt/model/search_result.dart';
+import 'package:fuel_opt/widgets/search_result_list.dart';
 import 'package:provider/provider.dart';
 import '../utils/appColors.dart' as appColors;
 import 'package:fuel_opt/api/api.dart';
@@ -15,7 +17,7 @@ class SearchBar extends StatefulWidget {
 }
 
 class _SearchState extends State<SearchBar> {
-  var _location;
+  // var _location = '';
 
   @override
   Widget build(BuildContext context) {
@@ -40,8 +42,8 @@ class _SearchState extends State<SearchBar> {
                     hintText: 'Current Location', border: InputBorder.none),
                 onTap: widget.searchOnTap,
                 onChanged: (value) {
-                  _location = value;
-                  state.location = _location;
+                  // _location = value;
+                  state.location = value;
                 },
               )),
               TextButton(
@@ -52,10 +54,17 @@ class _SearchState extends State<SearchBar> {
                     print(state.filterOptions.distance);
                     FuelStationDataService fuelStationDataService =
                         FuelStationDataService();
-                    List<Station>? stations = await fuelStationDataService
-                        .getSearchResults(_location, state.filterOptions);
-                    ;
-                    print(stations);
+                    List<StationResult?> stations = await fuelStationDataService
+                        .getSearchResults(state.location, state.filterOptions);
+                    // await Navigator.push(
+                    //     context,
+                    //     MaterialPageRoute(
+                    //         builder: (context) => SearchResultList()));
+                    // print(stations);
+                    await Navigator.of(context).push(MaterialPageRoute(
+                      builder: (context) =>
+                          SearchResultList(stations: stations),
+                    ));
                   },
                   child: Icon(
                     Icons.search,
