@@ -79,8 +79,8 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
 
-env_var = os.environ['env']
-logging.info(env_var)
+env_var = os.environ['env'] if "env" in os.environ else ""
+logging.info("env_var: " + env_var)
 
 if env_var and env_var == "PRODUCTION":
     DATABASES = {
