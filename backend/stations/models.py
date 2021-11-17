@@ -11,28 +11,24 @@ class Station(models.Model):
     lat = models.DecimalField(max_digits=10, decimal_places=7)
     lng = models.DecimalField(max_digits=10, decimal_places=7)
     station_id = models.IntegerField(primary_key=True)
-    car_wash = models.IntegerField()
-    air_and_water = models.IntegerField()
-    car_vacuum = models.IntegerField()
-    number_24_7_opening_hours = models.IntegerField( db_column='24_7_opening_hours')
-    toilet = models.IntegerField()
-    convenience_store = models.IntegerField()
-    atm = models.IntegerField()
-    parking_facilities = models.IntegerField()
-    disabled_toilet_baby_change = models.IntegerField()
-    alcohol = models.IntegerField()
-    wi_fi = models.IntegerField()
-    hgv_psv_fueling = models.IntegerField()
-    fuelservice = models.IntegerField()
-    payphone = models.IntegerField()
-    restaurant = models.IntegerField()
-    electric_car_charging = models.IntegerField()
-    repair_garage = models.IntegerField()
-    shower_facilities = models.IntegerField()
-
-    class Meta:
-        managed = False
-        db_table = 'stations_station'
+    car_wash = models.IntegerField(default=0)
+    air_and_water = models.IntegerField(default=0)
+    car_vacuum = models.IntegerField(default=0)
+    number_24_7_opening_hours = models.IntegerField(db_column='24_7_opening_hours')
+    toilet = models.IntegerField(default=0)
+    convenience_store = models.IntegerField(default=0)
+    atm = models.IntegerField(default=0)
+    parking_facilities = models.IntegerField(default=0)
+    disabled_toilet_baby_change = models.IntegerField(default=0)
+    alcohol = models.IntegerField(default=0)
+    wi_fi = models.IntegerField(default=0)
+    hgv_psv_fueling = models.IntegerField(default=0)
+    fuelservice = models.IntegerField(default=0)
+    payphone = models.IntegerField(default=0)
+    restaurant = models.IntegerField(default=0)
+    electric_car_charging = models.IntegerField(default=0)
+    repair_garage = models.IntegerField(default=0)
+    shower_facilities = models.IntegerField(default=0)
 
     def serialize(self):
         return {
@@ -67,7 +63,7 @@ class Station(models.Model):
 
 
 class FuelPrice(models.Model):
-    station = models.ForeignKey(Station, on_delete=models.CASCADE)
+    station = models.ForeignKey(Station, on_delete=models.CASCADE, to_field='station_id')
 
     unleaded_price = models.DecimalField(
         decimal_places=2, max_digits=10, default=None, null=True)
@@ -78,10 +74,10 @@ class FuelPrice(models.Model):
     premium_diesel_price = models.DecimalField(
         decimal_places=2, max_digits=10, default=None, null=True)
 
-    unleaded_date = models.DateField(default=datetime.date.today)
-    diesel_date = models.DateField(default=datetime.date.today)
-    super_unleaded_date = models.DateField(default=datetime.date.today)
-    premium_diesel_date = models.DateField(default=datetime.date.today)
+    unleaded_date = models.DateField(null=True)
+    diesel_date = models.DateField(null=True)
+    super_unleaded_date = models.DateField(null=True)
+    premium_diesel_date = models.DateField(null=True)
 
     def serialize(self):
         return {
@@ -98,3 +94,20 @@ class FuelPrice(models.Model):
 
     def __str__(self):
         return 'Station: {},Id: {}, Ref: {}'.format(self.station.name, self.id, self.station.station_id)
+
+class UserReview(models.Model):
+    station = models.ForeignKey(
+        Station, on_delete=models.CASCADE, to_field='station_id')
+
+    unleaded_price = models.DecimalField(
+        decimal_places=1, max_digits=4, default=None, null=True)
+    diesel_price = models.DecimalField(
+        decimal_places=1, max_digits=4, default=None, null=True)
+    super_unleaded_price = models.DecimalField(
+        decimal_places=1, max_digits=4, default=None, null=True)
+    premium_diesel_price = models.DecimalField(
+        decimal_places=1, max_digits=4, default=None, null=True)
+
+    receipt = models.ImageField(upload_to='receipts/', blank=True, null=True)
+    opening = models.BooleanField(null=True)
+    congestion = models.IntegerField(null=True)

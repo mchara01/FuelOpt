@@ -27,6 +27,7 @@ samples, guidance on mobile development, and a full API reference.
 * **Marcos-Antonios Charalambous** - *mc921@ic.ac.uk*
 * **Alicia Jiayun Law** - *xxx@ic.ac.uk*
 * **Dimosthenis Tsormpatzoudis** - *dt521@ic.ac.uk*
+* **Nadim Rahman** - *nr421@ic.ac.uk*
 * **ENTER YOUR NAMES AND EMAILS**
 
 ## License

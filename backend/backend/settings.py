@@ -34,9 +34,17 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'rest_framework',
     'rest_framework.authtoken',
+    'rest_auth',
     'apis.apps.ApisConfig',
     'stations.apps.StationsConfig',
+
+    'django.contrib.sites',
+    'allauth',
+    'allauth.account',
+    'rest_auth.registration',
 ]
+SITE_ID = 1
+
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -72,7 +80,7 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
 
 env_var = os.environ['env'] if "env" in os.environ else ""
-logging.info("env var: " + env_var)
+logging.info("env_var: " + env_var)
 
 if env_var and env_var == "PRODUCTION":
     DATABASES = {
@@ -155,3 +163,6 @@ MESSAGE_TAGS = {
     messages.WARNING: 'alert-warning',
     messages.ERROR: 'alert-danger',
 }
+
+
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'

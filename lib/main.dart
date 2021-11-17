@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:fuel_opt/api/api.dart';
 import 'package:fuel_opt/screens/home_screen.dart';
+import 'package:fuel_opt/screens/login_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:fuel_opt/model/search_options.dart';
 
@@ -24,7 +25,7 @@ class MyApp extends StatelessWidget {
         theme: ThemeData(
           primaryColor: const Color(0xFF002060),
         ),
-        home: const HomeScreen(),
+        home: const LoginScreen(),
       ),
     );
     // return ChangeNotifierProvider(
