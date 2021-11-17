@@ -12,7 +12,7 @@
 #    See the documentation for each action used below for the recommended IAM policies for this IAM user,
 #    and best practices on handling the access key credentials.
 
-name: Deploy to Amazon ECS
+name: Deploy to Amazon ECR
 
 on:
   push:
@@ -44,6 +44,9 @@ jobs:
       id: login-ecr
       uses: aws-actions/amazon-ecr-login@v1
 
+    - name: Docker layer caching
+      uses: satackey/action-docker-layer-caching@v0.0.11
+    
     - name: Build, tag, and push image to Amazon ECR
       id: build-image
       env:
