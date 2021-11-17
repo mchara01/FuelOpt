@@ -16,23 +16,23 @@ class _DistanceOptionsState extends State<DistanceOptions> {
 
   @override
   Widget build(BuildContext context) {
-    final state = Provider.of<SearchOptions>(context);
 
     return Stack(children: [
       Padding(
         padding: const EdgeInsets.only(right: 40.0),
-        child: Slider(
-          value: distance,
-          min: 0,
-          max: 100,
-          divisions: 100,
-          onChanged: (newDistance) {
-            setState(() {
-              distance = newDistance;
-              state.filterOptions.distance = newDistance;
-            });
-          },
-          label: distance.round().toString(),
+        child: Consumer<DistancePreferenceModel>(
+          builder: (context, distancePreferenceModel, childWidget) {
+            return Slider(
+              value: distancePreferenceModel.distancePreference,
+              min: 0,
+              max: 100,
+              divisions: 100,
+              onChanged: (newDistance) {
+                distancePreferenceModel.setDistancePreference(newDistance);
+              },
+              label: distancePreferenceModel.distancePreference.round().toString(),
+            );
+    },
         ),
       ),
       Align(

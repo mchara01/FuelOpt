@@ -2,9 +2,11 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
+import 'package:fuel_opt/model/search_options.dart';
 import 'package:fuel_opt/model/search_result.dart';
 import 'package:fuel_opt/widgets/filter/filter_menu.dart';
 import 'package:fuel_opt/widgets/search_bar.dart';
+import 'package:provider/provider.dart';
 import 'package:snapping_sheet/snapping_sheet.dart';
 import 'package:fuel_opt/widgets/search_result_list.dart';
 
@@ -72,17 +74,19 @@ class _FuelStationsBottomSheetState extends State<FuelStationsBottomSheet> {
       sheetBelow: SnappingSheetContent(
           child: Container(
             color: Colors.white,
-            child: Stack(
-              children: const [
-                Align(alignment: Alignment.center,child: SearchResultList(stations: <StationResult>[])),
-                FilterMenu(),
+            child: MultiProvider(
+              providers: [
+                ChangeNotifierProvider(create: (context) => SortByPreferenceModel()),
+                ChangeNotifierProvider(create: (context) => FuelTypePreferenceModel(),),
+                ChangeNotifierProvider(create: (context) => DistancePreferenceModel(),)
               ],
+              child: Stack(
+                children: const [
+                  Align(alignment: Alignment.center,child: SearchResultList(stations: <StationResult>[])),
+                  FilterMenu(),
+                ],
+              ),
             ),
-            // child: Column(
-            //   children: <Widget>[
-            //     Filter(),
-            //   ],
-            // ),
           ),
           draggable: true),
       initialSnappingPosition:
