@@ -1,13 +1,13 @@
 class FuelPrice {
   final int stationId;
-  final double unleadedPrice;
-  final double dieselPrice;
-  final double superUnleadedPrice;
-  final double premiumDieselPrice;
-  final String unleadedDate;
-  final String dieselDate;
-  final String superUnleadedDate;
-  final String premiumDieselDate;
+  final String? unleadedPrice;
+  final String? dieselPrice;
+  final String? superUnleadedPrice;
+  final String? premiumDieselPrice;
+  final String? unleadedDate;
+  final String? dieselDate;
+  final String? superUnleadedDate;
+  final String? premiumDieselDate;
 
   FuelPrice(
       {required this.stationId,

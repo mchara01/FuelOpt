@@ -56,15 +56,15 @@ class _SearchState extends State<SearchBar> {
                         FuelStationDataService();
                     List<StationResult?> stations = await fuelStationDataService
                         .getSearchResults(state.location, state.filterOptions);
-                    // await Navigator.push(
-                    //     context,
-                    //     MaterialPageRoute(
-                    //         builder: (context) => SearchResultList()));
+                    state.result = stations;
+                    print(state.result.length);
+                    setState(() {});
+                    // return Center(child: SearchResultList(stations: stations));
                     // print(stations);
-                    await Navigator.of(context).push(MaterialPageRoute(
-                      builder: (context) =>
-                          SearchResultList(stations: stations),
-                    ));
+                    // await Navigator.of(context).push(MaterialPageRoute(
+                    //   builder: (context) =>
+                    //       SearchResultList(stations: stations),
+                    // ));
                   },
                   child: Icon(
                     Icons.search,

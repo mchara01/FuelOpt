@@ -1,5 +1,5 @@
 class Station {
-  final int id;
+  final int station_id;
   final String name;
   final String street;
   final double latitude;
@@ -25,7 +25,7 @@ class Station {
   final int shower_facilities;
 
   Station({
-    required this.id,
+    required this.station_id,
     required this.name,
     required this.street,
     required this.latitude,
@@ -53,7 +53,7 @@ class Station {
 
   factory Station.fromJson(Map<String, dynamic> json) {
     return Station(
-      id: json['id'],
+      station_id: json['station_id'],
       name: json['name'],
       street: json['street'],
       latitude: double.parse(json['latitude']),

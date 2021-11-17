@@ -25,7 +25,7 @@ class MyApp extends StatelessWidget {
         theme: ThemeData(
           primaryColor: const Color(0xFF002060),
         ),
-        home: const LoginScreen(),
+        home: const HomeScreen(),
       ),
     );
     // return ChangeNotifierProvider(

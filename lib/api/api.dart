@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:fuel_opt/model/fuelprice_model.dart';
 import 'package:fuel_opt/model/search_options.dart';
 import 'package:fuel_opt/model/search_result.dart';
@@ -52,7 +53,7 @@ class FuelStationDataService {
     String minLat = latLngBounds.southwest.latitude.toString();
     String minLng = latLngBounds.southwest.longitude.toString();
 
-    String urlstring = 'http://10.0.2.2:8000/apis/home/?' +
+    String urlstring = 'http://127.0.0.1:8000/apis/home/?' +
         'lat_max=' +
         maxLat +
         '&lat_min=' +
@@ -87,21 +88,70 @@ class FuelStationDataService {
 
   Future<List<StationResult?>> getSearchResults(
       String address, FilterOptions filter) async {
+    final String response_list = await rootBundle
+        .loadString('/Users/yeliu/IC/Group_Project/FuelOpt/lib/api/test.json');
+    var data = json.decode(response_list) as List;
+    List<StationResult> test_stations = data
+        .map<StationResult>((json) => StationResult.fromJson(json))
+        .toList();
+    return test_stations;
+    List<StationResult?> stations = [
+      StationResult(
+          station_id: 1,
+          name: 'name',
+          street: 'street',
+          latitude: 1,
+          longitude: 2,
+          postcode: 'postcode',
+          car_wash: 1,
+          air_and_water: 1,
+          car_vacuum: 1,
+          number_24_7_opening_hours: 1,
+          toilet: 1,
+          convenience_store: 1,
+          atm: 1,
+          parking_facilities: 1,
+          disabled_toilet_baby_change: 1,
+          alcohol: 1,
+          wi_fi: 1,
+          hgv_psv_fueling: 1,
+          fuelservice: 1,
+          payphone: 1,
+          restaurant: 1,
+          electric_car_charging: 1,
+          repair_garage: 1,
+          shower_facilities: 1,
+          duration: '2',
+          price: FuelPrice(
+              stationId: 1,
+              unleadedPrice: '1',
+              dieselPrice: '2',
+              superUnleadedPrice: '3',
+              premiumDieselPrice: '4',
+              unleadedDate: 'unleadedDate',
+              dieselDate: 'dieselDate',
+              superUnleadedDate: 'superUnleadedDate',
+              premiumDieselDate: 'premiumDieselDate'),
+          distance: '5')
+    ];
+
+    // return stations;
     String urlstring = 'http://127.0.0.1:8000/apis/nearest/?' +
         'user_preference=' +
-        filter.sort_by +
+        filter.sort_by.toLowerCase() +
         // 'duration' +
         '&location=' +
         address +
         // 'Imperial College London' +
         '&fuel_type=' +
-        filter.fuel_type +
+        filter.fuel_type.toLowerCase() +
         // 'unleaded' +
         '&distance=' +
         filter.distance.toString();
     // '5';
 
     final url = Uri.parse(urlstring);
+    print(url);
 
     final response = await http.get(url);
     print(response.statusCode);

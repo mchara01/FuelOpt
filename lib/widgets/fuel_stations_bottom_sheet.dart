@@ -2,11 +2,13 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
+import 'package:fuel_opt/model/search_options.dart';
 import 'package:fuel_opt/model/search_result.dart';
 import 'package:fuel_opt/widgets/filter/filter_menu.dart';
 import 'package:fuel_opt/widgets/search_bar.dart';
 import 'package:snapping_sheet/snapping_sheet.dart';
 import 'package:fuel_opt/widgets/search_result_list.dart';
+import 'package:provider/provider.dart';
 
 class FuelStationsBottomSheet extends StatefulWidget {
   const FuelStationsBottomSheet({Key? key}) : super(key: key);
@@ -42,6 +44,8 @@ class _FuelStationsBottomSheetState extends State<FuelStationsBottomSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final state = Provider.of<SearchOptions>(context);
+
     return SnappingSheet(
       controller: snappingSheetController,
       grabbing: Container(
@@ -77,7 +81,8 @@ class _FuelStationsBottomSheetState extends State<FuelStationsBottomSheet> {
             child: Column(
               children: [
                 FilterMenu(),
-                SearchResultList(stations: <StationResult>[])
+                // SearchResultList(stations: state.result)
+                SearchResultList()
               ],
             ),
             // child: Column(
