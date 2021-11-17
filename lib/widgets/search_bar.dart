@@ -19,6 +19,8 @@ class SearchBar extends StatefulWidget {
 class _SearchState extends State<SearchBar> {
   // var _location = '';
 
+  final TextEditingController _textEditingController = TextEditingController();
+
   @override
   Widget build(BuildContext context) {
     final state = Provider.of<SearchOptions>(context);
@@ -37,15 +39,21 @@ class _SearchState extends State<SearchBar> {
                 width: 10,
               ),
               Expanded(
-                  child: TextField(
-                decoration: const InputDecoration(
-                    hintText: 'Current Location', border: InputBorder.none),
-                onTap: widget.searchOnTap,
-                onChanged: (value) {
-                  // _location = value;
-                  state.location = value;
-                },
-              )),
+                  child: Consumer<SearchQueryModel>(
+                    builder: (context, searchQueryModel, childWidget) {
+                      print(searchQueryModel.searchQuery);
+                      _textEditingController.text = searchQueryModel.searchQuery;
+                      return TextField(
+                        controller: _textEditingController,
+                        decoration: const InputDecoration(
+                            hintText: 'Current Location', border: InputBorder.none),
+                        onTap: widget.searchOnTap,
+                        onChanged: (value) {
+                          searchQueryModel.setSearchQuery(value);
+                        },
+                      );
+                    },
+                  )),
               TextButton(
                   onPressed: () async {
                     print(state.location);

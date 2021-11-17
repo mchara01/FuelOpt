@@ -6,6 +6,7 @@ import 'package:fuel_opt/model/search_options.dart';
 import 'package:fuel_opt/model/search_result.dart';
 import 'package:fuel_opt/widgets/filter/filter_menu.dart';
 import 'package:fuel_opt/widgets/search_bar.dart';
+import 'package:provider/provider.dart';
 import 'package:snapping_sheet/snapping_sheet.dart';
 import 'package:fuel_opt/widgets/search_result_list.dart';
 import 'package:provider/provider.dart';
@@ -46,68 +47,78 @@ class _FuelStationsBottomSheetState extends State<FuelStationsBottomSheet> {
   Widget build(BuildContext context) {
     final state = Provider.of<SearchOptions>(context);
 
-    return SnappingSheet(
-      controller: snappingSheetController,
-      grabbing: Container(
-        decoration: BoxDecoration(
-          color: Colors.white,
-          boxShadow: <BoxShadow>[
-            BoxShadow(blurRadius: 20.0, color: Colors.black.withOpacity(0.2))
-          ],
-        ),
-        child: SizedBox(
-          height: 100,
-          width: 100,
-          child: SearchBar(
-            searchOnTap: () {
-              programmaticBottomSheetMovement = true;
-              snappingSheetController
-                  .snapToPosition(
-                      const SnappingPosition.factor(positionFactor: 0.7))
-                  .then((value) {
-                bottomSheetPosition = snappingSheetController.currentPosition;
-                programmaticBottomSheetMovement = false;
-              });
-            },
+    return ChangeNotifierProvider(
+      create: (context) => SearchQueryModel(),
+      child: SnappingSheet(
+        controller: snappingSheetController,
+        grabbing: Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            boxShadow: <BoxShadow>[
+              BoxShadow(blurRadius: 20.0, color: Colors.black.withOpacity(0.2))
+            ],
           ),
-        ),
-      ),
-      grabbingHeight: 80,
-      sheetBelow: SnappingSheetContent(
-          child: Container(
+          child: SizedBox(
             height: 100,
             width: 100,
-            color: Colors.white,
-            child: Column(
-              children: [
-                FilterMenu(),
-                // SearchResultList(stations: state.result)
-                SearchResultList()
-              ],
+            child: SearchBar(
+              searchOnTap: () {
+                programmaticBottomSheetMovement = true;
+                snappingSheetController
+                    .snapToPosition(
+                        const SnappingPosition.factor(positionFactor: 0.7))
+                    .then((value) {
+                  bottomSheetPosition = snappingSheetController.currentPosition;
+                  programmaticBottomSheetMovement = false;
+                });
+              },
             ),
-            // child: Column(
-            //   children: <Widget>[
-            //     Filter(),
-            //   ],
-            // ),
           ),
-          draggable: true),
-      initialSnappingPosition:
-          const SnappingPosition.factor(positionFactor: 0.4),
-      snappingPositions: const [
-        SnappingPosition.factor(
-            positionFactor: 0.0,
-            grabbingContentOffset: GrabbingContentOffset.top),
-        SnappingPosition.factor(positionFactor: 0.4),
-        SnappingPosition.factor(positionFactor: 0.7)
-      ],
-      onSheetMoved: (sheetPositionData) {
-        if (!programmaticBottomSheetMovement && isKeyboardVisible) {
-          if ((sheetPositionData.pixels - bottomSheetPosition!).abs() > 30) {
-            FocusScope.of(context).unfocus();
+        ),
+        grabbingHeight: 80,
+        sheetBelow: SnappingSheetContent(
+            child: Container(
+              color: Colors.white,
+              child: MultiProvider(
+                providers: [
+                  ChangeNotifierProvider(
+                      create: (context) => SortByPreferenceModel()),
+                  ChangeNotifierProvider(
+                    create: (context) => FuelTypePreferenceModel(),
+                  ),
+                  ChangeNotifierProvider(
+                    create: (context) => DistancePreferenceModel(),
+                  )
+                ],
+                child: Stack(
+                  children: [
+                    Align(
+                      alignment: Alignment.center,
+                      child: SearchResultList(),
+                    ),
+                    const FilterMenu(),
+                  ],
+                ),
+              ),
+            ),
+            draggable: true),
+        initialSnappingPosition:
+            const SnappingPosition.factor(positionFactor: 0.4),
+        snappingPositions: const [
+          SnappingPosition.factor(
+              positionFactor: 0.0,
+              grabbingContentOffset: GrabbingContentOffset.top),
+          SnappingPosition.factor(positionFactor: 0.4),
+          SnappingPosition.factor(positionFactor: 0.7)
+        ],
+        onSheetMoved: (sheetPositionData) {
+          if (!programmaticBottomSheetMovement && isKeyboardVisible) {
+            if ((sheetPositionData.pixels - bottomSheetPosition!).abs() > 30) {
+              FocusScope.of(context).unfocus();
+            }
           }
-        }
-      },
+        },
+      ),
     );
   }
 
