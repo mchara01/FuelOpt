@@ -46,7 +46,8 @@ jobs:
 
     - name: Docker layer caching
       uses: satackey/action-docker-layer-caching@v0.0.11
-    
+      continue-on-error: true
+        
     - name: Build, tag, and push image to Amazon ECR
       id: build-image
       env:
