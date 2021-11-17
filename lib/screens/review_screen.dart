@@ -15,18 +15,25 @@ class ReviewScreen extends StatefulWidget {
 }
 
 class _ReviewScreenState extends State<ReviewScreen> {
+  bool unleadedNotAvailable = false;
+  bool dieselNotAvailable = false;
+  bool superUnleadedNotAvailable = false;
+  bool premiumDieselNotAvailable = false;
   // Form key
   final _formKey = GlobalKey<FormState>();
   final TextEditingController unleadedController = new TextEditingController();
   final TextEditingController dieselController = new TextEditingController();
-  final TextEditingController superUnleadedController = new TextEditingController();
-  final TextEditingController premiumDieselController = new TextEditingController();
+  final TextEditingController superUnleadedController =
+      new TextEditingController();
+  final TextEditingController premiumDieselController =
+      new TextEditingController();
 
   @override
   Widget build(BuildContext context) {
     // unleaded field
     final unleadedField = TextFormField(
       autofocus: false,
+      enabled: !unleadedNotAvailable,
       controller: unleadedController,
       keyboardType: TextInputType.number,
       onSaved: (value) {
@@ -40,9 +47,18 @@ class _ReviewScreenState extends State<ReviewScreen> {
           labelText: 'Insert Unleaded Price',
           border: OutlineInputBorder(borderRadius: BorderRadius.circular(10))),
     );
-
+    final unleadedButton = Checkbox(
+      value: unleadedNotAvailable,
+      onChanged: (value) {
+        setState(() {
+          bool test = value ?? false;
+          unleadedNotAvailable = test;
+        });
+      },
+    );
     final dieselField = TextFormField(
       autofocus: false,
+      enabled: !dieselNotAvailable,
       controller: dieselController,
       keyboardType: TextInputType.number,
       onSaved: (value) {
@@ -56,9 +72,18 @@ class _ReviewScreenState extends State<ReviewScreen> {
           labelText: 'Insert Diesel Price',
           border: OutlineInputBorder(borderRadius: BorderRadius.circular(10))),
     );
-
-    final superUnleadedfield= TextFormField(
+    final dieselButton = Checkbox(
+      value: dieselNotAvailable,
+      onChanged: (value) {
+        setState(() {
+          bool test = value ?? false;
+          dieselNotAvailable = test;
+        });
+      },
+    );
+    final superUnleadedfield = TextFormField(
       autofocus: false,
+      enabled: !superUnleadedNotAvailable,
       controller: superUnleadedController,
       keyboardType: TextInputType.number,
       onSaved: (value) {
@@ -72,9 +97,18 @@ class _ReviewScreenState extends State<ReviewScreen> {
           labelText: 'Insert Super Unleaded Price',
           border: OutlineInputBorder(borderRadius: BorderRadius.circular(10))),
     );
-
+    final superUnleadedButton = Checkbox(
+      value: superUnleadedNotAvailable,
+      onChanged: (value) {
+        setState(() {
+          bool test = value ?? false;
+          superUnleadedNotAvailable = test;
+        });
+      },
+    );
     final premiumDieselField = TextFormField(
       autofocus: false,
+      enabled: !premiumDieselNotAvailable,
       controller: premiumDieselController,
       keyboardType: TextInputType.number,
       onSaved: (value) {
@@ -88,7 +122,15 @@ class _ReviewScreenState extends State<ReviewScreen> {
           labelText: 'Insert Premium Diesel Price',
           border: OutlineInputBorder(borderRadius: BorderRadius.circular(10))),
     );
-
+    final premiumDieselButton = Checkbox(
+      value: premiumDieselNotAvailable,
+      onChanged: (value) {
+        setState(() {
+          bool test = value ?? false;
+          premiumDieselNotAvailable = test;
+        });
+      },
+    );
     final submitButton = Material(
         elevation: 5,
         borderRadius: BorderRadius.circular(30),
@@ -97,10 +139,11 @@ class _ReviewScreenState extends State<ReviewScreen> {
           padding: EdgeInsets.fromLTRB(20, 15, 20, 15),
           minWidth: MediaQuery.of(context).size.width,
           onPressed: () {
-            debugPrint(dieselController.text+"hello");
-            debugPrint(unleadedController.text+"goodbye");
-            // print(dieselController.text+"hello");
-            // submitReview(double.parse(unleadedController.text), double.parse(dieselController.text), double.parse(superUnleadedController.text), double.parse(premiumDieselController.text) );
+            submitReview(
+                double.tryParse(unleadedController.text),
+                double.tryParse(dieselController.text),
+                double.tryParse(superUnleadedController.text),
+                double.tryParse(premiumDieselController.text));
           },
           child: Text(
             "Submit",
@@ -117,52 +160,68 @@ class _ReviewScreenState extends State<ReviewScreen> {
         backgroundColor: Colors.white,
         body: Center(
           child: SingleChildScrollView(
-              child: Container(
-                  color: Colors.white,
-                  child: Padding(
-                    padding: const EdgeInsets.all(36.0),
-                    child: Form(
-                      key: _formKey,
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: <Widget>[
-                          Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: <Widget>[
-                                SizedBox.fromSize(
-                                    size: Size.fromRadius(30),
-                                    child: FittedBox(
-                                      child: Icon(Icons.local_gas_station),
-                                    )),
-                                Text(
-                                  "Update Fuel Prices",
-                                  style: TextStyle(
-                                      color: appColors.PrimaryBlue,
-                                      fontWeight: FontWeight.w800,
-                                      fontSize: 30),
-                                ),
-                              ]),
-                          SizedBox(height: 20),
-                          unleadedField,
-                          SizedBox(height: 20),
-                          dieselField,
-                          SizedBox(height: 20),
-                          superUnleadedfield,
-                          SizedBox(height: 20),
-                          premiumDieselField,
-                          SizedBox(height: 20),
-                          submitButton,
-                          SizedBox(height: 20)
-                        ],
-                      ),
-                    ),
-                  ))),
+              child: Padding(
+            padding: const EdgeInsets.all(36.0),
+            child: Form(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: <Widget>[
+                  Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: <Widget>[
+                        SizedBox.fromSize(
+                            size: Size.fromRadius(30),
+                            child: FittedBox(
+                              child: Icon(Icons.local_gas_station),
+                            )),
+                        Text(
+                          "Update Fuel Prices",
+                          style: TextStyle(
+                              color: appColors.PrimaryBlue,
+                              fontWeight: FontWeight.w800,
+                              fontSize: 30),
+                        ),
+                      ]),
+                  SizedBox(height: 20),
+                  Row(children: <Widget>[
+                    Expanded(child:unleadedField),
+                    unleadedButton,
+                    Text("N/A")
+                  ]),
+                  SizedBox(height: 20),
+                  Row(children: <Widget>[
+                    Expanded(child:dieselField),
+                    dieselButton,
+                    Text("N/A")
+                  ]),
+                  SizedBox(height: 20),
+                  Row(children: <Widget>[
+                    Expanded(child:superUnleadedfield),
+                    superUnleadedButton,
+                    Text("N/A")
+                  ]),
+                  SizedBox(height: 20),
+                  Row(children: <Widget>[
+                    Expanded(child:premiumDieselField),
+                    premiumDieselButton,
+                    Text("N/A")
+                  ]),
+                  SizedBox(height: 20),
+                  submitButton,
+                  SizedBox(height: 20)
+                ],
+              ),
+            ),
+          )),
         ));
   }
 
   // login function
-  void submitReview(double unleadedPrice, double dieselPrice, double superUnleadedPrice, double premiumDieselPrice) async {
-    Fluttertoast.showToast(msg: '$unleadedPrice + $dieselPrice + $superUnleadedPrice + $premiumDieselPrice');
+  void submitReview(double? unleadedPrice, double? dieselPrice,
+      double? superUnleadedPrice, double? premiumDieselPrice) async {
+    Fluttertoast.showToast(
+        msg:
+            '$unleadedPrice + $dieselPrice + $superUnleadedPrice + $premiumDieselPrice');
   }
 }
