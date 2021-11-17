@@ -150,9 +150,15 @@ def home(request):
         stations_near_me = Station.objects.filter(
             lat__lte=lat_max, lat__gte=lat_min, lng__lte=lng_max, lng__gte=lng_min
         )
+
+        response = []
+        for station in stations_near_me:
+            station_response = station.serialize()
+            station_response['prices'] = FuelPrice.objects.get(station=station.pk).serialize()
+            response.append(station_response)
     
     # returns a Json list of stations within that page
-    return JsonResponse([station.serialize() for station in stations_near_me], safe=False)
+    return JsonResponse(response, safe=False)
 
 def search(request):
     """
@@ -167,26 +173,35 @@ def search(request):
         user_location = request.GET['location']
         fuel_type = request.GET['fuel_type']
         max_radius_km = request.GET['distance']
+        amenities_list = request.GET['amenities'].split(',')
 
         user_lat, user_lng = geocoding(user_location)
 
-        if max_radius_km == None:
+        # Default distance range
+        if max_radius_km == '':
             max_radius_km = 50
-
-        if user_preference == None and fuel_type == None:
-            user_preference = 'price'
-            fuel_type = 'unleaded'
 
         # (i) Distance Limit: check only for stations that are within user specified radius of the location
         # Convert radius from km to degree [110.574km = 1deg lat/lng]
         max_radius_degree = float(max_radius_km)/110.574
         # Filter for stations within the radius
-        preferences_list = []
-        stations_near_me = Station.objects.filter(
-            lat__lte=user_lat+max_radius_degree, lat__gte=user_lat-max_radius_degree, lng__lte=user_lng+max_radius_degree, lng__gte=user_lng-max_radius_degree
+        """
+        preferences_list = Station.objects.filter(
+            lat__lte=user_lat+max_radius_degree,
+            lat__gte=user_lat-max_radius_degree,
+            lng__lte=user_lng+max_radius_degree, 
+            lng__gte=user_lng-max_radius_degree
         )
+        """
+        preferences_list = FuelPrice.objects.filter(
+            station__lat__lte=user_lat+max_radius_degree,
+            station__lat__gte=user_lat-max_radius_degree,
+            station__lng__lte=user_lng+max_radius_degree,
+            station__lng__gte=user_lng-max_radius_degree
+        )
+        
         # If user has not provide any specification/ preferences, return this:
-        preferences_list = stations_near_me
+        # preferences_list = stations_prices_near_me
 
         # (ii) If fuel_type is specified, show only stations that have said fuel.
         if fuel_type:
@@ -194,52 +209,87 @@ def search(request):
             kwargs = {
                 '{0}__{1}'.format(fuel_preference, 'isnull'): True,
             }
+            
             # Exclude stations where fuel price is not available
-            fuel_prices_all = FuelPrice.objects.filter(station__in=preferences_list).exclude(**kwargs)
-            fuel_prices_preference = fuel_prices_all.values_list(fuel_preference, flat=True)
-            preferences_list = [fuel_price.station for fuel_price in fuel_prices_all]
+            preferences_list = preferences_list.exclude(**kwargs)
+            # preferences_list = [fuel_price.station for fuel_price in fuel_prices_all]
 
-        # Get travel durations and distances and store as a dictionary: { station_pk : duration } pair
+        # (iii) Filter all the amenities (if any). If the station doesn't have the amenity listed, exclude.
+        if amenities_list!=['']:
+            for amenity in amenities_list:
+                station__amenity = 'station__'+amenity
+                kwargs = {}
+                kwargs['{0}__{1}'.format(station__amenity, 'exact')] = 0
+                preferences_list = preferences_list.exclude(**kwargs)
+
+        # (iv) Get travel durations and distances for current candidates and store as a dictionary: { station_pk : duration } pair
         # Duration units: seconds   Distance units: km
-        travel_durations, travel_distance = dict(), dict()
-        for station in preferences_list:
-            # travel_durations[station.pk], travel_distance[station.pk] = get_duration_distance(user_lat, user_lng, station.lat, station.lng)
-            travel_durations[station.pk], travel_distance[station.pk] = 10, 10
+        travel_durations, travel_distance, travel_traffic_durations = dict(), dict(), dict()
+        for fuel_price in preferences_list:
+            travel_durations[fuel_price.station.pk], travel_traffic_durations[fuel_price.station.pk], travel_distance[fuel_price.station.pk] = get_duration_distance(user_lat, user_lng, fuel_price.station.lat, fuel_price.station.lng)
 
-        # (iii) If user's optimisation criteria is duration
-        if user_preference == 'duration':
-
+        # (v) Optimisation Criteria. If
+        # a. Time to arrival
+        if user_preference == 'time':
             # Sort travel durations. 
-            sorted_duration = {k: v for k, v in sorted(travel_durations.items(), key=lambda item: item[1])}
+            sorted_duration = {k: v for k, v in sorted(travel_traffic_durations.items(), key=lambda item: item[1])}
             sorted_station_pks = sorted_duration.keys()
 
             # Sort stations according to sorted durations, querying stations in the correct order
             preferences_list = query_sorted_order(sorted_station_pks)
 
-        # (iv) If user's optimisation criteria is price
-        # Assuming 0.057litre per km x £1.442/litre = £0.082/km distance
-        if user_preference == 'price':
+        # b. Fuel Price
+        # Assuming average speed = 50miles/hr = 80.47km/hr; 0.057litre per km;  £1.442/litre 
+        # Penalty cost for duration = £0.00184/s
+        # Penalty cost for distance = £0.0822/km
+
+        if user_preference == 'price' or user_preference == '':
             if not fuel_type:
-                return JsonResponse({'status':'false', 'message': 'Fuel type not specified.'}, status=500)
+                fuel_preference = ['unleaded_price','diesel_price','super_unleaded_price','premium_diesel_price']
+                best_station_general = {} 
+                kwargs = {}
+                tmp = preferences_list
+                for pref in fuel_preference:
+                    kwargs = {
+                        '{0}__{1}'.format(pref, 'isnull'): True,
+                    }
+                    curr_pref_list = tmp
+                    curr_pref_list = curr_pref_list.exclude(**kwargs)
+                    preferred_fuel_prices = curr_pref_list.values_list(pref, flat=True)
+                    # Sort stations according to sorted durations
+                    sorted_station_pks = sort_by_price(curr_pref_list, travel_traffic_durations, travel_durations, travel_distance, preferred_fuel_prices)
+                    # Query stations in sorted order, selecting only the top 3 station for each fuel type
+                    curr_pref_list = query_sorted_order(sorted_station_pks[:3]) 
+                    best_station_general[pref]=curr_pref_list
 
-            weighted_prices = dict()
-            for index, station in enumerate(preferences_list):
-                weighted_prices[station.pk] = fuel_prices_preference[index] + Decimal(travel_distance[station.pk]*0.082)
+                response = []
+                for fuel, preferences_list in best_station_general.items():
+                    fuel_response={}
+                    fuel_response['fuel_type']=fuel
+                    top_3=[]
+                    for fuel_price in preferences_list:
+                        station_response = fuel_price.station.serialize()
+                        station_response['prices'] = fuel_price.serialize()
+                        station_response['duration'] = str(int(travel_traffic_durations[fuel_price.station.pk]/60)) + 'mins'
+                        station_response['distance'] = str(travel_distance[fuel_price.station.pk]) + 'km'
+                        top_3.append(station_response)
+                    fuel_response['Top 3 Stations']=top_3
+                    response.append(fuel_response)
 
-            sorted_weighted_prices = {k: v for k, v in sorted(weighted_prices.items(), key=lambda item: item[1])}
-            sorted_station_pks = list(sorted_weighted_prices.keys())
-
-            # Sort stations according to sorted durations, querying stations in the correct order
-            preferences_list = query_sorted_order(sorted_station_pks[:10])
-
-        # Append prices with the station information
-        response = []
-        for station in preferences_list:
-            station_response = station.serialize()
-            station_response['prices'] = FuelPrice.objects.get(station=station.pk).serialize()
-            station_response['duration'] = str(int(travel_durations[station.pk]/60)) + 'mins'
-            station_response['distance'] = str(travel_distance[station.pk]) + 'km'
-            response.append(station_response)
+            else:
+                preferred_fuel_prices = preferences_list.values_list(fuel_preference, flat=True)
+                # Sort stations according to sorted durations
+                sorted_station_pks = sort_by_price(preferences_list, travel_traffic_durations, travel_durations, travel_distance, preferred_fuel_prices)
+                # Query stations in sorted order
+                preferences_list = query_sorted_order(sorted_station_pks[:10])
+                # Append prices with the station information
+                response = []
+                for fuel_price in preferences_list:
+                    station_response = fuel_price.station.serialize()
+                    station_response['prices'] = fuel_price.serialize()
+                    station_response['duration'] = str(int(travel_traffic_durations[fuel_price.station.pk]/60)) + 'mins'
+                    station_response['distance'] = str(travel_distance[fuel_price.station.pk]) + 'km'
+                    response.append(station_response)
 
     return JsonResponse(response, safe=False)
 
@@ -248,17 +298,37 @@ def get_duration_distance(lat1, lng1, lat2, lng2):
     bingMapsKey = "Aiiv3MUtA8Fq3gGOuwLYLrzz_FRSm1xXUEgDZxO6-R8wg73PKwV50hxqwSrbBhXY"
     routeUrl = "http://dev.virtualearth.net/REST/V1/Routes/Driving?wp.0=" + str(lat1) + "," + str(
         lng1) + "&wp.1=" + str(lat2) + "," + str(lng2) + "&key=" + bingMapsKey
-
+    # http://dev.virtualearth.net/REST/V1/Routes/Driving?wp.0=51.0,-0.1,&wp.1=51.5,-0.12&key=Aiiv3MUtA8Fq3gGOuwLYLrzz_FRSm1xXUEgDZxO6-R8wg73PKwV50hxqwSrbBhXY
     request = urllib.request.Request(routeUrl)
     response = urllib.request.urlopen(request)
 
     r = response.read().decode(encoding="utf-8")
     result = json.loads(r)
-    duration = result['resourceSets'][0]['resources'][0]['routeLegs'][0]['travelDuration'] # units: km
-    distance = result['resourceSets'][0]['resources'][0]['routeLegs'][0]['travelDistance'] # units: seconds
+    duration = result['resourceSets'][0]['resources'][0]['travelDuration'] # units: s
+    duration_with_traffic = result['resourceSets'][0]['resources'][0]['travelDurationTraffic'] # units: s
+    distance = result['resourceSets'][0]['resources'][0]['travelDistance'] # units: km
 
     # return the duration and distance
-    return duration, distance
+    return duration, duration_with_traffic, distance
+
+def sort_by_price(preferences_list, travel_traffic_durations, travel_durations, travel_distance, preferred_fuel_prices):
+    """
+    preferences_list(query object): list of potential station candidates
+    """
+    weighted_prices = dict()
+    for index, fuel_price in enumerate(preferences_list):
+        weighted_prices[fuel_price.station.pk] = \
+            preferred_fuel_prices[index] + \
+            Decimal(travel_traffic_durations[fuel_price.station.pk]*0.00184) + \
+            Decimal(travel_distance[fuel_price.station.pk]*0.0822)
+
+    sorted_weighted_prices = {k: v for k, v in sorted(weighted_prices.items(), key=lambda item: item[1])}
+    sorted_station_pks = list(sorted_weighted_prices.keys())
+
+    return sorted_station_pks
+
+def get_carbon_emission(distance):
+    pass
 
 def geocoding(location):
     location_iq_key = "pk.bd315221041f3e0a99e6464f9de0157a"
@@ -276,6 +346,8 @@ def query_sorted_order(pk_list):
     """ Query stations in sorted order and append into a list. """
     preferences_list = []
     for pk in pk_list:
-        preferences_list.append(Station.objects.get(pk=pk))
+        preferences_list.append(FuelPrice.objects.get(station_id=pk))
     
     return preferences_list
+
+
