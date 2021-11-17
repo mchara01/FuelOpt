@@ -87,8 +87,8 @@ if env_var and env_var == "PRODUCTION":
         'default': {
             'ENGINE': 'django.db.backends.mysql',
             'NAME': 'db_fuelopt',
-            'USER': 'user',
-            'PASSWORD': 'password',
+            'USER': 'fuelopt_main',
+            'PASSWORD': 'N;vZu!93Gh',
             'HOST': '192.168.100.20',
             'PORT': '3306',
         }
@@ -98,8 +98,8 @@ else:
         'default': {
             'ENGINE': 'django.db.backends.mysql',
             'NAME': 'db_fuelopt',
-            'USER': 'user',
-            'PASSWORD': 'password',
+            'USER': 'fuelopt_main',
+            'PASSWORD': 'N;vZu!93Gh',
             'HOST': '127.0.0.1',
             'PORT': '3306',
         }

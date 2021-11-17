@@ -6,13 +6,11 @@ services:
     image: mariadb:10.6.4
     volumes:
       - /home/ec2-user/mariadb/data:/var/lib/mysql
-    ports:
-      - 3306:3306
     environment:
       MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: db_fuelopt
-      MYSQL_USER: user
-      MYSQL_PASSWORD: password
+      MYSQL_USER: fuelopt_main
+      MYSQL_PASSWORD: N;vZu!93Gh
       environment:
         - env="${env}"
     networks:
