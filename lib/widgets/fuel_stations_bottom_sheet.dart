@@ -71,13 +71,11 @@ class _FuelStationsBottomSheetState extends State<FuelStationsBottomSheet> {
       grabbingHeight: 80,
       sheetBelow: SnappingSheetContent(
           child: Container(
-            height: 100,
-            width: 100,
             color: Colors.white,
-            child: Column(
-              children: [
+            child: Stack(
+              children: const [
+                Align(alignment: Alignment.center,child: SearchResultList(stations: <StationResult>[])),
                 FilterMenu(),
-                SearchResultList(stations: <StationResult>[])
               ],
             ),
             // child: Column(
