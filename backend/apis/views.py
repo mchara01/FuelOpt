@@ -294,21 +294,33 @@ def search(request):
 
     return JsonResponse(response, safe=False)
 
+@api_view(['POST'])
 def review(request):
     """API handles all user requests regarding station reviews."""
     if request.method == 'POST':
-        station = request.POST['station'] # pk?
-        open_status = request.POST['open'] # Boolean
-        fuel_type = request.POST['fuel_type'] # Unleaded, diesel, super_unleaded, premium_diesel
-        fuel_price = request.POST['fuel_price'] # Decimal
-        congestion = request.POST['congestion'] # Integer
-        receipt = request.POST['receipt'] # Image File
+        if 'receipt' in request.FILES:
+            receipt = request.FILES['receipt']
+            s3 = boto3.client(
+                's3',
+                aws_access_key_id="AKIA4O5FKY2EUZ3SY7P4",
+                aws_secret_access_key="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",
+            )
+            s3.upload_fileobj(receipt, "fuelopt-s3-main", receipt.name)
+            # create new review
+            return JsonResponse({'status':'true', 'message': 'Good.'}, status=200)
+        else:
+            station_id = request.POST['station'] # pk?
+            open_status = bool(int(request.POST['open'])) # Boolean
+            fuel_type = request.POST['fuel_type'] # unleaded, diesel, super_unleaded, premium_diesel
+            fuel_price = float(request.POST['fuel_price']) # Decimal
+            congestion = int(request.POST['congestion']) # Integer
 
-        fuel_preference = fuel_type+'_price'
-        # new_review = UserReview(station=station, getattr(UserReivew, fuel_preference)=fuel_price, opening=open_status,  congestion=congestion)
-        s3 = boto3.client('s3')
-        with open("FILE_NAME", "rb") as f:
-            s3.upload_fileobj(f, "BUCKET_NAME", "OBJECT_NAME")
+            station = Station.objects.get(pk=station_id)
+            fuel_preference = fuel_type+'_price'
+            new_review = UserReview(station=station, opening=open_status, congestion=congestion)
+            setattr(new_review, fuel_preference, fuel_price)
+            new_review.save()
+            return JsonResponse({'status':'true', 'message': 'Good.'}, status=200)
 
 # calculate the travel duration to this station
 def get_duration_distance(lat1, lng1, lat2, lng2):
