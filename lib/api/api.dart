@@ -47,6 +47,26 @@ class FuelStationDataService {
     return [..._stations];
   }
 
+  Future<Station> getStationDetail(var stationId) async {
+    String urlstring =
+        'http://10.0.2.2:8000/apis/station/' + stationId.toString();
+    final url = Uri.parse(urlstring);
+
+    var request = http.Request('GET', url);
+    //request.headers.addAll(headers);
+    http.StreamedResponse response = await request.send();
+
+    if (response.statusCode == 200) {
+      var data = json.decode(await response.stream.bytesToString());
+      print(data);
+      Station station = Station.fromJson(data);
+      return station;
+    } else {
+      print(response.reasonPhrase);
+    }
+    return Future.value(null);
+  }
+
   Future<List<Station>?> getStations(LatLngBounds latLngBounds) async {
     String maxLat = latLngBounds.northeast.latitude.toString();
     String maxLng = latLngBounds.northeast.longitude.toString();

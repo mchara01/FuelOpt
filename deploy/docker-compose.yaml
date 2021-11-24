@@ -5,16 +5,13 @@ services:
     container_name: db_fuelopt
     image: mariadb:10.6.4
     volumes:
-      - /home/ec2-user/mariadb/data:/var/lib/mysql
-    ports:
-      - 3306:3306
+      - ../../mariadb/data:/var/lib/mysql
     environment:
       MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: db_fuelopt
-      MYSQL_USER: user
-      MYSQL_PASSWORD: password
-      environment:
-        - env="${env}"
+      MYSQL_USER: fuelopt_main
+      MYSQL_PASSWORD: "N;vZu!93Gh"
+      env: "${env}"
     networks:
       fuelopt_net:
         ipv4_address: 192.168.100.20
@@ -23,14 +20,14 @@ services:
     container_name: api_fuelopt
     image: fueloptapi:latest
     volumes:
-      - /home/ec2-user/FuelOpt:/usr/src/app
+      - ../../FuelOpt:/usr/src/app
     ports:
       - 8000:8000
     networks:
       fuelopt_net:
         ipv4_address: 192.168.100.10
     environment:
-      - env="${env}"
+      env: "${env}"
     restart: always
 
 networks:
