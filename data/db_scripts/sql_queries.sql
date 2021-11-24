@@ -54,4 +54,8 @@ INSERT INTO db_fuelopt.stations_station
 (name, street, postcode, lat, lng, station_id, car_wash, air_and_water, car_vacuum, `24_7_opening_hours`, toilet, convenience_store, atm, parking_facilities, disabled_toilet_baby_change, alcohol, wi_fi, hgv_psv_fueling, fuelservice, payphone, restaurant, electric_car_charging, repair_garage, shower_facilities)
 VALUES('BP WHYTELEAFE (GODSTONE ROAD SF CONNECT)', 'GODSTONE ROAD', 'CR3 0EG', 51.3134521, -0.0819079, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 0, 0, 0, 0, 0, 1, 0, 0);
 
+-- instert into fuel_prices table: example
+INSERT INTO db_fuelopt.stations_fuelprice
+(id, unleaded_price, diesel_price, super_unleaded_price, premium_diesel_price, unleaded_date, diesel_date, super_unleaded_date, premium_diesel_date, station_id)
+VALUES(1, 151.90, 153.90, 164.90, 169.90, '2021-10-13', '2021-10-13', '2021-10-13', '2021-10-13', 1);
 
