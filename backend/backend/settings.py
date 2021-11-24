@@ -89,7 +89,7 @@ DATABASES = {
         'USER': 'fuelopt_main',
         'PASSWORD': "N;vZu!93Gh",
         'HOST': '192.168.100.20',
-        'PORT': '3306',
+        'PORT': '3333',
     }
 }
 
