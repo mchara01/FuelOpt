@@ -167,22 +167,13 @@ class _ReviewScreenState extends State<ReviewScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: <Widget>[
-                  Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: <Widget>[
-                        SizedBox.fromSize(
-                            size: Size.fromRadius(30),
-                            child: FittedBox(
-                              child: Icon(Icons.local_gas_station),
-                            )),
-                        Text(
-                          "Update Fuel Prices",
-                          style: TextStyle(
-                              color: appColors.PrimaryBlue,
-                              fontWeight: FontWeight.w800,
-                              fontSize: 30),
-                        ),
-                      ]),
+                  Text(
+                    "Update Fuel Prices",
+                    style: TextStyle(
+                        color: appColors.PrimaryBlue,
+                        fontWeight: FontWeight.w800,
+                        fontSize: 30),
+                  ),
                   SizedBox(height: 20),
                   Row(children: <Widget>[
                     Expanded(child:unleadedField),
