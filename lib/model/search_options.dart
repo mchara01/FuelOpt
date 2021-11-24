@@ -2,30 +2,12 @@ import 'package:fuel_opt/model/search_result.dart';
 import 'package:flutter/material.dart';
 import 'package:fuel_opt/model/filter_enums.dart';
 
-class SearchOptions {
-  late String location = 'Imperial College London';
-  FilterOptions filterOptions = FilterOptions(
-    sort_by: 'duration',
-    fuel_type: 'unleaded',
-    distance: 50,
-  );
-  List<StationResult?> result = [];
-}
-
-class FilterOptions {
-  String sort_by;
-  String fuel_type;
-  double distance;
-
-  FilterOptions(
-      {required this.sort_by, required this.fuel_type, required this.distance});
-}
-
 class SearchQueryModel extends ChangeNotifier {
   String searchQuery = '';
 
   void setSearchQuery(String searchQuery) {
     this.searchQuery = searchQuery;
+
     notifyListeners();
   }
 }
@@ -53,6 +35,15 @@ class DistancePreferenceModel extends ChangeNotifier {
 
   void setDistancePreference(double distancePreference) {
     this.distancePreference = distancePreference;
+    notifyListeners();
+  }
+}
+
+class SearchResultModel extends ChangeNotifier {
+  List<StationResult> stations = [];
+
+  void setSearchResult(List<StationResult> stations) {
+    this.stations = stations;
     notifyListeners();
   }
 }
