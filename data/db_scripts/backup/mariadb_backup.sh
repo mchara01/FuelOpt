@@ -2,22 +2,21 @@
 # FuelOpt database backup script
 
 ################################################################
-################## CONSTANTS DECLARATION  ########################
+################## CONSTANTS DECLARATION  ######################
  
 DB_BACKUP_PATH='/home/ec2-user/mariadb/backup'
 MYSQL_HOST='127.0.0.1'
-MYSQL_PORT='3306'
-MYSQL_USER='user'
-MYSQL_PASSWORD='password'
+MYSQL_PORT='3333'
+MYSQL_USER='fuelopt_main'
+MYSQL_PASSWORD='N;vZu!93Gh'
 DATABASE_NAME='db_fuelopt'
-BACKUP_RETAIN_DAYS=14
+BACKUP_RETAIN_DAYS=3
 TODAY=`date +"%d_%b_%Y"`
 
 #################################################################
 
 mkdir -p ${DB_BACKUP_PATH}/${TODAY}
 echo "Backup started for database - ${DATABASE_NAME}"
-
 
 mysqldump -h ${MYSQL_HOST} \
    -P ${MYSQL_PORT} \
@@ -32,14 +31,13 @@ else
   exit 1
 fi
 
-
 ##### Remove backups older than {BACKUP_RETAIN_DAYS} days #####
 
 DBDELDATE=`date +"%d%b%Y" --date="${BACKUP_RETAIN_DAYS} days ago"`
 
 if [ ! -z ${DB_BACKUP_PATH} ]; then
-      cd ${DB_BACKUP_PATH}
-      if [ ! -z ${DBDELDATE} ] && [ -d ${DBDELDATE} ]; then
-            rm -rf ${DBDELDATE}
-      fi
+  cd ${DB_BACKUP_PATH}
+  if [ ! -z ${DBDELDATE} ] && [ -d ${DBDELDATE} ]; then
+        rm -rf ${DBDELDATE}
+  fi
 fi
