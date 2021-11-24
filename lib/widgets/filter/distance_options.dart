@@ -39,13 +39,10 @@ class _DistanceOptionsState extends State<DistanceOptions> {
         alignment: Alignment.centerRight,
         child: IconButton(
             onPressed: widget.onTapClose,
-            icon: Container(
-                decoration: const BoxDecoration(
-                    shape: BoxShape.circle, color: Colors.white),
-                child: Icon(
-                  Icons.close,
-                  color: Theme.of(context).primaryColor,
-                ))),
+            icon: Icon(
+              Icons.close,
+              color: Theme.of(context).primaryColor,
+            )),
       )
     ]);
   }

@@ -155,13 +155,10 @@ class FuelTypeOptions extends StatelessWidget {
         alignment: Alignment.centerRight,
         child: IconButton(
             onPressed: onTapClose,
-            icon: Container(
-                decoration: const BoxDecoration(
-                    shape: BoxShape.circle, color: Colors.white),
-                child: Icon(
-                  Icons.close,
-                  color: Theme.of(context).primaryColor,
-                ))),
+            icon: Icon(
+              Icons.close,
+              color: Theme.of(context).primaryColor,
+            )),
       )
     ]);
   }
