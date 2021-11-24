@@ -3,13 +3,11 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 import 'package:fuel_opt/model/search_options.dart';
-import 'package:fuel_opt/model/search_result.dart';
 import 'package:fuel_opt/widgets/filter/filter_menu.dart';
 import 'package:fuel_opt/widgets/search_bar.dart';
 import 'package:provider/provider.dart';
 import 'package:snapping_sheet/snapping_sheet.dart';
 import 'package:fuel_opt/widgets/search_result_list.dart';
-import 'package:provider/provider.dart';
 
 class FuelStationsBottomSheet extends StatefulWidget {
   const FuelStationsBottomSheet({Key? key}) : super(key: key);
@@ -72,21 +70,17 @@ class _FuelStationsBottomSheetState extends State<FuelStationsBottomSheet> {
               BoxShadow(blurRadius: 20.0, color: Colors.black.withOpacity(0.2))
             ],
           ),
-          child: SizedBox(
-            height: 100,
-            width: 100,
-            child: SearchBar(
-              searchOnTap: () {
-                programmaticBottomSheetMovement = true;
-                snappingSheetController
-                    .snapToPosition(
-                        const SnappingPosition.factor(positionFactor: 0.7))
-                    .then((value) {
-                  bottomSheetPosition = snappingSheetController.currentPosition;
-                  programmaticBottomSheetMovement = false;
-                });
-              },
-            ),
+          child: SearchBar(
+            searchOnTap: () {
+              programmaticBottomSheetMovement = true;
+              snappingSheetController
+                  .snapToPosition(
+                      const SnappingPosition.factor(positionFactor: 0.7))
+                  .then((value) {
+                bottomSheetPosition = snappingSheetController.currentPosition;
+                programmaticBottomSheetMovement = false;
+              });
+            },
           ),
         ),
         grabbingHeight: 80,
