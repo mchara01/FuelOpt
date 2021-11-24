@@ -36,8 +36,8 @@ fi
 DBDELDATE=`date +"%d%b%Y" --date="${BACKUP_RETAIN_DAYS} days ago"`
 
 if [ ! -z ${DB_BACKUP_PATH} ]; then
-      cd ${DB_BACKUP_PATH}
-      if [ ! -z ${DBDELDATE} ] && [ -d ${DBDELDATE} ]; then
-            rm -rf ${DBDELDATE}
-      fi
+  cd ${DB_BACKUP_PATH}
+  if [ ! -z ${DBDELDATE} ] && [ -d ${DBDELDATE} ]; then
+        rm -rf ${DBDELDATE}
+  fi
 fi
