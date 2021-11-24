@@ -59,7 +59,7 @@ class Station(models.Model):
         }
 
     def __str__(self):
-        return 'Station: {}, Id: {}, Ref: {}'.format(self.name, self.station_id)
+        return 'Station: {}, Id: {}'.format(self.name, self.station_id)
 
 
 class FuelPrice(models.Model):
