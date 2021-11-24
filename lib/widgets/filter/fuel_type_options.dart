@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:fuel_opt/model/filter_enums.dart';
 import 'package:fuel_opt/model/search_options.dart';
 import 'package:provider/provider.dart';
-import '../../utils/appColors.dart';
+import '../../utils/app_colors.dart';
 
 class FuelTypeOptions extends StatelessWidget {
   final void Function() onTapClose;
@@ -12,14 +12,14 @@ class FuelTypeOptions extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final Color selectedTextColor =
-        Theme.of(context).buttonTheme.selectedTextColor(context);
+        Theme.of(context).buttonTheme.selectedTextColor;
     final Color selectedButtonColor =
-        Theme.of(context).buttonTheme.selectedButtonColor;
+        Theme.of(context).buttonTheme.selectedButtonColor(context);
 
     final Color unselectedTextColor =
-        Theme.of(context).buttonTheme.unselectedTextColor;
+        Theme.of(context).buttonTheme.unselectedTextColor(context);
     final Color unselectedButtonColor =
-        Theme.of(context).buttonTheme.unselectedButtonColor(context);
+        Theme.of(context).buttonTheme.unselectedButtonColor;
 
     return Stack(children: [
       Padding(
@@ -44,14 +44,17 @@ class FuelTypeOptions extends StatelessWidget {
                           backgroundColor: MaterialStateProperty.all<Color>(
                               isUnleaded
                                   ? selectedButtonColor
-                                  : unselectedButtonColor)),
-                      child: Text(
-                        'Unleaded',
-                        style: TextStyle(
-                            color: isUnleaded
-                                ? selectedTextColor
-                                : unselectedTextColor),
-                      ));
+                                  : unselectedButtonColor),
+                          shape: MaterialStateProperty.all<OutlinedBorder>(
+                              RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10)))),
+                      child: Text('Unleaded',
+                          style: TextStyle(
+                              color: isUnleaded
+                                  ? selectedTextColor
+                                  : unselectedTextColor,
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold)));
                 },
               ),
               Consumer<FuelTypePreferenceModel>(
@@ -70,13 +73,18 @@ class FuelTypeOptions extends StatelessWidget {
                         backgroundColor: MaterialStateProperty.all<Color>(
                             isSuperUnleaded
                                 ? selectedButtonColor
-                                : unselectedButtonColor)),
+                                : unselectedButtonColor),
+                        shape: MaterialStateProperty.all<OutlinedBorder>(
+                            RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10)))),
                     child: Text(
                       'Super Unleaded',
                       style: TextStyle(
                           color: isSuperUnleaded
                               ? selectedTextColor
-                              : unselectedTextColor),
+                              : unselectedTextColor,
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold),
                     ));
               }),
               Consumer<FuelTypePreferenceModel>(
@@ -93,13 +101,18 @@ class FuelTypeOptions extends StatelessWidget {
                           backgroundColor: MaterialStateProperty.all<Color>(
                               isDiesel
                                   ? selectedButtonColor
-                                  : unselectedButtonColor)),
+                                  : unselectedButtonColor),
+                          shape: MaterialStateProperty.all<OutlinedBorder>(
+                              RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10)))),
                       child: Text(
                         'Diesel',
                         style: TextStyle(
                             color: isDiesel
                                 ? selectedTextColor
-                                : unselectedTextColor),
+                                : unselectedTextColor,
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold),
                       ));
                 },
               ),
@@ -119,13 +132,18 @@ class FuelTypeOptions extends StatelessWidget {
                           backgroundColor: MaterialStateProperty.all<Color>(
                               isPremiumDiesel
                                   ? selectedButtonColor
-                                  : unselectedButtonColor)),
+                                  : unselectedButtonColor),
+                          shape: MaterialStateProperty.all<OutlinedBorder>(
+                              RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10)))),
                       child: Text(
                         'Super Diesel',
                         style: TextStyle(
                             color: isPremiumDiesel
                                 ? selectedTextColor
-                                : unselectedTextColor),
+                                : unselectedTextColor,
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold),
                       ));
                 },
               ),

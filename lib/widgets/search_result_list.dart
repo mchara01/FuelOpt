@@ -4,7 +4,7 @@ import 'package:fuel_opt/model/search_result.dart';
 import 'package:fuel_opt/model/stations_model.dart';
 import 'package:fuel_opt/widgets/station_info.dart';
 import 'package:provider/provider.dart';
-import '../utils/appColors.dart' as appColors;
+import '../utils/app_colors.dart' as appColors;
 
 class SearchResultList extends StatefulWidget {
   // final List<StationResult?> stations;

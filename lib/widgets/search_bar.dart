@@ -3,7 +3,7 @@ import 'package:fuel_opt/model/search_options.dart';
 import 'package:fuel_opt/model/search_result.dart';
 import 'package:fuel_opt/widgets/search_result_list.dart';
 import 'package:provider/provider.dart';
-import '../utils/appColors.dart' as appColors;
+import '../utils/app_colors.dart' as appColors;
 import 'package:fuel_opt/api/api.dart';
 import 'package:fuel_opt/model/stations_model.dart';
 

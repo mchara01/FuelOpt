@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:fuel_opt/model/search_options.dart';
 import 'package:fuel_opt/model/search_result.dart';
 import 'package:provider/provider.dart';
-import '../utils/appColors.dart' as appColors;
+import '../utils/app_colors.dart' as appColors;
 
 class SearchInfo extends StatefulWidget {
   final StationResult? station;
