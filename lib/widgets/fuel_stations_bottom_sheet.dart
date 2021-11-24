@@ -45,10 +45,24 @@ class _FuelStationsBottomSheetState extends State<FuelStationsBottomSheet> {
 
   @override
   Widget build(BuildContext context) {
-    final state = Provider.of<SearchOptions>(context);
-
-    return ChangeNotifierProvider(
-      create: (context) => SearchQueryModel(),
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(
+          create: (context) => SearchQueryModel(),
+        ),
+        ChangeNotifierProvider(
+          create: (context) => SortByPreferenceModel(),
+        ),
+        ChangeNotifierProvider(
+          create: (context) => FuelTypePreferenceModel(),
+        ),
+        ChangeNotifierProvider(
+          create: (context) => DistancePreferenceModel(),
+        ),
+        ChangeNotifierProvider(
+          create: (context) => SearchResultModel(),
+        )
+      ],
       child: SnappingSheet(
         controller: snappingSheetController,
         grabbing: Container(
@@ -79,26 +93,14 @@ class _FuelStationsBottomSheetState extends State<FuelStationsBottomSheet> {
         sheetBelow: SnappingSheetContent(
             child: Container(
               color: Colors.white,
-              child: MultiProvider(
-                providers: [
-                  ChangeNotifierProvider(
-                      create: (context) => SortByPreferenceModel()),
-                  ChangeNotifierProvider(
-                    create: (context) => FuelTypePreferenceModel(),
+              child: Stack(
+                children: [
+                  Align(
+                    alignment: Alignment.center,
+                    child: SearchResultList(),
                   ),
-                  ChangeNotifierProvider(
-                    create: (context) => DistancePreferenceModel(),
-                  )
+                  const FilterMenu(),
                 ],
-                child: Stack(
-                  children: [
-                    Align(
-                      alignment: Alignment.center,
-                      child: SearchResultList(),
-                    ),
-                    const FilterMenu(),
-                  ],
-                ),
               ),
             ),
             draggable: true),

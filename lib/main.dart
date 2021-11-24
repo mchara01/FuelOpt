@@ -18,7 +18,6 @@ class MyApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         Provider(create: (context) => StationsProvider()),
-        Provider(create: (context) => SearchOptions()),
       ],
       child: MaterialApp(
         title: 'FuelOpt',
