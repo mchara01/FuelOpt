@@ -166,7 +166,7 @@ def search(request):
     nearestStation API returns the client a json list of all the petrol stations nearest to the user-specified location
     according to user preference selection.
     API called via a GET Request.
-    Example API call: http://127.0.0.1:8000/apis/search
+    Example API call: http://127.0.0.1:8000/apis/search/?user_preference=price&location=Imperial%20College%20London&fuel_type=unleaded&distance=50&amenities=
     """
     if request.method == 'GET':
         # Get user specifications/ preferences
@@ -239,10 +239,16 @@ def search(request):
             # Sort stations according to sorted durations, querying stations in the correct order
             preferences_list = query_sorted_order(sorted_station_pks)
 
+            # API Response
+            response = create_response(preferences_list, travel_traffic_durations, travel_distance)
+
         # b. Fuel Price
         # Assuming average speed = 50miles/hr = 80.47km/hr; 0.057litre per km;  £1.442/litre 
         # Penalty cost for duration = £0.00184/s
         # Penalty cost for distance = £0.0822/km
+
+        if user_preference == 'carbon':
+            pass
 
         if user_preference == 'price' or user_preference == '':
             if not fuel_type:
@@ -263,17 +269,18 @@ def search(request):
                     curr_pref_list = query_sorted_order(sorted_station_pks[:3]) 
                     best_station_general[pref]=curr_pref_list
 
+                # API Response
                 response = []
                 for fuel, preferences_list in best_station_general.items():
                     fuel_response={}
                     fuel_response['fuel_type']=fuel
-                    top_3=[]
-                    for fuel_price in preferences_list:
-                        station_response = fuel_price.station.serialize()
-                        station_response['prices'] = fuel_price.serialize()
-                        station_response['duration'] = str(int(travel_traffic_durations[fuel_price.station.pk]/60)) + 'mins'
-                        station_response['distance'] = str(travel_distance[fuel_price.station.pk]) + 'km'
-                        top_3.append(station_response)
+                    top_3 = create_response(preferences_list, travel_traffic_durations, travel_distance)
+                    # for fuel_price in preferences_list:
+                    #     station_response = fuel_price.station.serialize()
+                    #     station_response['prices'] = fuel_price.serialize()
+                    #     station_response['duration'] = str(int(travel_traffic_durations[fuel_price.station.pk]/60)) + 'mins'
+                    #     station_response['distance'] = str(travel_distance[fuel_price.station.pk]) + 'km'
+                    #     top_3.append(station_response)
                     fuel_response['Top 3 Stations']=top_3
                     response.append(fuel_response)
 
@@ -283,15 +290,16 @@ def search(request):
                 sorted_station_pks = sort_by_price(preferences_list, travel_traffic_durations, travel_durations, travel_distance, preferred_fuel_prices)
                 # Query stations in sorted order
                 preferences_list = query_sorted_order(sorted_station_pks[:10])
-                # Append prices with the station information
-                response = []
-                for fuel_price in preferences_list:
-                    station_response = fuel_price.station.serialize()
-                    station_response['prices'] = fuel_price.serialize()
-                    station_response['duration'] = str(int(travel_traffic_durations[fuel_price.station.pk]/60)) + 'mins'
-                    station_response['distance'] = str(travel_distance[fuel_price.station.pk]) + 'km'
-                    response.append(station_response)
-
+                # API Response
+                response = create_response(preferences_list, travel_traffic_durations, travel_distance)
+                # response = []
+                # for fuel_price in preferences_list:
+                #     station_response = fuel_price.station.serialize()
+                #     station_response['prices'] = fuel_price.serialize()
+                #     station_response['duration'] = str(int(travel_traffic_durations[fuel_price.station.pk]/60)) + 'mins'
+                #     station_response['distance'] = str(travel_distance[fuel_price.station.pk]) + 'km'
+                #     response.append(station_response)
+                
     return JsonResponse(response, safe=False)
 
 @api_view(['POST'])
@@ -378,5 +386,20 @@ def query_sorted_order(pk_list):
         preferences_list.append(FuelPrice.objects.get(station_id=pk))
     
     return preferences_list
+
+def create_response(preferences_list, travel_traffic_durations, travel_distance):
+    """
+    Serialise list of search results to be returned by the API.
+    Appends search results: station info, fuel prices, duration and distance.
+    """
+    response = []
+    for fuel_price in preferences_list:
+        station_response = fuel_price.station.serialize()
+        station_response['prices'] = fuel_price.serialize()
+        station_response['duration'] = str(int(travel_traffic_durations[fuel_price.station.pk]/60)) + 'mins'
+        station_response['distance'] = str(travel_distance[fuel_price.station.pk]) + 'km'
+        response.append(station_response)
+    
+    return response
 
 
