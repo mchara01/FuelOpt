@@ -111,7 +111,7 @@ class FuelStationDataService {
       String sortByPreference,
       String fuelTypePreference,
       String distancePreference) async {
-    String urlstring = 'http://127.0.0.1:8000/apis/nearest/?' +
+    String urlstring = 'http://127.0.0.1:8000/apis/search/?' +
         'user_preference=' +
         sortByPreference +
         '&location=' +
@@ -119,7 +119,8 @@ class FuelStationDataService {
         '&fuel_type=' +
         fuelTypePreference +
         '&distance=' +
-        distancePreference.toString();
+        distancePreference.toString() +
+        '&amenities=';
 
     final url = Uri.parse(urlstring);
     print(url);
