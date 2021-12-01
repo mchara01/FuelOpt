@@ -90,7 +90,7 @@ if env_var and env_var == "PRODUCTION":
             'USER': 'root',
             'PASSWORD': "btrobwssd9",
             'HOST': '18.170.63.134',
-            'PORT': '3333',
+            'PORT': '3306',
         }
     }
 else:
