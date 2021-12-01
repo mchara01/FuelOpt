@@ -334,12 +334,12 @@ def review(request):
             return JsonResponse({'status':'true', 'message': 'Good.'}, status=200)
         else:
             station_id = request.POST['station'] # pk?
-            open_status = not bool(int(request.POST['close'])) # Boolean
-            unleaded_price = float(request.POST['unleaded_price']) # Decimal
-            diesel_price = float(request.POST['diesel_price']) # Decimal
-            super_unleaded_price = float(request.POST['super_unleaded_price']) # Decimal
-            premium_diesel_price = float(request.POST['premium_diesel_price']) # Decimal
-            congestion = int(request.POST['congestion']) # Integer
+            open_status = not bool(int(request.POST['close'])) if request.POST['close'] == "" else None # Boolean
+            unleaded_price = float(request.POST['unleaded_price']) if request.POST['unleaded_price'] == "" else None # Decimal
+            diesel_price = float(request.POST['diesel_price']) if request.POST['diesel_price'] == "" else None # Decimal
+            super_unleaded_price = float(request.POST['super_unleaded_price']) if request.POST['super_unleaded_price'] == "" else None # Decimal
+            premium_diesel_price = float(request.POST['premium_diesel_price']) if request.POST['premium_diesel_price'] == "" else None # Decimal
+            congestion = int(request.POST['congestion']) if request.POST['congestion'] == "" else None # Integer
 
             # anomaly detection
 
@@ -360,8 +360,8 @@ def review(request):
                 user_review.diesel_price = diesel_price if (diesel_price is not None) else user_review.diesel_price
                 user_review.super_unleaded_price = super_unleaded_price if (super_unleaded_price is not None) else user_review.super_unleaded_price
                 user_review.premium_diesel_price = premium_diesel_price if (premium_diesel_price is not None) else user_review.premium_diesel_price
-                user_review.open_status = open_status
-                user_review.congestion = congestion
+                user_review.open_status = open_status if (open_status is not None) else user_review.open_status
+                user_review.congestion = congestion if (congestion is not None) else user_review.congestion
                 user_review.save()
             else:
                 new_review = UserReview(station=station, 
