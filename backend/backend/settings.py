@@ -99,8 +99,8 @@ else:
         'default': {
             'ENGINE': 'django.db.backends.mysql',
             'NAME': 'db_fuelopt',
-            'USER': 'root',
-            'PASSWORD': "btrobwssd9",
+            'USER': 'fuelopt_main',
+            'PASSWORD': 'N7vZu493Gh',
             'HOST': '192.168.100.20',
             'PORT': '3306',
         }
