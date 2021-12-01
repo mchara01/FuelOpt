@@ -229,10 +229,15 @@ def search(request):
         emission_factor=0.2 #kgCO2/km
         for fuel_price in preferences_list:
             travel_traffic_durations[fuel_price.station.pk], travel_distance[fuel_price.station.pk] = get_duration_distance(user_lat, user_lng, fuel_price.station.lat, fuel_price.station.lng)
+            try:
+                congestion = UserReview.objects.get(station=fuel_price.station.pk).congestion
+            except UserReview.DoesNotExist:
+                congestion = 0
+            travel_traffic_durations[fuel_price.station.pk] += congestion
             carbon_emission[fuel_price.station.pk] = emission_factor*travel_distance[fuel_price.station.pk]
             
         # (v) Optimisation Criteria. If
-        # a. Time to arrival
+        # a. Time to arrivals
         if user_preference == 'time':
             # Sort travel durations. 
             sorted_duration = {k: v for k, v in sorted(travel_traffic_durations.items(), key=lambda item: item[1])}
@@ -392,9 +397,6 @@ def sort_by_price(preferences_list, travel_traffic_durations, travel_distance, p
     sorted_station_pks = list(sorted_weighted_prices.keys())
 
     return sorted_station_pks
-
-def get_carbon_emission(distance):
-    pass
 
 def geocoding(location):
     location_iq_key = "pk.bd315221041f3e0a99e6464f9de0157a"
