@@ -8,7 +8,7 @@ DB_BACKUP_PATH='/home/ec2-user/mariadb/backup/03_Nov_2021'
 MYSQL_HOST='127.0.0.1'
 MYSQL_PORT='3333'
 MYSQL_USER='fuelopt_main'
-MYSQL_PASSWORD="N;vZu!93Gh"
+MYSQL_PASSWORD='N;vZu!93Gh'
 DATABASE_NAME='db_fuelopt'
 
 #################################################################

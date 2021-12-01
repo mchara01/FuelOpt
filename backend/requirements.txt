@@ -25,3 +25,4 @@ six==1.16.0
 sqlparse==0.4.2
 urllib3==1.26.7
 Pillow==8.4.0
+boto3==1.20.12

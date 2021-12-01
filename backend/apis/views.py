@@ -3,10 +3,11 @@ import time
 import math
 import urllib.request
 import json
+import boto3
 
 from django.http.response import HttpResponse
 from django.shortcuts import render, redirect
-from stations.models import FuelPrice, Station
+from stations.models import FuelPrice, Station, UserReview
 from rest_framework import generics
 from rest_framework.decorators import api_view, permission_classes
 from django.contrib import messages
@@ -306,6 +307,33 @@ def search(request):
 
     return JsonResponse(response, safe=False)
 
+@api_view(['POST'])
+def review(request):
+    """API handles all user requests regarding station reviews."""
+    if request.method == 'POST':
+        if 'receipt' in request.FILES:
+            receipt = request.FILES['receipt']
+            s3 = boto3.client(
+                's3',
+                aws_access_key_id="AKIA4O5FKY2EUZ3SY7P4",
+                aws_secret_access_key="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",
+            )
+            s3.upload_fileobj(receipt, "fuelopt-s3-main", receipt.name)
+            # create new review
+            return JsonResponse({'status':'true', 'message': 'Good.'}, status=200)
+        else:
+            station_id = request.POST['station'] # pk?
+            open_status = bool(int(request.POST['open'])) # Boolean
+            fuel_type = request.POST['fuel_type'] # unleaded, diesel, super_unleaded, premium_diesel
+            fuel_price = float(request.POST['fuel_price']) # Decimal
+            congestion = int(request.POST['congestion']) # Integer
+
+            station = Station.objects.get(pk=station_id)
+            fuel_preference = fuel_type+'_price'
+            new_review = UserReview(station=station, opening=open_status, congestion=congestion)
+            setattr(new_review, fuel_preference, fuel_price)
+            new_review.save()
+            return JsonResponse({'status':'true', 'message': 'Good.'}, status=200)
 
 # calculate the travel duration to this station
 def get_duration_distance(lat1, lng1, lat2, lng2):

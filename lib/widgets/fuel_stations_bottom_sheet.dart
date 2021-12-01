@@ -2,9 +2,12 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
+import 'package:fuel_opt/model/search_options.dart';
 import 'package:fuel_opt/widgets/filter/filter_menu.dart';
 import 'package:fuel_opt/widgets/search_bar.dart';
+import 'package:provider/provider.dart';
 import 'package:snapping_sheet/snapping_sheet.dart';
+import 'package:fuel_opt/widgets/search_result_list.dart';
 
 class FuelStationsBottomSheet extends StatefulWidget {
   const FuelStationsBottomSheet({Key? key}) : super(key: key);
@@ -40,18 +43,33 @@ class _FuelStationsBottomSheetState extends State<FuelStationsBottomSheet> {
 
   @override
   Widget build(BuildContext context) {
-    return SnappingSheet(
-      controller: snappingSheetController,
-      grabbing: Container(
-        decoration: BoxDecoration(
-          color: Colors.white,
-          boxShadow: <BoxShadow>[
-            BoxShadow(blurRadius: 20.0, color: Colors.black.withOpacity(0.2))
-          ],
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(
+          create: (context) => SearchQueryModel(),
         ),
-        child: SizedBox(
-          height: 100,
-          width: 100,
+        ChangeNotifierProvider(
+          create: (context) => SortByPreferenceModel(),
+        ),
+        ChangeNotifierProvider(
+          create: (context) => FuelTypePreferenceModel(),
+        ),
+        ChangeNotifierProvider(
+          create: (context) => DistancePreferenceModel(),
+        ),
+        ChangeNotifierProvider(
+          create: (context) => SearchResultModel(),
+        )
+      ],
+      child: SnappingSheet(
+        controller: snappingSheetController,
+        grabbing: Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            boxShadow: <BoxShadow>[
+              BoxShadow(blurRadius: 20.0, color: Colors.black.withOpacity(0.2))
+            ],
+          ),
           child: SearchBar(
             searchOnTap: () {
               programmaticBottomSheetMovement = true;
@@ -65,41 +83,38 @@ class _FuelStationsBottomSheetState extends State<FuelStationsBottomSheet> {
             },
           ),
         ),
-      ),
-      grabbingHeight: 80,
-      sheetBelow: SnappingSheetContent(
-          child: Container(
-            height: 100,
-            width: 100,
-            color: Colors.white,
-            child: Column(
-              children: [
-                FilterMenu(),
-              ],
+        grabbingHeight: 80,
+        sheetBelow: SnappingSheetContent(
+            child: Container(
+              color: Colors.white,
+              child: Stack(
+                children: [
+                  Align(
+                    alignment: Alignment.center,
+                    child: SearchResultList(),
+                  ),
+                  const FilterMenu(),
+                ],
+              ),
             ),
-            // child: Column(
-            //   children: <Widget>[
-            //     Filter(),
-            //   ],
-            // ),
-          ),
-          draggable: true),
-      initialSnappingPosition:
-          const SnappingPosition.factor(positionFactor: 0.4),
-      snappingPositions: const [
-        SnappingPosition.factor(
-            positionFactor: 0.0,
-            grabbingContentOffset: GrabbingContentOffset.top),
-        SnappingPosition.factor(positionFactor: 0.4),
-        SnappingPosition.factor(positionFactor: 0.7)
-      ],
-      onSheetMoved: (sheetPositionData) {
-        if (!programmaticBottomSheetMovement && isKeyboardVisible) {
-          if ((sheetPositionData.pixels - bottomSheetPosition!).abs() > 30) {
-            FocusScope.of(context).unfocus();
+            draggable: true),
+        initialSnappingPosition:
+            const SnappingPosition.factor(positionFactor: 0.4),
+        snappingPositions: const [
+          SnappingPosition.factor(
+              positionFactor: 0.0,
+              grabbingContentOffset: GrabbingContentOffset.top),
+          SnappingPosition.factor(positionFactor: 0.4),
+          SnappingPosition.factor(positionFactor: 0.7)
+        ],
+        onSheetMoved: (sheetPositionData) {
+          if (!programmaticBottomSheetMovement && isKeyboardVisible) {
+            if ((sheetPositionData.pixels - bottomSheetPosition!).abs() > 30) {
+              FocusScope.of(context).unfocus();
+            }
           }
-        }
-      },
+        },
+      ),
     );
   }
 
