@@ -20,7 +20,7 @@ ALLOWED_HOSTS = [
     '10.0.2.2',  # needed for android emulator
     'localhost',
     '127.0.0.1',
-    '3.8.3.44',
+    '18.170.63.134',
 ]
 
 # Application definition
