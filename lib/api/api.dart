@@ -139,6 +139,41 @@ class FuelStationDataService {
       // throw Exception('Failed to load data');
     }
   }
+
+  Future<List<StationResult>> updateInfo(
+      String staionId,
+      String sortByPreference,
+      String fuelTypePreference,
+      String distancePreference,
+      String address) async {
+    String urlstring = 'http://127.0.0.1:8000/apis/review/?' +
+        'user_preference=' +
+        sortByPreference +
+        '&location=' +
+        address +
+        '&fuel_type=' +
+        fuelTypePreference +
+        '&distance=' +
+        distancePreference.toString() +
+        '&amenities=';
+
+    final url = Uri.parse(urlstring);
+    print(url);
+
+    final response = await http.get(url);
+    print(response.statusCode);
+    if (response.statusCode == 200) {
+      var data = json.decode(response.body) as List;
+      List<StationResult> stations = data
+          .map<StationResult>((json) => StationResult.fromJson(json))
+          .toList();
+      print(stations);
+      return stations;
+    } else {
+      return [];
+      // throw Exception('Failed to load data');
+    }
+  }
 }
 
 class AccountFunctionality {
