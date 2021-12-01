@@ -1,4 +1,6 @@
+import 'dart:collection';
 import 'dart:convert';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fuel_opt/model/fuelprice_model.dart';
@@ -140,38 +142,67 @@ class FuelStationDataService {
     }
   }
 
-  Future<List<StationResult>> updateInfo(
-      String staionId,
-      String sortByPreference,
-      String fuelTypePreference,
-      String distancePreference,
-      String address) async {
+  Future<bool> updateInfo(
+    int staionId,
+    HashMap info,
+    String token,
+  ) async {
     String urlstring = 'http://127.0.0.1:8000/apis/review/?' +
-        'user_preference=' +
-        sortByPreference +
-        '&location=' +
-        address +
-        '&fuel_type=' +
-        fuelTypePreference +
-        '&distance=' +
-        distancePreference.toString() +
-        '&amenities=';
+        'station=' +
+        staionId.toString() +
+        '&close=' +
+        info['close'] +
+        '&congestion=' +
+        info['congestion'] +
+        '&unleaded_price=' +
+        info['unleaded'] +
+        '&disel_price=' +
+        info['disel'] +
+        '&super_unleaded_price=' +
+        info['superUnleaded'] +
+        '&premium_disel_price=' +
+        info['premiumDiesel'];
 
     final url = Uri.parse(urlstring);
     print(url);
-
-    final response = await http.get(url);
+    final response = await http.post(
+      url,
+      headers: {"Authorization": token},
+    );
     print(response.statusCode);
     if (response.statusCode == 200) {
-      var data = json.decode(response.body) as List;
-      List<StationResult> stations = data
-          .map<StationResult>((json) => StationResult.fromJson(json))
-          .toList();
-      print(stations);
-      return stations;
+      return true;
     } else {
-      return [];
-      // throw Exception('Failed to load data');
+      return false;
+    }
+  }
+
+  Future<bool> updateImage(
+    int staionId,
+    File image,
+    String token,
+  ) async {
+    String urlstring = 'http://127.0.0.1:8000/apis/review/?' +
+        'station=' +
+        staionId.toString();
+
+    final url = Uri.parse(urlstring);
+    print(url);
+    var request = http.MultipartRequest(
+      'POST',
+      url,
+    );
+    var headers = {'Token': token};
+    var pic = await http.MultipartFile.fromPath("file_field", image.path);
+    request.files.add(pic);
+    request.headers.addAll(headers);
+    http.StreamedResponse response = await request.send();
+
+    print(response.statusCode);
+    if (response.statusCode == 200) {
+      return true;
+    } else {
+      return false;
     }
   }
 }
