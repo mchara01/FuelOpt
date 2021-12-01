@@ -200,7 +200,16 @@ def search(request):
             station__lng__lte=user_lng+max_radius_degree,
             station__lng__gte=user_lng-max_radius_degree
         )
-        
+
+        for fuel_price in preferences_list:
+            try:
+                opening = UserReview.objects.get(station=fuel_price.station.pk).opening
+            except UserReview.DoesNotExist:
+                opening = True
+
+            if not opening:
+                fuel_price.delete()
+
         # If user has not provide any specification/ preferences, return this:
         # preferences_list = stations_prices_near_me
 
