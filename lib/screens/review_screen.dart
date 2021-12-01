@@ -207,12 +207,12 @@ class _ReviewScreenState extends State<ReviewScreen> {
           minWidth: MediaQuery.of(context).size.width,
           onPressed: () {
             _submitReview();
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                  builder: (context) =>
-                      UploadReceiptScreen(widget.stationId, widget.token)),
-            );
+            // Navigator.push(
+            //   context,
+            //   MaterialPageRoute(
+            //       builder: (context) =>
+            //           UploadReceiptScreen(widget.stationId, widget.token)),
+            // );
           },
           child: Text(
             "Submit",
@@ -227,6 +227,17 @@ class _ReviewScreenState extends State<ReviewScreen> {
 
     return Scaffold(
         backgroundColor: Colors.white,
+        appBar: AppBar(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          leading: IconButton(
+            icon: Icon(Icons.arrow_back, color: appColors.PrimaryBlue),
+            onPressed: () {
+              // passing this to our root
+              Navigator.of(context).pop();
+            },
+          ),
+        ),
         body: Center(
           child: SingleChildScrollView(
               child: Padding(
@@ -285,44 +296,50 @@ class _ReviewScreenState extends State<ReviewScreen> {
 
   // login function
   _submitReview() async {
-    var toSubmit = HashMap<String, double?>();
+    var toSubmit = HashMap<String, String>();
     if (unleadedNotAvailable) {
-      toSubmit["unleaded"] = null;
+      toSubmit["unleaded"] = '0';
     } else if (double.tryParse(unleadedController.text) != null) {
-      toSubmit["unleaded"] = double.tryParse(unleadedController.text);
+      toSubmit["unleaded"] = unleadedController.text.toString();
     }
 
     if (dieselNotAvailable) {
-      toSubmit["diesel"] = null;
+      toSubmit["diesel"] = '0';
     } else if (double.tryParse(dieselController.text) != null) {
-      toSubmit["diesel"] = double.tryParse(dieselController.text);
+      toSubmit["diesel"] = dieselController.text.toString();
     }
 
     if (superUnleadedNotAvailable) {
-      toSubmit["superUnleaded"] = null;
+      toSubmit["superUnleaded"] = '0';
     } else if (double.tryParse(superUnleadedController.text) != null) {
-      toSubmit["superUnleaded"] = double.tryParse(superUnleadedController.text);
+      toSubmit["superUnleaded"] = superUnleadedController.text.toString();
     }
 
     if (premiumDieselNotAvailable) {
-      toSubmit["premiumDiesel"] = null;
+      toSubmit["premiumDiesel"] = '0';
     } else if (double.tryParse(premiumDieselController.text) != null) {
-      toSubmit["premiumDiesel"] = double.tryParse(premiumDieselController.text);
+      toSubmit["premiumDiesel"] = premiumDieselController.text.toString();
     }
 
     if (int.tryParse(congestionController.text) != null) {
-      toSubmit["congestion"] = double.tryParse(congestionController.text);
+      toSubmit["congestion"] = congestionController.text.toString();
     }
 
     if (isClosed) {
-      toSubmit["closed"] = 1;
+      toSubmit["closed"] = '1';
+    } else {
+      toSubmit["closed"] = '0';
     }
 
     if (toSubmit.isNotEmpty) {
       print(toSubmit);
       FuelStationDataService fuelStationDataService = FuelStationDataService();
+      String token1 = 'Token 50ccba64d862962d71639294c5bb1f83808e6cd1';
+
+      // bool succuess = await fuelStationDataService.updateInfo(
+      //     widget.stationId, toSubmit, widget.token);
       bool succuess = await fuelStationDataService.updateInfo(
-          widget.stationId, toSubmit, widget.token);
+          widget.stationId, toSubmit, token1);
       if (succuess) {
         Fluttertoast.showToast(msg: "Update Successful");
       } else {

@@ -38,7 +38,7 @@ class MyApp extends StatelessWidget {
         theme: ThemeData(
           primaryColor: const Color(0xFF002060),
         ),
-        home: const TrendScreen(),
+        home: const HomeScreen(),
       ),
     );
   }

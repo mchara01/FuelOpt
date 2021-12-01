@@ -242,22 +242,31 @@ class StationsDetail extends StatelessWidget {
                 width: size.width,
                 child: Center(
                   child: TextButton.icon(
-                      onPressed: () async {
-                        AccountFunctionality accountFunctionality =
-                            AccountFunctionality();
-                        String token =
-                            await accountFunctionality.getAccessToken();
-                        if (token.isEmpty) {
-                          Navigator.of(context).push(MaterialPageRoute(
-                              builder: (context) => LoginScreen()));
-                        } else {
-                          Navigator.of(context).push(MaterialPageRoute(
-                              builder: (context) =>
-                                  ReviewScreen(station.station_id, token)));
-                        }
-                      },
-                      icon: Icon(Icons.map_rounded),
-                      label: Text('Review Stations')),
+                    onPressed: () async {
+                      AccountFunctionality accountFunctionality =
+                          AccountFunctionality();
+                      String token =
+                          await accountFunctionality.getAccessToken();
+                      if (token == 'None') {
+                        Navigator.of(context).push(MaterialPageRoute(
+                            builder: (context) => LoginScreen()));
+                      } else {
+                        Navigator.of(context).push(MaterialPageRoute(
+                            builder: (context) =>
+                                ReviewScreen(station.station_id, token)));
+                      }
+                    },
+                    icon: Icon(
+                      Icons.map_rounded,
+                      color: appColors.PrimaryBlue,
+                    ),
+                    label: Text(
+                      'Review Stations',
+                      style: TextStyle(
+                          color: appColors.PrimaryBlue,
+                          fontWeight: FontWeight.bold),
+                    ),
+                  ),
                 ),
               )
             ],

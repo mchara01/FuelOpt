@@ -146,10 +146,11 @@ class _SearchResultListState extends State<SearchResultList> {
                                                 ),
                                                 SizedBox(width: 5),
                                                 Visibility(
+                                                    // visible: true,
                                                     visible: fuelTypePreference
                                                             .fuelTypePreference
                                                             .string ==
-                                                        'unlealed',
+                                                        'unleaded',
                                                     child: Text(
                                                       searchResultModel
                                                               .stations[i]

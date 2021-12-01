@@ -151,16 +151,16 @@ class FuelStationDataService {
         'station=' +
         staionId.toString() +
         '&close=' +
-        info['close'] +
+        info['closed'] +
         '&congestion=' +
         info['congestion'] +
         '&unleaded_price=' +
         info['unleaded'] +
-        '&disel_price=' +
-        info['disel'] +
+        '&diesel_price=' +
+        info['diesel'] +
         '&super_unleaded_price=' +
         info['superUnleaded'] +
-        '&premium_disel_price=' +
+        '&premium_diesel_price=' +
         info['premiumDiesel'];
 
     final url = Uri.parse(urlstring);
