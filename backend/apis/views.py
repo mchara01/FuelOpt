@@ -166,7 +166,7 @@ def search(request):
     nearestStation API returns the client a json list of all the petrol stations nearest to the user-specified location
     according to user preference selection.
     API called via a GET Request.
-    Example API call: http://127.0.0.1:8000/apis/search/?user_preference=time&location=Imperial%20College%20London&fuel_type=unleaded&distance=50&amenities=
+    Example API call: http://127.0.0.1:8000/apis/search/?user_preference=time&location=Imperial%20College%20London&fuel_type=unleaded&distance=30&amenities=
     """
     if request.method == 'GET':
         # Get user specifications/ preferences
@@ -225,15 +225,15 @@ def search(request):
 
         # (iv) Get travel durations and distances for current candidates and store as a dictionary: { station_pk : duration } pair
         # Duration units: seconds   Distance units: km
-        carbon_emission, travel_distance, travel_traffic_durations = dict(), dict(), dict(), dict()
+        carbon_emission, travel_distance, travel_traffic_durations = dict(), dict(), dict()
         emission_factor=0.2 #kgCO2/km
         for fuel_price in preferences_list:
             travel_traffic_durations[fuel_price.station.pk], travel_distance[fuel_price.station.pk] = get_duration_distance(user_lat, user_lng, fuel_price.station.lat, fuel_price.station.lng)
             try:
-                congestion = UserReview.objects.get(station=fuel_price.station.pk).congestion
+                congestion = travel_traffic_durations[fuel_price.station.pk]
             except UserReview.DoesNotExist:
                 congestion = 0
-            travel_traffic_durations[fuel_price.station.pk] += congestion
+            travel_traffic_durations[fuel_price.station.pk] = travel_traffic_durations[fuel_price.station.pk]+congestion
             carbon_emission[fuel_price.station.pk] = emission_factor*travel_distance[fuel_price.station.pk]
             
         # (v) Optimisation Criteria. If
@@ -421,7 +421,7 @@ def query_sorted_order(pk_list):
 
 def create_response(preferences_list,travel_traffic_durations,travel_distance,carbon_emission):
     response = []
-    for fuel_price in preferences_list:
+    for fuel_price in preferences_list[:20]:
         station_response = fuel_price.station.serialize()
         station_response['prices'] = fuel_price.serialize()
         station_response['duration'] = str(int(travel_traffic_durations[fuel_price.station.pk]/60)) + 'mins'
