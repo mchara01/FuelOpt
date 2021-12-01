@@ -6,8 +6,8 @@ import numpy as np
 
 # Connect to MariaDB database
 connection = pymysql.connect(
-    user="user",
-    password="password",
+    user="fuelopt_main",
+    password="N;vZu!93Gh",
     host="127.0.0.1",
     port=3306,
     database="db_fuelopt"

@@ -21,7 +21,7 @@ class _FilterMenuState extends State<FilterMenu>
   late double screenWidth;
   late double buttonWidth;
 
-  static const _animationDuration = Duration(milliseconds: 600);
+  static const _animationDuration = Duration(milliseconds: 450);
 
   bool openSortBy = false;
   bool openFuelType = false;
@@ -87,19 +87,20 @@ class _FilterMenuState extends State<FilterMenu>
           child: AnimatedContainer(
             curve: Curves.easeInOut,
             decoration: BoxDecoration(
-                color: Theme.of(context).primaryColor,
+                color: Colors.white,
+                border: Border.all(color: isAnythingOpen() ? Colors.transparent : Theme.of(context).primaryColor),
                 borderRadius: BorderRadius.circular(10)),
             width: getWidth(FilterType.SORT_BY),
             height: 50,
             duration: _animationDuration,
             child: openSortBy
                 ? SortByOptions(onTapClose: closeAllFilters)
-                : const Center(
+                : Center(
                     child: Text(
                     'Sort by',
                     textAlign: TextAlign.center,
                     overflow: TextOverflow.ellipsis,
-                    style: TextStyle(color: Colors.white, fontSize: 15),
+                    style: TextStyle(color: Theme.of(context).primaryColor, fontSize: 16, fontWeight: FontWeight.bold),
                   )),
           ),
         ),
@@ -112,18 +113,19 @@ class _FilterMenuState extends State<FilterMenu>
           child: AnimatedContainer(
             curve: Curves.easeInOut,
             decoration: BoxDecoration(
-                color: Theme.of(context).primaryColor,
+                color: Colors.white,
+                border: Border.all(color: isAnythingOpen() ? Colors.transparent : Theme.of(context).primaryColor),
                 borderRadius: BorderRadius.circular(10)),
             width: getWidth(FilterType.FUEL_TYPE),
             height: 50,
             duration: _animationDuration,
             child: openFuelType
                 ? FuelTypeOptions(onTapClose: closeAllFilters)
-                : const Center(
+                : Center(
                     child: Text(
                     'Fuel type',
                     textAlign: TextAlign.center,
-                    style: TextStyle(color: Colors.white, fontSize: 15),
+                    style: TextStyle(color: Theme.of(context).primaryColor, fontSize: 16, fontWeight: FontWeight.bold),
                     overflow: TextOverflow.ellipsis,
                   )),
           ),
@@ -137,18 +139,19 @@ class _FilterMenuState extends State<FilterMenu>
             child: AnimatedContainer(
               curve: Curves.easeInOut,
               decoration: BoxDecoration(
-                  color: Theme.of(context).primaryColor,
+                  color: Colors.white,
+                  border: Border.all(color: isAnythingOpen() ? Colors.transparent : Theme.of(context).primaryColor),
                   borderRadius: BorderRadius.circular(10)),
               width: getWidth(FilterType.DISTANCE),
               height: 50,
               duration: _animationDuration,
               child: openDistance
                   ? DistanceOptions(onTapClose: closeAllFilters)
-                  : const Center(
+                  : Center(
                       child: Text(
                       'Distance',
                       textAlign: TextAlign.center,
-                      style: TextStyle(color: Colors.white, fontSize: 15),
+                      style: TextStyle(color: Theme.of(context).primaryColor, fontSize: 16, fontWeight: FontWeight.bold),
                       overflow: TextOverflow.ellipsis,
                     )),
             )),

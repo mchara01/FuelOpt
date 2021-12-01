@@ -2,18 +2,25 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:fuel_opt/api/api.dart';
+import 'package:fuel_opt/main.dart';
 import 'package:fuel_opt/model/stations_model.dart';
 import 'package:fuel_opt/utils/location_manager.dart';
 import 'package:fuel_opt/utils/map_marker_generator.dart';
 import 'package:fuel_opt/widgets/fuel_stations_bottom_sheet.dart';
+import 'package:fuel_opt/widgets/navigation_drawer.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
+import 'package:fuel_opt/widgets/options_button.dart';
+import '../utils/appColors.dart' as appColors;
+import 'package:fluttertoast/fluttertoast.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    MyApp().showNotification(
+        "Fuel Prices are projected to increase by 20% next week");
     return const Map();
   }
 }
@@ -59,7 +66,9 @@ class MapState extends State<Map> {
 
   @override
   Widget build(BuildContext context) {
+    final Size size = MediaQuery.of(context).size;
     return Scaffold(
+      drawer: NavigationDrawerWidget(),
       resizeToAvoidBottomInset: false,
       body: Stack(
         children: [
@@ -107,7 +116,26 @@ class MapState extends State<Map> {
             },
             markers: _markers,
           ),
-          const FuelStationsBottomSheet()
+          const FuelStationsBottomSheet(),
+          Builder(builder: (context) {
+            return Positioned(
+              top: 20,
+              width: size.width * 0.2,
+              child: TextButton(
+                style: TextButton.styleFrom(
+                  backgroundColor: appColors.PrimaryBlue,
+                  shape: CircleBorder(),
+                ),
+                child: Icon(
+                  Icons.menu,
+                  color: appColors.COLOR_White,
+                ),
+                onPressed: () {
+                  Scaffold.of(context).openDrawer();
+                },
+              ),
+            );
+          })
         ],
       ),
     );

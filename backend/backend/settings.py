@@ -82,16 +82,32 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 env_var = os.environ['env'] if "env" in os.environ else ""
 logging.info("env_var: " + env_var)
 
+"""
+
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'db_fuelopt',
         'USER': 'fuelopt_main',
-        'PASSWORD': "N;vZu!93Gh",
+        'PASSWORD': "N7vZu493Gh",
         'HOST': '192.168.100.20',
-        'PORT': '3333',
+        'PORT': '3306',
     }
 }
+"""
+
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'db_fuelopt',
+        'USER': 'fuelopt_main',
+        'PASSWORD': "N7vZu493Gh",
+        'HOST': '192.168.100.20',
+        'PORT': '3306',
+    }
+}
+
 
 
 # Password validation
