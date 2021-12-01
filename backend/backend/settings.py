@@ -100,8 +100,8 @@ else:
             'NAME': 'db_fuelopt',
             'USER': 'fuelopt_main',
             'PASSWORD': 'N7vZu493Gh',
-            'HOST': '192.168.100.20',
-            'PORT': '3306',
+            'HOST': '18.170.63.134',
+            'PORT': '3333',
         }
     }
 
