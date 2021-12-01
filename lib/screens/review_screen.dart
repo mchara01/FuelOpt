@@ -12,7 +12,9 @@ import 'dart:io';
 import 'package:image_picker/image_picker.dart';
 
 class ReviewScreen extends StatefulWidget {
-  const ReviewScreen({Key? key}) : super(key: key);
+  final int stationId;
+  final String token;
+  const ReviewScreen(this.stationId, this.token);
 
   @override
   _ReviewScreenState createState() => _ReviewScreenState();
@@ -25,7 +27,7 @@ class _ReviewScreenState extends State<ReviewScreen> {
   bool premiumDieselNotAvailable = false;
   bool submitAvailable = false;
 
-  bool isClosed=false;
+  bool isClosed = false;
 
   double? unleadedPrice;
   double? dieselPrice;
@@ -59,7 +61,9 @@ class _ReviewScreenState extends State<ReviewScreen> {
       onSaved: (value) {
         unleadedController.text = value!;
       },
-      inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'(^\d{1,3}(\.\d?)?)'))],
+      inputFormatters: [
+        FilteringTextInputFormatter.allow(RegExp(r'(^\d{1,3}(\.\d?)?)'))
+      ],
       textInputAction: TextInputAction.next,
       decoration: InputDecoration(
           prefixIcon: Icon(Icons.local_gas_station),
@@ -86,7 +90,9 @@ class _ReviewScreenState extends State<ReviewScreen> {
       onSaved: (value) {
         dieselController.text = value!;
       },
-      inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'(^\d{1,3}(\.\d?)?)'))],
+      inputFormatters: [
+        FilteringTextInputFormatter.allow(RegExp(r'(^\d{1,3}(\.\d?)?)'))
+      ],
       textInputAction: TextInputAction.next,
       decoration: InputDecoration(
           prefixIcon: Icon(Icons.local_gas_station_rounded),
@@ -113,7 +119,9 @@ class _ReviewScreenState extends State<ReviewScreen> {
       onSaved: (value) {
         superUnleadedController.text = value!;
       },
-      inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'(^\d{1,3}(\.\d?)?)'))],
+      inputFormatters: [
+        FilteringTextInputFormatter.allow(RegExp(r'(^\d{1,3}(\.\d?)?)'))
+      ],
       textInputAction: TextInputAction.next,
       decoration: InputDecoration(
           prefixIcon: Icon(Icons.local_gas_station_rounded),
@@ -140,7 +148,9 @@ class _ReviewScreenState extends State<ReviewScreen> {
       onSaved: (value) {
         premiumDieselController.text = value!;
       },
-      inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'(^\d{1,3}(\.\d?)?)'))],
+      inputFormatters: [
+        FilteringTextInputFormatter.allow(RegExp(r'(^\d{1,3}(\.\d?)?)'))
+      ],
       textInputAction: TextInputAction.next,
       decoration: InputDecoration(
           prefixIcon: Icon(Icons.local_gas_station_rounded),
@@ -176,7 +186,9 @@ class _ReviewScreenState extends State<ReviewScreen> {
       onSaved: (value) {
         congestionController.text = value!;
       },
-      inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'(^\d{1,3})'))],
+      inputFormatters: [
+        FilteringTextInputFormatter.allow(RegExp(r'(^\d{1,3})'))
+      ],
       textInputAction: TextInputAction.next,
       decoration: InputDecoration(
           prefixIcon: Icon(Icons.more_time),
@@ -195,10 +207,12 @@ class _ReviewScreenState extends State<ReviewScreen> {
           minWidth: MediaQuery.of(context).size.width,
           onPressed: () {
             _submitReview();
-            // Navigator.push(
-            //   context,
-            //   MaterialPageRoute(builder: (context) => UploadReceiptScreen()),
-            // );
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (context) =>
+                      UploadReceiptScreen(widget.stationId, widget.token)),
+            );
           },
           child: Text(
             "Submit",
@@ -270,7 +284,7 @@ class _ReviewScreenState extends State<ReviewScreen> {
   }
 
   // login function
-  _submitReview() {
+  _submitReview() async {
     var toSubmit = HashMap<String, double?>();
     if (unleadedNotAvailable) {
       toSubmit["unleaded"] = null;
@@ -304,21 +318,27 @@ class _ReviewScreenState extends State<ReviewScreen> {
       toSubmit["closed"] = 1;
     }
 
-    if (toSubmit.isNotEmpty){
+    if (toSubmit.isNotEmpty) {
       print(toSubmit);
+      FuelStationDataService fuelStationDataService = FuelStationDataService();
+      bool succuess = await fuelStationDataService.updateInfo(
+          widget.stationId, toSubmit, widget.token);
+      if (succuess) {
+        Fluttertoast.showToast(msg: "Update Successful");
+      } else {
+        Fluttertoast.showToast(msg: "Failed to Update");
+      }
       debugPrint('submit prices not implemented');
-    }
-    else {
-    debugPrint("Sanity Check");
+    } else {
+      debugPrint("Sanity Check");
       Fluttertoast.showToast(
-        msg: "This is Center Short Toast",
-        toastLength: Toast.LENGTH_SHORT,
-        gravity: ToastGravity.CENTER,
-        timeInSecForIosWeb: 1,
-        backgroundColor: Colors.red,
-        textColor: Colors.white,
-        fontSize: 16.0
-    );
+          msg: "This is Center Short Toast",
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.CENTER,
+          timeInSecForIosWeb: 1,
+          backgroundColor: Colors.red,
+          textColor: Colors.white,
+          fontSize: 16.0);
     }
   }
 }

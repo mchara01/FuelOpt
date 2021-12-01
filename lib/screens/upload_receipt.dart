@@ -7,7 +7,10 @@ import 'dart:io';
 import 'package:image_picker/image_picker.dart';
 
 class UploadReceiptScreen extends StatefulWidget {
-  const UploadReceiptScreen({Key? key}) : super(key: key);
+  // const UploadReceiptScreen({Key? key}) : super(key: key);
+  final int stationId;
+  final String token;
+  const UploadReceiptScreen(this.stationId, this.token);
 
   @override
   _UploadReceiptScreenState createState() => _UploadReceiptScreenState();
