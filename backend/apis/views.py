@@ -225,10 +225,10 @@ def search(request):
 
         # (iv) Get travel durations and distances for current candidates and store as a dictionary: { station_pk : duration } pair
         # Duration units: seconds   Distance units: km
-        carbon_emission, travel_durations, travel_distance, travel_traffic_durations = dict(), dict(), dict(), dict()
+        carbon_emission, travel_distance, travel_traffic_durations = dict(), dict(), dict(), dict()
         emission_factor=0.2 #kgCO2/km
         for fuel_price in preferences_list:
-            travel_durations[fuel_price.station.pk], travel_traffic_durations[fuel_price.station.pk], travel_distance[fuel_price.station.pk] = get_duration_distance(user_lat, user_lng, fuel_price.station.lat, fuel_price.station.lng)
+            travel_traffic_durations[fuel_price.station.pk], travel_distance[fuel_price.station.pk] = get_duration_distance(user_lat, user_lng, fuel_price.station.lat, fuel_price.station.lng)
             carbon_emission[fuel_price.station.pk] = emission_factor*travel_distance[fuel_price.station.pk]
             
         # (v) Optimisation Criteria. If
@@ -273,7 +273,7 @@ def search(request):
                     curr_pref_list = curr_pref_list.exclude(**kwargs)
                     preferred_fuel_prices = curr_pref_list.values_list(pref, flat=True)
                     # Sort stations according to sorted durations
-                    sorted_station_pks = sort_by_price(curr_pref_list, travel_traffic_durations, travel_durations, travel_distance, preferred_fuel_prices)
+                    sorted_station_pks = sort_by_price(curr_pref_list, travel_traffic_durations, travel_distance, preferred_fuel_prices)
                     # Query stations in sorted order, selecting only the top 3 station for each fuel type
                     curr_pref_list = query_sorted_order(sorted_station_pks[:3]) 
                     best_station_general[pref]=curr_pref_list
@@ -295,7 +295,7 @@ def search(request):
             else:
                 preferred_fuel_prices = preferences_list.values_list(fuel_preference, flat=True)
                 # Sort stations according to sorted durations
-                sorted_station_pks = sort_by_price(preferences_list, travel_traffic_durations, travel_durations, travel_distance, preferred_fuel_prices)
+                sorted_station_pks = sort_by_price(preferences_list, travel_traffic_durations, travel_distance, preferred_fuel_prices)
                 # Query stations in sorted order
                 preferences_list = query_sorted_order(sorted_station_pks[:10])
                 # API Response
@@ -371,14 +371,13 @@ def get_duration_distance(lat1, lng1, lat2, lng2):
 
     r = response.read().decode(encoding="utf-8")
     result = json.loads(r)
-    duration = result['resourceSets'][0]['resources'][0]['travelDuration'] # units: s
     duration_with_traffic = result['resourceSets'][0]['resources'][0]['travelDurationTraffic'] # units: s
     distance = result['resourceSets'][0]['resources'][0]['travelDistance'] # units: km
 
     # return the duration and distance
-    return duration, duration_with_traffic, distance
+    return duration_with_traffic, distance
 
-def sort_by_price(preferences_list, travel_traffic_durations, travel_durations, travel_distance, preferred_fuel_prices):
+def sort_by_price(preferences_list, travel_traffic_durations, travel_distance, preferred_fuel_prices):
     """
     preferences_list(query object): list of potential station candidates
     """
