@@ -7,10 +7,10 @@ services:
     volumes:
       - ../../mariadb/data:/var/lib/mysql
     environment:
-      MYSQL_ROOT_PASSWORD: root
+      MYSQL_ROOT_PASSWORD: "btrobwssd9"
       MYSQL_DATABASE: db_fuelopt
       MYSQL_USER: fuelopt_main
-      MYSQL_PASSWORD: "N;vZu!93Gh"
+      MYSQL_PASSWORD: "N7vZu493Gh"
       env: "${env}"
     ports:
       - 3333:3306
