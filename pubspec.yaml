@@ -40,6 +40,8 @@ dependencies:
   location: ^4.2.0
   provider: ^6.0.1
   snapping_sheet: ^3.1.0
+  flutter_local_notifications: ^9.1.4
+
 
 dev_dependencies:
   flutter_lints: ^1.0.0
