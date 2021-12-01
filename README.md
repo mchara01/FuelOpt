@@ -1,4 +1,6 @@
 # FuelOpt
+![example workflow](https://github.com/mchara01/FuelOpt/actions/workflows/aws.yml/badge.svg)
+
 FuelOpt: Software Tool for Fuel Needs
 
 

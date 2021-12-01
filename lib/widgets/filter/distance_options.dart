@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:fuel_opt/model/search_options.dart';
+import 'package:provider/provider.dart';
 
 class DistanceOptions extends StatefulWidget {
   final void Function() onTapClose;
@@ -14,33 +16,39 @@ class _DistanceOptionsState extends State<DistanceOptions> {
 
   @override
   Widget build(BuildContext context) {
+
     return Stack(children: [
       Padding(
         padding: const EdgeInsets.only(right: 40.0),
-        child: Slider(
-          value: distance,
-          min: 0,
-          max: 100,
-          divisions: 100,
-          onChanged: (newDistance) {
-            setState(() {
-              distance = newDistance;
-            });
-          },
-          label: distance.round().toString(),
+        child: Consumer<DistancePreferenceModel>(
+          builder: (context, distancePreferenceModel, childWidget) {
+            return Column(
+              children: [
+                Expanded(child: Text(distancePreferenceModel.distancePreference.round().toString() + ' km')),
+                Expanded(
+                  child: Slider(
+                    value: distancePreferenceModel.distancePreference,
+                    min: 0,
+                    max: 100,
+                    divisions: 100,
+                    onChanged: (newDistance) {
+                      distancePreferenceModel.setDistancePreference(newDistance);
+                    },
+                  ),
+                ),
+              ],
+            );
+    },
         ),
       ),
       Align(
         alignment: Alignment.centerRight,
         child: IconButton(
             onPressed: widget.onTapClose,
-            icon: Container(
-                decoration: const BoxDecoration(
-                    shape: BoxShape.circle, color: Colors.white),
-                child: Icon(
-                  Icons.close,
-                  color: Theme.of(context).primaryColor,
-                ))),
+            icon: Icon(
+              Icons.close,
+              color: Theme.of(context).primaryColor,
+            )),
       )
     ]);
   }

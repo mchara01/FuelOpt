@@ -1,5 +1,10 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:fuel_opt/model/fuelprice_model.dart';
+import 'package:fuel_opt/model/search_options.dart';
+import 'package:fuel_opt/model/search_result.dart';
+import 'package:fuel_opt/widgets/search_result_list.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import '../model/stations_model.dart';
 import 'package:http/http.dart' as http;
@@ -42,13 +47,33 @@ class FuelStationDataService {
     return [..._stations];
   }
 
+  Future<Station> getStationDetail(var stationId) async {
+    String urlstring =
+        'http://10.0.2.2:8000/apis/station/' + stationId.toString();
+    final url = Uri.parse(urlstring);
+
+    var request = http.Request('GET', url);
+    //request.headers.addAll(headers);
+    http.StreamedResponse response = await request.send();
+
+    if (response.statusCode == 200) {
+      var data = json.decode(await response.stream.bytesToString());
+      print(data);
+      Station station = Station.fromJson(data);
+      return station;
+    } else {
+      print(response.reasonPhrase);
+    }
+    return Future.value(null);
+  }
+
   Future<List<Station>?> getStations(LatLngBounds latLngBounds) async {
     String maxLat = latLngBounds.northeast.latitude.toString();
     String maxLng = latLngBounds.northeast.longitude.toString();
     String minLat = latLngBounds.southwest.latitude.toString();
     String minLng = latLngBounds.southwest.longitude.toString();
 
-    String urlstring = 'http://10.0.2.2:8000/apis/home/?' +
+    String urlstring = 'http://127.0.0.1:8000/apis/home/?' +
         'lat_max=' +
         maxLat +
         '&lat_min=' +
@@ -79,6 +104,40 @@ class FuelStationDataService {
     }
 
     return Future.value(null);
+  }
+
+  Future<List<StationResult>> getSearchResults(
+      String address,
+      String sortByPreference,
+      String fuelTypePreference,
+      String distancePreference) async {
+    String urlstring = 'http://127.0.0.1:8000/apis/search/?' +
+        'user_preference=' +
+        sortByPreference +
+        '&location=' +
+        address +
+        '&fuel_type=' +
+        fuelTypePreference +
+        '&distance=' +
+        distancePreference.toString() +
+        '&amenities=';
+
+    final url = Uri.parse(urlstring);
+    print(url);
+
+    final response = await http.get(url);
+    print(response.statusCode);
+    if (response.statusCode == 200) {
+      var data = json.decode(response.body) as List;
+      List<StationResult> stations = data
+          .map<StationResult>((json) => StationResult.fromJson(json))
+          .toList();
+      print(stations);
+      return stations;
+    } else {
+      return [];
+      // throw Exception('Failed to load data');
+    }
   }
 }
 

@@ -82,28 +82,17 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 env_var = os.environ['env'] if "env" in os.environ else ""
 logging.info("env_var: " + env_var)
 
-if env_var and env_var == "PRODUCTION":
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.mysql',
-            'NAME': 'db_fuelopt',
-            'USER': 'user',
-            'PASSWORD': 'password',
-            'HOST': '192.168.100.20',
-            'PORT': '3306',
-        }
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'db_fuelopt',
+        'USER': 'fuelopt_main',
+        'PASSWORD': "N;vZu!93Gh",
+        'HOST': '192.168.100.20',
+        'PORT': '3333',
     }
-else:
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.mysql',
-            'NAME': 'db_fuelopt',
-            'USER': 'user',
-            'PASSWORD': 'password',
-            'HOST': '127.0.0.1',
-            'PORT': '3306',
-        }
-    }
+}
+
 
 # Password validation
 # https://docs.djangoproject.com/en/3.2/ref/settings/#auth-password-validators
