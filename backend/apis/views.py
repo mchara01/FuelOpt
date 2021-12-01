@@ -184,7 +184,10 @@ def search(request):
         max_radius_km = request.GET['distance']
         amenities_list = request.GET['amenities'].split(',')
 
-        user_lat, user_lng = geocoding(user_location)
+        try:
+            user_lat, user_lng = geocoding(user_location)
+        except ValueError as e:
+            return JsonResponse({ 'status':'false', 'message': str(e) }, status=500)
 
         # Default distance range
         if max_radius_km == '':
@@ -202,12 +205,15 @@ def search(request):
             lng__gte=user_lng-max_radius_degree
         )
         """
-        preferences_list = FuelPrice.objects.filter(
-            station__lat__lte=user_lat + max_radius_degree,
-            station__lat__gte=user_lat - max_radius_degree,
-            station__lng__lte=user_lng + max_radius_degree,
-            station__lng__gte=user_lng - max_radius_degree
-        )
+        try:
+            preferences_list = FuelPrice.objects.filter(
+                station__lat__lte=user_lat + max_radius_degree,
+                station__lat__gte=user_lat - max_radius_degree,
+                station__lng__lte=user_lng + max_radius_degree,
+                station__lng__gte=user_lng - max_radius_degree
+            )
+        except FuelPrice.DoesNotExist:
+            return JsonResponse({ 'status':'false', 'message': 'Location not in range!' }, status=500)
 
         for fuel_price in preferences_list:
             try:
@@ -245,6 +251,7 @@ def search(request):
         carbon_emission, travel_distance, travel_traffic_durations = dict(), dict(), dict()
         emission_factor=0.2 #kgCO2/km
         for fuel_price in preferences_list:
+            
             travel_traffic_durations[fuel_price.station.pk], travel_distance[fuel_price.station.pk] = get_duration_distance(user_lat, user_lng, fuel_price.station.lat, fuel_price.station.lng)
             try:
                 congestion = travel_traffic_durations[fuel_price.station.pk]
@@ -316,8 +323,8 @@ def search(request):
                 preferences_list = query_sorted_order(sorted_station_pks[:10])
                 # API Response
                 response = create_response(preferences_list,travel_traffic_durations,travel_distance,carbon_emission)
-          
-    return JsonResponse(response, safe=False)
+
+    return JsonResponse(response, safe=False, status=200)
 
 @api_view(['POST'])
 def review(request):
@@ -420,7 +427,10 @@ def geocoding(location):
     r = response.read().decode(encoding="utf-8")
     result = json.loads(r)
 
-    return float(result[0]['lat']), float(result[0]['lon'])
+    if result[0]['lat']:
+        return float(result[0]['lat']), float(result[0]['lon'])
+    else:
+        raise ValueError('Unable to geocode')
 
 
 def query_sorted_order(pk_list):
