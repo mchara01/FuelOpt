@@ -217,7 +217,7 @@ def search(request):
 
         for fuel_price in preferences_list:
             try:
-                opening = UserReview.objects.get(station=fuel_price.station.pk).opening
+                opening = UserReview.objects.get(station=fuel_price.station).opening
             except UserReview.DoesNotExist:
                 opening = True
 
@@ -254,7 +254,7 @@ def search(request):
             
             travel_traffic_durations[fuel_price.station.pk], travel_distance[fuel_price.station.pk] = get_duration_distance(user_lat, user_lng, fuel_price.station.lat, fuel_price.station.lng)
             try:
-                congestion = travel_traffic_durations[fuel_price.station.pk]
+                congestion = UserReview.objects.get(station=fuel_price.station).congestion
             except UserReview.DoesNotExist:
                 congestion = 0
             travel_traffic_durations[fuel_price.station.pk] = travel_traffic_durations[fuel_price.station.pk]+congestion
@@ -340,44 +340,38 @@ def review(request):
             return JsonResponse({'status':'true', 'message': 'Good.'}, status=200)
         else:
             station_id = request.POST['station'] # pk?
-            open_status = not bool(int(request.POST['close'])) if request.POST['close'] == "" else None # Boolean
-            unleaded_price = float(request.POST['unleaded_price']) if request.POST['unleaded_price'] == "" else None # Decimal
-            diesel_price = float(request.POST['diesel_price']) if request.POST['diesel_price'] == "" else None # Decimal
-            super_unleaded_price = float(request.POST['super_unleaded_price']) if request.POST['super_unleaded_price'] == "" else None # Decimal
-            premium_diesel_price = float(request.POST['premium_diesel_price']) if request.POST['premium_diesel_price'] == "" else None # Decimal
-            congestion = int(request.POST['congestion']) if request.POST['congestion'] == "" else None # Integer
-
-            # anomaly detection
-
             station = Station.objects.get(pk=station_id)
-
-            # update fuel prices
             fuel_prices = FuelPrice.objects.get(station=station)
-            fuel_prices.unleaded_price = unleaded_price if (unleaded_price is not None) else fuel_prices.unleaded_price
-            fuel_prices.diesel_price = diesel_price if (diesel_price is not None) else fuel_prices.diesel_price
-            fuel_prices.super_unleaded_price = super_unleaded_price if (super_unleaded_price is not None) else fuel_prices.super_unleaded_price
-            fuel_prices.premium_diesel_price = premium_diesel_price if (premium_diesel_price is not None) else fuel_prices.premium_diesel_price
+            user_review, _ = UserReview.objects.get_or_create(station=station)
+
+            if request.POST['unleaded_price'] != "":
+                unleaded_price = float(request.POST['unleaded_price']) # Decimal
+                if not check_and_update('unleaded_price', unleaded_price, fuel_prices, user_review):
+                    return JsonResponse({'status':'false', 'message': 'Exceeded threshold. Please submit receipt.'}, status=500)
+
+            if request.POST['diesel_price'] != "":
+                diesel_price = float(request.POST['diesel_price']) # Decimal
+                if not check_and_update('diesel_price', diesel_price, fuel_prices, user_review):
+                    return JsonResponse({'status':'false', 'message': 'Exceeded threshold. Please submit receipt.'}, status=500)
+
+            if request.POST['super_unleaded_price'] != "":
+                super_unleaded_price = float(request.POST['super_unleaded_price']) # Decimal
+                if not check_and_update('super_unleaded_price', super_unleaded_price, fuel_prices, user_review):
+                    return JsonResponse({'status':'false', 'message': 'Exceeded threshold. Please submit receipt.'}, status=500)
+
+            if request.POST['premium_diesel_price'] != "":
+                premium_diesel_price = float(request.POST['premium_diesel_price']) # Decimal
+                if not check_and_update('premium_diesel_price', premium_diesel_price, fuel_prices, user_review):
+                    return JsonResponse({'status':'false', 'message': 'Exceeded threshold. Please submit receipt.'}, status=500)
+
+            if request.POST['close'] != "":
+                user_review.opening = not bool(int(request.POST['close']))
+
+            if request.POST['congestion'] != "":
+                user_review.congestion = int(request.POST['congestion'])
+
             fuel_prices.save()
-            
-            # update or create user review
-            user_review = UserReview.objects.get(station=station)
-            if user_review:
-                user_review.unleaded_price = unleaded_price if (unleaded_price is not None) else user_review.unleaded_price
-                user_review.diesel_price = diesel_price if (diesel_price is not None) else user_review.diesel_price
-                user_review.super_unleaded_price = super_unleaded_price if (super_unleaded_price is not None) else user_review.super_unleaded_price
-                user_review.premium_diesel_price = premium_diesel_price if (premium_diesel_price is not None) else user_review.premium_diesel_price
-                user_review.open_status = open_status if (open_status is not None) else user_review.open_status
-                user_review.congestion = congestion if (congestion is not None) else user_review.congestion
-                user_review.save()
-            else:
-                new_review = UserReview(station=station, 
-                                        unleaded_price = unleaded_price,
-                                        diesel_price = diesel_price,
-                                        super_unleaded_price = super_unleaded_price,
-                                        premium_diesel_price = premium_diesel_price,
-                                        opening=open_status, 
-                                        congestion=congestion)
-                new_review.save()
+            user_review.save()
             return JsonResponse({'status':'true', 'message': 'Good.'}, status=200)
 
 # calculate the travel duration to this station
@@ -450,3 +444,16 @@ def create_response(preferences_list,travel_traffic_durations,travel_distance,ca
         response.append(station_response)
     
     return response
+
+def check_and_update(fuel_type, price, fuel_prices, user_review):
+    if (price < getattr(fuel_prices, fuel_type) * 1.05 and \
+        price > getattr(fuel_prices, fuel_type)* 0.95) or price == 0:
+        if price == 0:
+            setattr(fuel_prices, fuel_type, None)
+            setattr(user_review, fuel_type, None)
+        else:
+            setattr(fuel_prices, fuel_type, price)
+            setattr(user_review, fuel_type, price)
+        return True
+    else:
+        return False
