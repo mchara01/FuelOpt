@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:fuel_opt/model/search_result.dart';
+import 'package:fuel_opt/screens/login_screen.dart';
+import 'package:fuel_opt/screens/registration_screen.dart';
+import 'package:fuel_opt/screens/review_screen.dart';
 import 'package:fuel_opt/widgets/border_box.dart';
 import 'package:fuel_opt/widgets/options_button.dart';
 import '../utils/appColors.dart' as appColors;
@@ -235,14 +238,28 @@ class StationsDetail extends StatelessWidget {
                 ],
               ),
               Positioned(
-                  bottom: 20,
-                  width: size.width,
-                  child: Center(
-                    child: OptionButton(
-                        icon: Icons.map_rounded,
-                        text: "Review Stations",
-                        width: size.width * 0.5),
-                  ))
+                bottom: 20,
+                width: size.width,
+                child: Center(
+                  child: TextButton.icon(
+                      onPressed: () async {
+                        AccountFunctionality accountFunctionality =
+                            AccountFunctionality();
+                        String token =
+                            await accountFunctionality.getAccessToken();
+                        if (token.isEmpty) {
+                          Navigator.of(context).push(MaterialPageRoute(
+                              builder: (context) => LoginScreen()));
+                        } else {
+                          Navigator.of(context).push(MaterialPageRoute(
+                              builder: (context) =>
+                                  ReviewScreen(station.station_id, token)));
+                        }
+                      },
+                      icon: Icon(Icons.map_rounded),
+                      label: Text('Review Stations')),
+                ),
+              )
             ],
           )),
     );
