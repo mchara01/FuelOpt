@@ -1,13 +1,11 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:fuel_opt/model/fuelprice_model.dart';
-import 'package:fuel_opt/model/search_options.dart';
 import 'package:fuel_opt/model/search_result.dart';
-import 'package:fuel_opt/widgets/search_result_list.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import '../model/stations_model.dart';
 import 'package:http/http.dart' as http;
+import 'package:flutter/services.dart' show rootBundle;
 
 /*
 Test
@@ -45,6 +43,13 @@ class FuelStationDataService {
 
   List<Station> get stations {
     return [..._stations];
+  }
+
+  Future<List<StationResult>> getStationsLocal() async {
+    var jsonText = await rootBundle.loadString('assets/test.json');
+    List data = jsonDecode(jsonText) as List;
+    List<StationResult> stationData = data.map((stationJson) => StationResult.fromJson(stationJson)).toList();
+    return stationData;
   }
 
   Future<Station> getStationDetail(var stationId) async {
