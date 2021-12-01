@@ -333,19 +333,19 @@ def review(request):
 
             # update fuel prices
             fuel_prices = FuelPrice.objects.get(station=station)
-            fuel_prices.unleaded_price = unleaded_price
-            fuel_prices.diesel_price = diesel_price
-            fuel_prices.super_unleaded_price = super_unleaded_price
-            fuel_prices.premium_diesel_price = premium_diesel_price
+            fuel_prices.unleaded_price = unleaded_price if (unleaded_price is not None) else fuel_prices.unleaded_price
+            fuel_prices.diesel_price = diesel_price if (diesel_price is not None) else fuel_prices.diesel_price
+            fuel_prices.super_unleaded_price = super_unleaded_price if (super_unleaded_price is not None) else fuel_prices.super_unleaded_price
+            fuel_prices.premium_diesel_price = premium_diesel_price if (premium_diesel_price is not None) else fuel_prices.premium_diesel_price
             fuel_prices.save()
             
             # update or create user review
             user_review = UserReview.objects.get(station=station)
             if user_review:
-                user_review.unleaded_price = unleaded_price
-                user_review.diesel_price = diesel_price
-                user_review.super_unleaded_price = super_unleaded_price
-                user_review.premium_diesel_price = premium_diesel_price
+                user_review.unleaded_price = unleaded_price if (unleaded_price is not None) else user_review.unleaded_price
+                user_review.diesel_price = diesel_price if (diesel_price is not None) else user_review.diesel_price
+                user_review.super_unleaded_price = super_unleaded_price if (super_unleaded_price is not None) else user_review.super_unleaded_price
+                user_review.premium_diesel_price = premium_diesel_price if (premium_diesel_price is not None) else user_review.premium_diesel_price
                 user_review.open_status = open_status
                 user_review.congestion = congestion
                 user_review.save()
