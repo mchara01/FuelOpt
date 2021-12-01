@@ -109,5 +109,5 @@ class UserReview(models.Model):
         decimal_places=1, max_digits=4, default=None, null=True)
 
     receipt = models.ImageField(upload_to='receipts/', blank=True, null=True)
-    opening = models.BooleanField(null=True)
-    congestion = models.IntegerField(null=True)
+    opening = models.BooleanField(default=True, null=True)
+    congestion = models.IntegerField(default=0, null=True)
