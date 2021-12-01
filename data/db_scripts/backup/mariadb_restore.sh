@@ -18,7 +18,7 @@ echo "Restore backup to database - ${DATABASE_NAME}"
 myloader -h ${MYSQL_HOST} \
    -P ${MYSQL_PORT} \
    -u ${MYSQL_USER} \
-   -p${MYSQL_PASSWORD} \
+   --password ${MYSQL_PASSWORD} \
    --threads=8 \
    --directory=${DB_BACKUP_PATH}
 
