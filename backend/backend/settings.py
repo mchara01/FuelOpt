@@ -87,9 +87,9 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'db_fuelopt',
         'USER': 'fuelopt_main',
-        'PASSWORD': "N;vZu!93Gh",
+        'PASSWORD': "N7vZu493Gh",
         'HOST': '192.168.100.20',
-        'PORT': '3306',
+        'PORT': '3333',
     }
 }
 
