@@ -41,6 +41,7 @@ dependencies:
   provider: ^6.0.1
   snapping_sheet: ^3.1.0
   firebase_auth: ^3.1.4
+  image_picker: ^0.8.4+4
 
 dev_dependencies:
   flutter_lints: ^1.0.0

@@ -1,11 +1,15 @@
 // ignore_for_file: prefer_const_constructors
 
+import 'dart:collection';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:fuel_opt/screens/home_screen.dart';
-import 'package:fuel_opt/screens/registration_screen.dart';
 import '../utils/appColors.dart' as appColors;
 import 'package:fuel_opt/api/api.dart';
+import 'upload_receipt.dart';
+import 'dart:io';
+import 'package:image_picker/image_picker.dart';
 
 class ReviewScreen extends StatefulWidget {
   const ReviewScreen({Key? key}) : super(key: key);
@@ -19,6 +23,17 @@ class _ReviewScreenState extends State<ReviewScreen> {
   bool dieselNotAvailable = false;
   bool superUnleadedNotAvailable = false;
   bool premiumDieselNotAvailable = false;
+  bool submitAvailable = false;
+
+  bool isClosed=false;
+
+  double? unleadedPrice;
+  double? dieselPrice;
+  double? superUnleadedPrice;
+  double? premiumDieselPrice;
+
+  String updateTitle = "Update Prices for " + "<Station>";
+
   // Form key
   final _formKey = GlobalKey<FormState>();
   final TextEditingController unleadedController = new TextEditingController();
@@ -27,6 +42,11 @@ class _ReviewScreenState extends State<ReviewScreen> {
       new TextEditingController();
   final TextEditingController premiumDieselController =
       new TextEditingController();
+  final TextEditingController congestionController =
+      new TextEditingController();
+
+  /// Variables
+  File? imageFile;
 
   @override
   Widget build(BuildContext context) {
@@ -39,6 +59,7 @@ class _ReviewScreenState extends State<ReviewScreen> {
       onSaved: (value) {
         unleadedController.text = value!;
       },
+      inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'(^\d{1,3}(\.\d?)?)'))],
       textInputAction: TextInputAction.next,
       decoration: InputDecoration(
           prefixIcon: Icon(Icons.local_gas_station),
@@ -56,6 +77,7 @@ class _ReviewScreenState extends State<ReviewScreen> {
         });
       },
     );
+
     final dieselField = TextFormField(
       autofocus: false,
       enabled: !dieselNotAvailable,
@@ -64,6 +86,7 @@ class _ReviewScreenState extends State<ReviewScreen> {
       onSaved: (value) {
         dieselController.text = value!;
       },
+      inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'(^\d{1,3}(\.\d?)?)'))],
       textInputAction: TextInputAction.next,
       decoration: InputDecoration(
           prefixIcon: Icon(Icons.local_gas_station_rounded),
@@ -81,6 +104,7 @@ class _ReviewScreenState extends State<ReviewScreen> {
         });
       },
     );
+
     final superUnleadedfield = TextFormField(
       autofocus: false,
       enabled: !superUnleadedNotAvailable,
@@ -89,6 +113,7 @@ class _ReviewScreenState extends State<ReviewScreen> {
       onSaved: (value) {
         superUnleadedController.text = value!;
       },
+      inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'(^\d{1,3}(\.\d?)?)'))],
       textInputAction: TextInputAction.next,
       decoration: InputDecoration(
           prefixIcon: Icon(Icons.local_gas_station_rounded),
@@ -106,6 +131,7 @@ class _ReviewScreenState extends State<ReviewScreen> {
         });
       },
     );
+
     final premiumDieselField = TextFormField(
       autofocus: false,
       enabled: !premiumDieselNotAvailable,
@@ -114,6 +140,7 @@ class _ReviewScreenState extends State<ReviewScreen> {
       onSaved: (value) {
         premiumDieselController.text = value!;
       },
+      inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'(^\d{1,3}(\.\d?)?)'))],
       textInputAction: TextInputAction.next,
       decoration: InputDecoration(
           prefixIcon: Icon(Icons.local_gas_station_rounded),
@@ -131,6 +158,34 @@ class _ReviewScreenState extends State<ReviewScreen> {
         });
       },
     );
+
+    final isItClosedButton = Checkbox(
+      value: isClosed,
+      onChanged: (value) {
+        setState(() {
+          bool test = value ?? false;
+          isClosed = test;
+        });
+      },
+    );
+
+    final congestionField = TextFormField(
+      autofocus: false,
+      controller: congestionController,
+      keyboardType: TextInputType.number,
+      onSaved: (value) {
+        congestionController.text = value!;
+      },
+      inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'(^\d{1,3})'))],
+      textInputAction: TextInputAction.next,
+      decoration: InputDecoration(
+          prefixIcon: Icon(Icons.more_time),
+          contentPadding: EdgeInsets.fromLTRB(20, 15, 20, 15),
+          hintText: "minutes",
+          labelText: 'Time Congested',
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(10))),
+    );
+
     final submitButton = Material(
         elevation: 5,
         borderRadius: BorderRadius.circular(30),
@@ -139,11 +194,11 @@ class _ReviewScreenState extends State<ReviewScreen> {
           padding: EdgeInsets.fromLTRB(20, 15, 20, 15),
           minWidth: MediaQuery.of(context).size.width,
           onPressed: () {
-            submitReview(
-                double.tryParse(unleadedController.text),
-                double.tryParse(dieselController.text),
-                double.tryParse(superUnleadedController.text),
-                double.tryParse(premiumDieselController.text));
+            _submitReview();
+            // Navigator.push(
+            //   context,
+            //   MaterialPageRoute(builder: (context) => UploadReceiptScreen()),
+            // );
           },
           child: Text(
             "Submit",
@@ -168,7 +223,7 @@ class _ReviewScreenState extends State<ReviewScreen> {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: <Widget>[
                   Text(
-                    "Update Fuel Prices",
+                    updateTitle,
                     style: TextStyle(
                         color: appColors.PrimaryBlue,
                         fontWeight: FontWeight.w800,
@@ -176,31 +231,37 @@ class _ReviewScreenState extends State<ReviewScreen> {
                   ),
                   SizedBox(height: 20),
                   Row(children: <Widget>[
-                    Expanded(child:unleadedField),
+                    Expanded(child: unleadedField),
                     unleadedButton,
-                    Text("N/A")
+                    Text("Unavailable")
                   ]),
                   SizedBox(height: 20),
                   Row(children: <Widget>[
-                    Expanded(child:dieselField),
+                    Expanded(child: dieselField),
                     dieselButton,
-                    Text("N/A")
+                    Text("Unavailable")
                   ]),
                   SizedBox(height: 20),
                   Row(children: <Widget>[
-                    Expanded(child:superUnleadedfield),
+                    Expanded(child: superUnleadedfield),
                     superUnleadedButton,
-                    Text("N/A")
+                    Text("Unavailable")
                   ]),
                   SizedBox(height: 20),
                   Row(children: <Widget>[
-                    Expanded(child:premiumDieselField),
+                    Expanded(child: premiumDieselField),
                     premiumDieselButton,
-                    Text("N/A")
+                    Text("Unavailable")
                   ]),
                   SizedBox(height: 20),
-                  submitButton,
-                  SizedBox(height: 20)
+                  Row(children: <Widget>[
+                    Expanded(child: congestionField),
+                    Text("")
+                  ]),
+                  SizedBox(height: 20),
+                  Row(children: <Widget>[isItClosedButton, Text("Closed")]),
+                  SizedBox(height: 20),
+                  submitButton
                 ],
               ),
             ),
@@ -209,10 +270,55 @@ class _ReviewScreenState extends State<ReviewScreen> {
   }
 
   // login function
-  void submitReview(double? unleadedPrice, double? dieselPrice,
-      double? superUnleadedPrice, double? premiumDieselPrice) async {
-    Fluttertoast.showToast(
-        msg:
-            '$unleadedPrice + $dieselPrice + $superUnleadedPrice + $premiumDieselPrice');
+  _submitReview() {
+    var toSubmit = HashMap<String, double?>();
+    if (unleadedNotAvailable) {
+      toSubmit["unleaded"] = null;
+    } else if (double.tryParse(unleadedController.text) != null) {
+      toSubmit["unleaded"] = double.tryParse(unleadedController.text);
+    }
+
+    if (dieselNotAvailable) {
+      toSubmit["diesel"] = null;
+    } else if (double.tryParse(dieselController.text) != null) {
+      toSubmit["diesel"] = double.tryParse(dieselController.text);
+    }
+
+    if (superUnleadedNotAvailable) {
+      toSubmit["superUnleaded"] = null;
+    } else if (double.tryParse(superUnleadedController.text) != null) {
+      toSubmit["superUnleaded"] = double.tryParse(superUnleadedController.text);
+    }
+
+    if (premiumDieselNotAvailable) {
+      toSubmit["premiumDiesel"] = null;
+    } else if (double.tryParse(premiumDieselController.text) != null) {
+      toSubmit["premiumDiesel"] = double.tryParse(premiumDieselController.text);
+    }
+
+    if (int.tryParse(congestionController.text) != null) {
+      toSubmit["congestion"] = double.tryParse(congestionController.text);
+    }
+
+    if (isClosed) {
+      toSubmit["closed"] = 1;
+    }
+
+    if (toSubmit.isNotEmpty){
+      print(toSubmit);
+      debugPrint('submit prices not implemented');
+    }
+    else {
+    debugPrint("Sanity Check");
+      Fluttertoast.showToast(
+        msg: "This is Center Short Toast",
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.CENTER,
+        timeInSecForIosWeb: 1,
+        backgroundColor: Colors.red,
+        textColor: Colors.white,
+        fontSize: 16.0
+    );
+    }
   }
 }
