@@ -247,6 +247,8 @@ class StationsDetail extends StatelessWidget {
                           AccountFunctionality();
                       String token =
                           await accountFunctionality.getAccessToken();
+                      token = 'Token 50ccba64d862962d71639294c5bb1f83808e6cd1';
+
                       if (token == 'None') {
                         Navigator.of(context).push(MaterialPageRoute(
                             builder: (context) => LoginScreen()));

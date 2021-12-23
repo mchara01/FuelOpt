@@ -301,28 +301,40 @@ class _ReviewScreenState extends State<ReviewScreen> {
       toSubmit["unleaded"] = '0';
     } else if (double.tryParse(unleadedController.text) != null) {
       toSubmit["unleaded"] = unleadedController.text.toString();
+    } else {
+      toSubmit["unleaded"] = '';
     }
 
     if (dieselNotAvailable) {
       toSubmit["diesel"] = '0';
     } else if (double.tryParse(dieselController.text) != null) {
       toSubmit["diesel"] = dieselController.text.toString();
+    } else {
+      toSubmit["diesel"] = '';
     }
 
     if (superUnleadedNotAvailable) {
       toSubmit["superUnleaded"] = '0';
     } else if (double.tryParse(superUnleadedController.text) != null) {
       toSubmit["superUnleaded"] = superUnleadedController.text.toString();
+    } else {
+      toSubmit["superUnleaded"] = '';
     }
 
     if (premiumDieselNotAvailable) {
       toSubmit["premiumDiesel"] = '0';
     } else if (double.tryParse(premiumDieselController.text) != null) {
       toSubmit["premiumDiesel"] = premiumDieselController.text.toString();
+    } else {
+      toSubmit["premiumDiesel"] = '';
     }
 
     if (int.tryParse(congestionController.text) != null) {
       toSubmit["congestion"] = congestionController.text.toString();
+    } else if (int.tryParse(congestionController.text) != null) {
+      toSubmit["congestion"] = congestionController.text.toString();
+    } else {
+      toSubmit["congestion"] = '';
     }
 
     if (isClosed) {
@@ -334,12 +346,9 @@ class _ReviewScreenState extends State<ReviewScreen> {
     if (toSubmit.isNotEmpty) {
       print(toSubmit);
       FuelStationDataService fuelStationDataService = FuelStationDataService();
-      String token1 = 'Token 50ccba64d862962d71639294c5bb1f83808e6cd1';
 
-      // bool succuess = await fuelStationDataService.updateInfo(
-      //     widget.stationId, toSubmit, widget.token);
       bool succuess = await fuelStationDataService.updateInfo(
-          widget.stationId, toSubmit, token1);
+          widget.stationId, toSubmit, widget.token);
       if (succuess) {
         Fluttertoast.showToast(msg: "Update Successful");
       } else {
