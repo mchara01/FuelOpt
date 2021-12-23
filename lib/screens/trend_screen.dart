@@ -59,8 +59,13 @@ class TrendScreen extends StatelessWidget {
               SizedBox(height: 10),
               Padding(
                 padding: horizontalPadding,
-                child: Text("Trends",
-                    style: appTheme.TEXT_THEME_DEFAULT.subtitle1),
+                child: Column(
+                  children: [
+                    Image.asset(
+                      'assets/trends.png',
+                    ),
+                  ],
+                ),
               ),
             ],
           ),
