@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:fuel_opt/screens/login_screen.dart';
+import 'package:fuel_opt/screens/trend_screen.dart';
+
 import '../utils/app_colors.dart' as appColors;
 
 class NavigationDrawerWidget extends StatelessWidget {
@@ -61,7 +63,7 @@ class NavigationDrawerWidget extends StatelessWidget {
     switch (index) {
       case 0:
         Navigator.of(context)
-            .push(MaterialPageRoute(builder: (context) => LoginScreen()));
+            .push(MaterialPageRoute(builder: (context) => TrendScreen()));
         break;
       case 1:
         Navigator.of(context)

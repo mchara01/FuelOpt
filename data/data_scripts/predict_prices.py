@@ -10,7 +10,9 @@ def predict_prices(fuel='ULSP', predict_len=5):
         :param predict_len : {Integer} number of weeks we want to predict
         :return predictions : {Array: Float} predictions of price for each predicted week
     """
-    data = pd.read_csv("data/data_scripts/uk_prices_2021.csv")
+    data = pd.read_csv("uk_prices_2021.csv")
+
+    #data = pd.read_csv("data/data_scripts/uk_prices_2021.csv")
     data = list(data[fuel])
     y = list(range(len(data)))
     # take 35 weeks into account
@@ -32,10 +34,12 @@ def predict_perc(predictions, current):
     """
     prediction = predictions[-1]
     perc = float(((prediction - current) / current) * 100.0)
+    perc = '{:.2f}'.format(perc)
+
     return perc
 
-"""
-data = pd.read_csv("data/data_scripts/uk_prices_2021.csv")
+data = pd.read_csv("uk_prices_2021.csv")
+#data = pd.read_csv("data/data_scripts/uk_prices_2021.csv")
 fuel = "ULSP"
 #fuel = "ULSD"
 predictions = predict_prices(fuel, predict_len=5)
@@ -43,6 +47,9 @@ predictions = predict_prices(fuel, predict_len=5)
 current = data[fuel].tolist()[-1]
 perc = predict_perc(predictions, current)
 print(perc)
+
+with open('../../assets/trends_stats.txt', 'w') as f:
+    f.write(str(perc))
 
 weeks = list(range(len(data) + len(predictions)))
 weeks = weeks[-len(predictions):]
@@ -54,8 +61,9 @@ plt.title("Fuel Price Predictions")
 plt.xlabel("Week of 2021")
 plt.ylabel("Price in British Pounds")
 plt.legend(["Actual Prices", "Predicted Prices"])
+plt.savefig('../../assets/trends.png')
 plt.show()
-"""
+
 
 
 
