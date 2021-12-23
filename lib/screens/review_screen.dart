@@ -331,8 +331,6 @@ class _ReviewScreenState extends State<ReviewScreen> {
 
     if (int.tryParse(congestionController.text) != null) {
       toSubmit["congestion"] = congestionController.text.toString();
-    } else if (int.tryParse(congestionController.text) != null) {
-      toSubmit["congestion"] = congestionController.text.toString();
     } else {
       toSubmit["congestion"] = '';
     }
@@ -347,10 +345,13 @@ class _ReviewScreenState extends State<ReviewScreen> {
       print(toSubmit);
       FuelStationDataService fuelStationDataService = FuelStationDataService();
 
-      bool succuess = await fuelStationDataService.updateInfo(
+      int succuess = await fuelStationDataService.updateInfo(
           widget.stationId, toSubmit, widget.token);
-      if (succuess) {
+      if (succuess == 1) {
         Fluttertoast.showToast(msg: "Update Successful");
+      } else if (succuess == 2) {
+        Fluttertoast.showToast(
+            msg: "Price is too high/low, please check your input");
       } else {
         Fluttertoast.showToast(msg: "Failed to Update");
       }

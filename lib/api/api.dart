@@ -142,7 +142,7 @@ class FuelStationDataService {
     }
   }
 
-  Future<bool> updateInfo(
+  Future<int> updateInfo(
     int staionId,
     HashMap info,
     String token,
@@ -165,15 +165,19 @@ class FuelStationDataService {
 
     final url = Uri.parse(urlstring);
     print(url);
+    print(token);
     final response = await http.post(
       url,
-      headers: {"Authorization": token},
+      headers: {"Authorization": 'Token ' + token},
     );
     print(response.statusCode);
     if (response.statusCode == 200) {
-      return true;
+      return 1;
+    } else if (response.statusCode == 500) {
+      // anomalous price
+      return 2;
     } else {
-      return false;
+      return 0;
     }
   }
 
