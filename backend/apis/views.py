@@ -18,6 +18,7 @@ from decimal import Decimal
 from stations import models
 from .serializers import StationSerializer
 from rest_framework.permissions import IsAuthenticated, AllowAny
+from .utils import get_duration_distance, sort_by_price, geocoding, query_sorted_order, create_response, check_and_update, read_receipt
 
 
 class ListStation(generics.ListCreateAPIView):
@@ -195,16 +196,8 @@ def search(request):
 
         # (i) Distance Limit: check only for stations that are within user specified radius of the location
         # Convert radius from km to degree [110.574km = 1deg lat/lng]
-        max_radius_degree = float(max_radius_km) / 110.574
+        max_radius_degree = float(max_radius_km)/110.574
         # Filter for stations within the radius
-        """
-        preferences_list = Station.objects.filter(
-            lat__lte=user_lat+max_radius_degree,
-            lat__gte=user_lat-max_radius_degree,
-            lng__lte=user_lng+max_radius_degree, 
-            lng__gte=user_lng-max_radius_degree
-        )
-        """
         try:
             preferences_list = FuelPrice.objects.filter(
                 station__lat__lte=user_lat + max_radius_degree,
@@ -212,9 +205,11 @@ def search(request):
                 station__lng__lte=user_lng + max_radius_degree,
                 station__lng__gte=user_lng - max_radius_degree
             )
+        # If outside area of coverage (London)
         except FuelPrice.DoesNotExist:
             return JsonResponse({ 'status':'false', 'message': 'Location not in range!' }, status=500)
 
+        # (ii) Opening Hours: remove stations that are not open from preferences_list
         for fuel_price in preferences_list:
             try:
                 opening = UserReview.objects.get(station=fuel_price.station).opening
@@ -224,10 +219,7 @@ def search(request):
             if not opening:
                 fuel_price.delete()
 
-        # If user has not provide any specification/ preferences, return this:
-        # preferences_list = stations_prices_near_me
-
-        # (ii) If fuel_type is specified, show only stations that have said fuel.
+        # (iii) Fuel Type: show only stations that have the preferred fuel (if specified)
         if fuel_type:
             fuel_preference = fuel_type + '_price'
             kwargs = {
@@ -236,9 +228,8 @@ def search(request):
 
             # Exclude stations where fuel price is not available
             preferences_list = preferences_list.exclude(**kwargs)
-            # preferences_list = [fuel_price.station for fuel_price in fuel_prices_all]
 
-        # (iii) Filter all the amenities (if any). If the station doesn't have the amenity listed, exclude.
+        # (iv) Ammenities: show only stations with preferred amenities (if specified)
         if amenities_list != ['']:
             for amenity in amenities_list:
                 station__amenity = 'station__' + amenity
@@ -246,21 +237,21 @@ def search(request):
                 kwargs['{0}__{1}'.format(station__amenity, 'exact')] = 0
                 preferences_list = preferences_list.exclude(**kwargs)
 
-        # (iv) Get travel durations and distances for current candidates and store as a dictionary: { station_pk : duration } pair
-        # Duration units: seconds   Distance units: km
+        # Get carbon emissions, travel durations and distances for current candidates and store as a dictionary: EG { station_pk : duration } pair
+        # Carbon Emission units: kgCO2/km   Duration units: seconds   Distance units: km
         carbon_emission, travel_distance, travel_traffic_durations = dict(), dict(), dict()
         emission_factor=0.2 #kgCO2/km
         for fuel_price in preferences_list:
-            
             travel_traffic_durations[fuel_price.station.pk], travel_distance[fuel_price.station.pk] = get_duration_distance(user_lat, user_lng, fuel_price.station.lat, fuel_price.station.lng)
             try:
                 congestion = UserReview.objects.get(station=fuel_price.station).congestion
+            # Include congestion time specified by User Reviews
             except UserReview.DoesNotExist:
                 congestion = 0
             travel_traffic_durations[fuel_price.station.pk] = travel_traffic_durations[fuel_price.station.pk]+congestion
             carbon_emission[fuel_price.station.pk] = emission_factor*travel_distance[fuel_price.station.pk]
             
-        # (v) Optimisation Criteria. If
+        # (v) Optimisation Criteria.
         # a. Time to arrivals
         if user_preference == 'time':
             # Sort travel durations. 
@@ -278,13 +269,12 @@ def search(request):
             sorted_eco = {k: v for k, v in sorted(carbon_emission.items(), key=lambda item: item[1])}
             sorted_station_pks = sorted_eco.keys()
 
+            # Query stations in sorted order
+            preferences_list = query_sorted_order(sorted_station_pks)
             # API Response
             response = create_response(preferences_list, travel_traffic_durations, travel_distance)
 
-        # b. Fuel Price
-        # Assuming average speed = 50miles/hr = 80.47km/hr; 0.057litre per km;  £1.442/litre 
-        # Penalty cost for duration = £0.00184/s
-        # Penalty cost for distance = £0.0822/km
+        # c. Fuel Price
         if user_preference == 'price' or user_preference == '':
             if not fuel_type:
                 fuel_preference = ['unleaded_price', 'diesel_price', 'super_unleaded_price', 'premium_diesel_price']
@@ -298,9 +288,9 @@ def search(request):
                     curr_pref_list = tmp
                     curr_pref_list = curr_pref_list.exclude(**kwargs)
                     preferred_fuel_prices = curr_pref_list.values_list(pref, flat=True)
+                    
                     # Sort stations according to sorted durations
                     sorted_station_pks = sort_by_price(curr_pref_list, travel_traffic_durations, travel_distance, preferred_fuel_prices)
-
                     # Query stations in sorted order, selecting only the top 3 station for each fuel type
                     curr_pref_list = query_sorted_order(sorted_station_pks[:3])
                     best_station_general[pref] = curr_pref_list
@@ -335,9 +325,11 @@ def review(request):
                 aws_access_key_id="AKIA4O5FKY2EUZ3SY7P4",
                 aws_secret_access_key="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",
             )
-            s3.upload_fileobj(receipt, "fuelopt-s3-main", receipt.name)
+            # s3.upload_fileobj(receipt, "fuelopt-s3-main", receipt.name)
+            text = read_receipt(receipt)
+            response = { 'message': text }
             # create new review
-            return JsonResponse({'status':'true', 'message': 'Good.'}, status=200)
+            return JsonResponse(response, status=200)
         else:
             station_id = request.POST['station'] # pk?
             station = Station.objects.get(pk=station_id)
@@ -373,87 +365,3 @@ def review(request):
             fuel_prices.save()
             user_review.save()
             return JsonResponse({'status':'true', 'message': 'Good.'}, status=200)
-
-# calculate the travel duration to this station
-def get_duration_distance(lat1, lng1, lat2, lng2):
-    bingMapsKey = "Aiiv3MUtA8Fq3gGOuwLYLrzz_FRSm1xXUEgDZxO6-R8wg73PKwV50hxqwSrbBhXY"
-    routeUrl = "http://dev.virtualearth.net/REST/V1/Routes/Driving?wp.0=" + str(lat1) + "," + str(
-        lng1) + "&wp.1=" + str(lat2) + "," + str(lng2) + "&key=" + bingMapsKey
-    # http://dev.virtualearth.net/REST/V1/Routes/Driving?wp.0=51.0,-0.1,&wp.1=51.5,-0.12&key=Aiiv3MUtA8Fq3gGOuwLYLrzz_FRSm1xXUEgDZxO6-R8wg73PKwV50hxqwSrbBhXY
-    request = urllib.request.Request(routeUrl)
-    response = urllib.request.urlopen(request)
-
-    r = response.read().decode(encoding="utf-8")
-    result = json.loads(r)
-    duration_with_traffic = result['resourceSets'][0]['resources'][0]['travelDurationTraffic'] # units: s
-    distance = result['resourceSets'][0]['resources'][0]['travelDistance'] # units: km
-
-    # return the duration and distance
-    return duration_with_traffic, distance
-
-
-def sort_by_price(preferences_list, travel_traffic_durations, travel_distance, preferred_fuel_prices):
-    """
-    preferences_list(query object): list of potential station candidates
-    """
-    weighted_prices = dict()
-    for index, fuel_price in enumerate(preferences_list):
-        weighted_prices[fuel_price.station.pk] = \
-            preferred_fuel_prices[index] + \
-            Decimal(travel_traffic_durations[fuel_price.station.pk] * 0.00184) + \
-            Decimal(travel_distance[fuel_price.station.pk] * 0.0822)
-
-    sorted_weighted_prices = {k: v for k, v in sorted(weighted_prices.items(), key=lambda item: item[1])}
-    sorted_station_pks = list(sorted_weighted_prices.keys())
-
-    return sorted_station_pks
-
-def geocoding(location):
-    location_iq_key = "pk.bd315221041f3e0a99e6464f9de0157a"
-    routeUrl = "https://eu1.locationiq.com/v1/search.php?key=" + location_iq_key + "&q=" + str(
-        location.replace(' ', '%20')) + "&format=json"
-
-    request = urllib.request.Request(routeUrl)
-    response = urllib.request.urlopen(request)
-
-    r = response.read().decode(encoding="utf-8")
-    result = json.loads(r)
-
-    if result[0]['lat']:
-        return float(result[0]['lat']), float(result[0]['lon'])
-    else:
-        raise ValueError('Unable to geocode')
-
-
-def query_sorted_order(pk_list):
-    """ Query stations in sorted order and append into a list. """
-    preferences_list = []
-    for pk in pk_list:
-        preferences_list.append(FuelPrice.objects.get(station_id=pk))
-        
-    return preferences_list
-
-def create_response(preferences_list,travel_traffic_durations,travel_distance,carbon_emission):
-    response = []
-    for fuel_price in preferences_list[:20]:
-        station_response = fuel_price.station.serialize()
-        station_response['prices'] = fuel_price.serialize()
-        station_response['duration'] = str(int(travel_traffic_durations[fuel_price.station.pk]/60)) + 'mins'
-        station_response['distance'] = str(travel_distance[fuel_price.station.pk]) + 'km'
-        station_response['emission'] = str(round(carbon_emission[fuel_price.station.pk],2)) + 'kgCO2'
-        response.append(station_response)
-    
-    return response
-
-def check_and_update(fuel_type, price, fuel_prices, user_review):
-    if (price < getattr(fuel_prices, fuel_type) * 1.05 and \
-        price > getattr(fuel_prices, fuel_type)* 0.95) or price == 0:
-        if price == 0:
-            setattr(fuel_prices, fuel_type, None)
-            setattr(user_review, fuel_type, None)
-        else:
-            setattr(fuel_prices, fuel_type, price)
-            setattr(user_review, fuel_type, price)
-        return True
-    else:
-        return False
