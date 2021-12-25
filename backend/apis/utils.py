@@ -4,7 +4,7 @@ import time
 
 from stations.models import FuelPrice
 from decimal import Decimal
-import pytesseract
+# import pytesseract
 import re
 from datetime import datetime
 
@@ -14,17 +14,25 @@ def get_duration_distance(lat1, lng1, lat2, lng2):
     bingMapsKey = "Aiiv3MUtA8Fq3gGOuwLYLrzz_FRSm1xXUEgDZxO6-R8wg73PKwV50hxqwSrbBhXY"
     routeUrl = "http://dev.virtualearth.net/REST/V1/Routes/Driving?wp.0=" + str(lat1) + "," + str(
         lng1) + "&wp.1=" + str(lat2) + "," + str(lng2) + "&key=" + bingMapsKey
-    # http://dev.virtualearth.net/REST/V1/Routes/Driving?wp.0=51.0,-0.1,&wp.1=51.5,-0.12&key=Aiiv3MUtA8Fq3gGOuwLYLrzz_FRSm1xXUEgDZxO6-R8wg73PKwV50hxqwSrbBhXY
+    # http://dev.virtualearth.net/REST/V1/Routes/Driving?wp.0=51.0,-0.1&wp.1=51.1,-0.12&key=Aiiv3MUtA8Fq3gGOuwLYLrzz_FRSm1xXUEgDZxO6-R8wg73PKwV50hxqwSrbBhXY
     request = urllib.request.Request(routeUrl)
     response = urllib.request.urlopen(request)
-    # If Too Many Requests (Bing limit: 5 queries per second)
-    while response.status_code == 429:
-        time.sleep(1)
+    status_code = response.getcode()
+    print(status_code)
+    print(lat2)
+    while status_code != 200:
+        t += 1
+        print('looping in while loop. t=', t)
+        time.sleep(t)
         request = urllib.request.Request(routeUrl)
         response = urllib.request.urlopen(request)
-    
+        status_code = response.getcode()
+
     r = response.read().decode(encoding="utf-8")
     result = json.loads(r)
+    # If Too Many Requests (Bing limit: 5 queries per second)
+    
+
     duration_with_traffic = result['resourceSets'][0]['resources'][0]['travelDurationTraffic'] # units: s
     distance = result['resourceSets'][0]['resources'][0]['travelDistance'] # units: km
 

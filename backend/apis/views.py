@@ -143,7 +143,7 @@ def home(request):
     home API returns the client a json list of all petrol stations visible within a user's viewport when the 
     app is first opened (homepage).
     API called via a GET Request.
-    Example API call: http://127.0.0.1:8000/apis/home/?lat_max=51.5&lat_min=51.4&lng_max=-0.06&lng_min=-0.09
+    Example API call: http://18.170.63.134:8000/apis/home/?lat_max=51.5&lat_min=51.4&lng_max=-0.06&lng_min=-0.09
     """
 
     # permission_classes = (IsAuthenticated,) #Uncomment this later
@@ -175,7 +175,7 @@ def search(request):
     nearestStation API returns the client a json list of all the petrol stations nearest to the user-specified location
     according to user preference selection.
     API called via a GET Request.
-    Example API call: http://127.0.0.1:8000/apis/search/?user_preference=time&location=Imperial%20College%20London&fuel_type=unleaded&distance=30&amenities=
+    Example API call: http://18.170.63.134:8000/apis/search/?user_preference=time&location=Imperial%20College%20London&fuel_type=unleaded&distance=30&amenities=
     """
     if request.method == 'GET':
         # Get user specifications/ preferences
@@ -192,7 +192,7 @@ def search(request):
 
         # Default distance range
         if max_radius_km == '':
-            max_radius_km = 30
+            max_radius_km = 10
 
         # (i) Distance Limit: check only for stations that are within user specified radius of the location
         # Convert radius from km to degree [110.574km = 1deg lat/lng]
@@ -276,6 +276,7 @@ def search(request):
 
         # c. Fuel Price
         if user_preference == 'price' or user_preference == '':
+            # Generic Search
             if not fuel_type:
                 fuel_preference = ['unleaded_price', 'diesel_price', 'super_unleaded_price', 'premium_diesel_price']
                 best_station_general = {}
@@ -303,6 +304,7 @@ def search(request):
                     fuel_response['Top 3 Stations']=create_response(preferences_list,travel_traffic_durations,travel_distance,carbon_emission)
                     response.append(fuel_response)
 
+            # Fuel Specific Search
             else:
                 preferred_fuel_prices = preferences_list.values_list(fuel_preference, flat=True)
                 # Sort stations according to sorted durations
