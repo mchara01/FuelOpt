@@ -340,14 +340,15 @@ def review(request):
                     aws_secret_access_key="pi4Pr4nnz81yhLVi3LLkF5P57Ag6cEywz758Ptza",
                 )
                 s3.upload_fileobj(receipt, "fuelopt-s3-main", receipt.name)
-                s3.download_file("fuelopt-s3-main", receipt.name, "static/reviews/" + receipt.name)
-                price, type_of_fuel, date = read_receipt("static/reviews/" + receipt.name)
+                s3.download_file("fuelopt-s3-main", receipt.name, "backend/static/reviews/" + receipt.name)
+                price, type_of_fuel, date = read_receipt("backend/static/reviews/" + receipt.name)
 
-                setattr(fuel_prices, type_of_fuel, price)
-                setattr(user_review, type_of_fuel, price)
-                response = { "price": price, "type_of_fuel": type_of_fuel, "date": date }
+                setattr(fuel_prices, type_of_fuel + "_price", str(price))
+                setattr(user_review, type_of_fuel + "_price", str(price))
+                fuel_prices.save()
+                user_review.save()
                 # create new review
-                return JsonResponse(response, status=200)
+                return JsonResponse({ 'status':'true', 'message': 'Receipt submitted' }, status=200)
             except Exception as e:
                 return JsonResponse({ 'status':'false', 'message': str(e) }, status=500)
         else:
@@ -380,3 +381,4 @@ def review(request):
             fuel_prices.save()
             user_review.save()
             return JsonResponse({'status':'true', 'message': 'Good.'}, status=200)
+
