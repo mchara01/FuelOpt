@@ -2,20 +2,17 @@ import pandas as pd
 import time
 import math
 import boto3
-
-from django.shortcuts import render, redirect
 from stations.models import FuelPrice, Station, UserReview
 from rest_framework import generics
 from rest_framework.decorators import api_view, permission_classes
 from django.contrib import messages
 from django.db import connection
 from django.http import JsonResponse
-# Create your views here.
+from django.shortcuts import render, redirect
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from stations import models
 from .serializers import StationSerializer
-from rest_framework.permissions import IsAuthenticated, AllowAny
 from .utils import get_duration_distance, sort_by_price, geocoding, query_sorted_order, create_response, check_and_update, read_receipt
-
 
 class ListStation(generics.ListCreateAPIView):
     permission_classes = (IsAuthenticated,)
@@ -33,11 +30,15 @@ def detailStation(request, station_id):
     if request.method == 'GET':
         station = Station.objects.get(station_id=station_id)
         prices = FuelPrice.objects.get(station=station.station_id)
-        user_review = UserReview.objects.get(station=station.station_id)
+        try:
+            user_review = UserReview.objects.get(station=station.station_id)
+        except UserReview.DoesNotExist:
+            user_review = None
 
         response = station.serialize()
         response['prices'] = prices.serialize()
-        response['user_review'] = user_review.serialize()
+        if user_review:
+            response['user_review'] = user_review.serialize()
 
     return JsonResponse(response, safe=False)
 
@@ -239,8 +240,15 @@ def search(request):
         # Carbon Emission units: kgCO2/km   Duration units: seconds   Distance units: km
         carbon_emission, travel_distance, travel_traffic_durations = dict(), dict(), dict()
         emission_factor=0.2 #kgCO2/km
-        for fuel_price in preferences_list:
-            travel_traffic_durations[fuel_price.station.pk], travel_distance[fuel_price.station.pk] = get_duration_distance(user_lat, user_lng, fuel_price.station.lat, fuel_price.station.lng)
+        bing_key = 'a'
+        for index, fuel_price in enumerate(preferences_list):
+            if index%20:
+                if bing_key == 'a':
+                    bing_key = 'b'
+                else:
+                    bing_key = 'a'
+            
+            travel_traffic_durations[fuel_price.station.pk], travel_distance[fuel_price.station.pk] = get_duration_distance(user_lat, user_lng, fuel_price.station.lat, fuel_price.station.lng, bing_key)
             try:
                 congestion = UserReview.objects.get(station=fuel_price.station).congestion
             # Include congestion time specified by User Reviews
@@ -285,8 +293,8 @@ def search(request):
                         '{0}__{1}'.format(pref, 'isnull'): True,
                     }
                     curr_pref_list = tmp
-                    curr_pref_list = curr_pref_list.exclude(**kwargs)
-                    preferred_fuel_prices = curr_pref_list.values_list(pref, flat=True)
+                    curr_pref_list = curr_pref_list.exclude(**kwargs) # type: query
+                    preferred_fuel_prices = curr_pref_list.values_list(pref, flat=True) # type: dictionary {id: fuel price}
                     
                     # Sort stations according to sorted durations
                     sorted_station_pks = sort_by_price(curr_pref_list, travel_traffic_durations, travel_distance, preferred_fuel_prices)
@@ -318,25 +326,31 @@ def search(request):
 def review(request):
     """API handles all user requests regarding station reviews."""
     if request.method == 'POST':
-        if 'receipt' in request.FILES:
-            receipt = request.FILES['receipt']
-            s3 = boto3.client(
-                's3',
-                aws_access_key_id="AKIA4O5FKY2EUZ3SY7P4",
-                aws_secret_access_key="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",
-            )
-            s3.upload_fileobj(receipt, "fuelopt-s3-main", receipt.name)
-            s3.download_file("fuelopt-s3-main", receipt.name, "backend/static/reviews/" + receipt.name)
-            price, type_of_fuel, date = read_receipt("backend/static/reviews/" + receipt.name)
-            response = { "price": price, "type_of_fuel": type_of_fuel, "date": date }
-            # create new review
-            return JsonResponse(response, status=200)
-        else:
-            station_id = request.POST['station'] # pk?
-            station = Station.objects.get(pk=station_id)
-            fuel_prices = FuelPrice.objects.get(station=station)
-            user_review, _ = UserReview.objects.get_or_create(station=station)
+        station_id = request.POST['station'] # pk?
+        station = Station.objects.get(pk=station_id)
+        fuel_prices = FuelPrice.objects.get(station=station)
+        user_review, _ = UserReview.objects.get_or_create(station=station)
 
+        if 'receipt' in request.FILES:
+            try:
+                receipt = request.FILES['receipt']
+                s3 = boto3.client(
+                    's3',
+                    aws_access_key_id="AKIA4O5FKY2EUZ3SY7P4",
+                    aws_secret_access_key="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",
+                )
+                s3.upload_fileobj(receipt, "fuelopt-s3-main", receipt.name)
+                s3.download_file("fuelopt-s3-main", receipt.name, "static/reviews/" + receipt.name)
+                price, type_of_fuel, date = read_receipt("static/reviews/" + receipt.name)
+
+                setattr(fuel_prices, type_of_fuel, price)
+                setattr(user_review, type_of_fuel, price)
+                response = { "price": price, "type_of_fuel": type_of_fuel, "date": date }
+                # create new review
+                return JsonResponse(response, status=200)
+            except Exception as e:
+                return JsonResponse({ 'status':'false', 'message': str(e) }, status=500)
+        else:
             if request.POST['unleaded_price'] != "":
                 unleaded_price = float(request.POST['unleaded_price']) # Decimal
                 if not check_and_update('unleaded_price', unleaded_price, fuel_prices, user_review):

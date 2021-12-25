@@ -4,34 +4,29 @@ import time
 
 from stations.models import FuelPrice
 from decimal import Decimal
-# import pytesseract
+import pytesseract
 import re
 from datetime import datetime
 
 
 # Calculate the travel duration to this station
-def get_duration_distance(lat1, lng1, lat2, lng2):
-    bingMapsKey = "Aiiv3MUtA8Fq3gGOuwLYLrzz_FRSm1xXUEgDZxO6-R8wg73PKwV50hxqwSrbBhXY"
+def get_duration_distance(lat1, lng1, lat2, lng2, key):
+    a = "Aiiv3MUtA8Fq3gGOuwLYLrzz_FRSm1xXUEgDZxO6-R8wg73PKwV50hxqwSrbBhXY"
+    b = "AtgHYr66s1ywNPEIHRUMJtP4wPwrzZSka4L1Vl7EQl_lf9JuIAXWThc2CxJx411o"
+    
+    if key == 'a':
+        bingMapsKey = a
+    else:
+        bingMapsKey = b
+    
     routeUrl = "http://dev.virtualearth.net/REST/V1/Routes/Driving?wp.0=" + str(lat1) + "," + str(
         lng1) + "&wp.1=" + str(lat2) + "," + str(lng2) + "&key=" + bingMapsKey
     # http://dev.virtualearth.net/REST/V1/Routes/Driving?wp.0=51.0,-0.1&wp.1=51.1,-0.12&key=Aiiv3MUtA8Fq3gGOuwLYLrzz_FRSm1xXUEgDZxO6-R8wg73PKwV50hxqwSrbBhXY
     request = urllib.request.Request(routeUrl)
     response = urllib.request.urlopen(request)
-    status_code = response.getcode()
-    print(status_code)
-    print(lat2)
-    while status_code != 200:
-        t += 1
-        print('looping in while loop. t=', t)
-        time.sleep(t)
-        request = urllib.request.Request(routeUrl)
-        response = urllib.request.urlopen(request)
-        status_code = response.getcode()
-
+    print('lat2')
     r = response.read().decode(encoding="utf-8")
     result = json.loads(r)
-    # If Too Many Requests (Bing limit: 5 queries per second)
-    
 
     duration_with_traffic = result['resourceSets'][0]['resources'][0]['travelDurationTraffic'] # units: s
     distance = result['resourceSets'][0]['resources'][0]['travelDistance'] # units: km
@@ -47,9 +42,9 @@ def sort_by_price(preferences_list, travel_traffic_durations, travel_distance, p
     # Penalty cost for duration = £0.00184/s
     # Penalty cost for distance = £0.0822/km
     weighted_prices = dict()
-    for index, fuel_price in enumerate(preferences_list):
+    for index,fuel_price in enumerate(preferences_list):
         weighted_prices[fuel_price.station.pk] = \
-            preferred_fuel_prices[fuel_price.station.pk] + \
+            preferred_fuel_prices[index] + \
             Decimal(travel_traffic_durations[fuel_price.station.pk] * 0.00184) + \
             Decimal(travel_distance[fuel_price.station.pk] * 0.0822)
 
