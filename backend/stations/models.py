@@ -111,3 +111,9 @@ class UserReview(models.Model):
     receipt = models.ImageField(upload_to='receipts/', blank=True, null=True)
     opening = models.BooleanField(default=True, null=True)
     congestion = models.IntegerField(default=0, null=True)
+
+    def serialize(self):
+        return {
+            "opening": self.opening,
+            "congestion": self.congestion,
+        }

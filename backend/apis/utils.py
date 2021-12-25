@@ -112,7 +112,6 @@ def check_and_update(fuel_type, price, fuel_prices, user_review):
 def read_receipt(filepath):
     # image of receipt of user
     text = pytesseract.image_to_string(filepath)
-    return text
     text = text.splitlines()
 
     price = None

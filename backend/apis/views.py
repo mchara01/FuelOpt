@@ -1,11 +1,8 @@
 import pandas as pd
 import time
 import math
-import urllib.request
-import json
 import boto3
 
-from django.http.response import HttpResponse
 from django.shortcuts import render, redirect
 from stations.models import FuelPrice, Station, UserReview
 from rest_framework import generics
@@ -13,7 +10,6 @@ from rest_framework.decorators import api_view, permission_classes
 from django.contrib import messages
 from django.db import connection
 from django.http import JsonResponse
-from decimal import Decimal
 # Create your views here.
 from stations import models
 from .serializers import StationSerializer
@@ -37,9 +33,11 @@ def detailStation(request, station_id):
     if request.method == 'GET':
         station = Station.objects.get(station_id=station_id)
         prices = FuelPrice.objects.get(station=station.station_id)
+        user_review = UserReview.objects.get(station=station.station_id)
 
         response = station.serialize()
         response['prices'] = prices.serialize()
+        response['user_review'] = user_review.serialize()
 
     return JsonResponse(response, safe=False)
 
@@ -327,9 +325,10 @@ def review(request):
                 aws_access_key_id="AKIA4O5FKY2EUZ3SY7P4",
                 aws_secret_access_key="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",
             )
-            # s3.upload_fileobj(receipt, "fuelopt-s3-main", receipt.name)
-            text = read_receipt(receipt)
-            response = { 'message': text }
+            s3.upload_fileobj(receipt, "fuelopt-s3-main", receipt.name)
+            s3.download_file("fuelopt-s3-main", receipt.name, "backend/static/reviews/" + receipt.name)
+            price, type_of_fuel, date = read_receipt("backend/static/reviews/" + receipt.name)
+            response = { "price": price, "type_of_fuel": type_of_fuel, "date": date }
             # create new review
             return JsonResponse(response, status=200)
         else:
