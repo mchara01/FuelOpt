@@ -1,24 +1,18 @@
 import pandas as pd
 import time
 import math
-import urllib.request
-import json
 import boto3
-
-from django.http.response import HttpResponse
-from django.shortcuts import render, redirect
 from stations.models import FuelPrice, Station, UserReview
 from rest_framework import generics
 from rest_framework.decorators import api_view, permission_classes
 from django.contrib import messages
 from django.db import connection
 from django.http import JsonResponse
-from decimal import Decimal
-# Create your views here.
+from django.shortcuts import render, redirect
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from stations import models
 from .serializers import StationSerializer
-from rest_framework.permissions import IsAuthenticated, AllowAny
-
+from .utils import get_duration_distance, sort_by_price, geocoding, query_sorted_order, create_response, check_and_update, read_receipt
 
 class ListStation(generics.ListCreateAPIView):
     permission_classes = (IsAuthenticated,)
@@ -36,9 +30,15 @@ def detailStation(request, station_id):
     if request.method == 'GET':
         station = Station.objects.get(station_id=station_id)
         prices = FuelPrice.objects.get(station=station.station_id)
+        try:
+            user_review = UserReview.objects.get(station=station.station_id)
+        except UserReview.DoesNotExist:
+            user_review = None
 
         response = station.serialize()
         response['prices'] = prices.serialize()
+        if user_review:
+            response['user_review'] = user_review.serialize()
 
     return JsonResponse(response, safe=False)
 
@@ -142,7 +142,7 @@ def home(request):
     home API returns the client a json list of all petrol stations visible within a user's viewport when the 
     app is first opened (homepage).
     API called via a GET Request.
-    Example API call: http://127.0.0.1:8000/apis/home/?lat_max=51.5&lat_min=51.4&lng_max=-0.06&lng_min=-0.09
+    Example API call: http://18.170.63.134:8000/apis/home/?lat_max=51.5&lat_min=51.4&lng_max=-0.06&lng_min=-0.09
     """
 
     # permission_classes = (IsAuthenticated,) #Uncomment this later
@@ -174,7 +174,7 @@ def search(request):
     nearestStation API returns the client a json list of all the petrol stations nearest to the user-specified location
     according to user preference selection.
     API called via a GET Request.
-    Example API call: http://127.0.0.1:8000/apis/search/?user_preference=time&location=Imperial%20College%20London&fuel_type=unleaded&distance=30&amenities=
+    Example API call: http://18.170.63.134:8000/apis/search/?user_preference=time&location=Imperial%20College%20London&fuel_type=unleaded&distance=30&amenities=
     """
     if request.method == 'GET':
         # Get user specifications/ preferences
@@ -191,20 +191,12 @@ def search(request):
 
         # Default distance range
         if max_radius_km == '':
-            max_radius_km = 30
+            max_radius_km = 10
 
         # (i) Distance Limit: check only for stations that are within user specified radius of the location
         # Convert radius from km to degree [110.574km = 1deg lat/lng]
-        max_radius_degree = float(max_radius_km) / 110.574
+        max_radius_degree = float(max_radius_km)/110.574
         # Filter for stations within the radius
-        """
-        preferences_list = Station.objects.filter(
-            lat__lte=user_lat+max_radius_degree,
-            lat__gte=user_lat-max_radius_degree,
-            lng__lte=user_lng+max_radius_degree, 
-            lng__gte=user_lng-max_radius_degree
-        )
-        """
         try:
             preferences_list = FuelPrice.objects.filter(
                 station__lat__lte=user_lat + max_radius_degree,
@@ -212,9 +204,11 @@ def search(request):
                 station__lng__lte=user_lng + max_radius_degree,
                 station__lng__gte=user_lng - max_radius_degree
             )
+        # If outside area of coverage (London)
         except FuelPrice.DoesNotExist:
             return JsonResponse({ 'status':'false', 'message': 'Location not in range!' }, status=500)
 
+        # (ii) Opening Hours: remove stations that are not open from preferences_list
         for fuel_price in preferences_list:
             try:
                 opening = UserReview.objects.get(station=fuel_price.station).opening
@@ -224,10 +218,7 @@ def search(request):
             if not opening:
                 fuel_price.delete()
 
-        # If user has not provide any specification/ preferences, return this:
-        # preferences_list = stations_prices_near_me
-
-        # (ii) If fuel_type is specified, show only stations that have said fuel.
+        # (iii) Fuel Type: show only stations that have the preferred fuel (if specified)
         if fuel_type:
             fuel_preference = fuel_type + '_price'
             kwargs = {
@@ -236,9 +227,8 @@ def search(request):
 
             # Exclude stations where fuel price is not available
             preferences_list = preferences_list.exclude(**kwargs)
-            # preferences_list = [fuel_price.station for fuel_price in fuel_prices_all]
 
-        # (iii) Filter all the amenities (if any). If the station doesn't have the amenity listed, exclude.
+        # (iv) Ammenities: show only stations with preferred amenities (if specified)
         if amenities_list != ['']:
             for amenity in amenities_list:
                 station__amenity = 'station__' + amenity
@@ -246,21 +236,28 @@ def search(request):
                 kwargs['{0}__{1}'.format(station__amenity, 'exact')] = 0
                 preferences_list = preferences_list.exclude(**kwargs)
 
-        # (iv) Get travel durations and distances for current candidates and store as a dictionary: { station_pk : duration } pair
-        # Duration units: seconds   Distance units: km
+        # Get carbon emissions, travel durations and distances for current candidates and store as a dictionary: EG { station_pk : duration } pair
+        # Carbon Emission units: kgCO2/km   Duration units: seconds   Distance units: km
         carbon_emission, travel_distance, travel_traffic_durations = dict(), dict(), dict()
         emission_factor=0.2 #kgCO2/km
-        for fuel_price in preferences_list:
+        bing_key = 'a'
+        for index, fuel_price in enumerate(preferences_list):
+            if index%20:
+                if bing_key == 'a':
+                    bing_key = 'b'
+                else:
+                    bing_key = 'a'
             
-            travel_traffic_durations[fuel_price.station.pk], travel_distance[fuel_price.station.pk] = get_duration_distance(user_lat, user_lng, fuel_price.station.lat, fuel_price.station.lng)
+            travel_traffic_durations[fuel_price.station.pk], travel_distance[fuel_price.station.pk] = get_duration_distance(user_lat, user_lng, fuel_price.station.lat, fuel_price.station.lng, bing_key)
             try:
                 congestion = UserReview.objects.get(station=fuel_price.station).congestion
+            # Include congestion time specified by User Reviews
             except UserReview.DoesNotExist:
                 congestion = 0
             travel_traffic_durations[fuel_price.station.pk] = travel_traffic_durations[fuel_price.station.pk]+congestion
             carbon_emission[fuel_price.station.pk] = emission_factor*travel_distance[fuel_price.station.pk]
             
-        # (v) Optimisation Criteria. If
+        # (v) Optimisation Criteria.
         # a. Time to arrivals
         if user_preference == 'time':
             # Sort travel durations. 
@@ -278,14 +275,14 @@ def search(request):
             sorted_eco = {k: v for k, v in sorted(carbon_emission.items(), key=lambda item: item[1])}
             sorted_station_pks = sorted_eco.keys()
 
+            # Query stations in sorted order
+            preferences_list = query_sorted_order(sorted_station_pks)
             # API Response
             response = create_response(preferences_list, travel_traffic_durations, travel_distance)
 
-        # b. Fuel Price
-        # Assuming average speed = 50miles/hr = 80.47km/hr; 0.057litre per km;  £1.442/litre 
-        # Penalty cost for duration = £0.00184/s
-        # Penalty cost for distance = £0.0822/km
+        # c. Fuel Price
         if user_preference == 'price' or user_preference == '':
+            # Generic Search
             if not fuel_type:
                 fuel_preference = ['unleaded_price', 'diesel_price', 'super_unleaded_price', 'premium_diesel_price']
                 best_station_general = {}
@@ -296,11 +293,11 @@ def search(request):
                         '{0}__{1}'.format(pref, 'isnull'): True,
                     }
                     curr_pref_list = tmp
-                    curr_pref_list = curr_pref_list.exclude(**kwargs)
-                    preferred_fuel_prices = curr_pref_list.values_list(pref, flat=True)
+                    curr_pref_list = curr_pref_list.exclude(**kwargs) # type: query
+                    preferred_fuel_prices = curr_pref_list.values_list(pref, flat=True) # type: dictionary {id: fuel price}
+                    
                     # Sort stations according to sorted durations
                     sorted_station_pks = sort_by_price(curr_pref_list, travel_traffic_durations, travel_distance, preferred_fuel_prices)
-
                     # Query stations in sorted order, selecting only the top 3 station for each fuel type
                     curr_pref_list = query_sorted_order(sorted_station_pks[:3])
                     best_station_general[pref] = curr_pref_list
@@ -313,6 +310,7 @@ def search(request):
                     fuel_response['Top 3 Stations']=create_response(preferences_list,travel_traffic_durations,travel_distance,carbon_emission)
                     response.append(fuel_response)
 
+            # Fuel Specific Search
             else:
                 preferred_fuel_prices = preferences_list.values_list(fuel_preference, flat=True)
                 # Sort stations according to sorted durations
@@ -328,22 +326,32 @@ def search(request):
 def review(request):
     """API handles all user requests regarding station reviews."""
     if request.method == 'POST':
-        if 'receipt' in request.FILES:
-            receipt = request.FILES['receipt']
-            s3 = boto3.client(
-                's3',
-                aws_access_key_id="AKIA4O5FKY2EUZ3SY7P4",
-                aws_secret_access_key="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",
-            )
-            s3.upload_fileobj(receipt, "fuelopt-s3-main", receipt.name)
-            # create new review
-            return JsonResponse({'status':'true', 'message': 'Good.'}, status=200)
-        else:
-            station_id = request.POST['station'] # pk?
-            station = Station.objects.get(pk=station_id)
-            fuel_prices = FuelPrice.objects.get(station=station)
-            user_review, _ = UserReview.objects.get_or_create(station=station)
+        station_id = request.POST['station'] # pk?
+        station = Station.objects.get(pk=station_id)
+        fuel_prices = FuelPrice.objects.get(station=station)
+        user_review, _ = UserReview.objects.get_or_create(station=station)
 
+        if 'receipt' in request.FILES:
+            try:
+                receipt = request.FILES['receipt']
+                s3 = boto3.client(
+                    's3',
+                    aws_access_key_id="AKIA4O5FKY2EUZ3SY7P4",
+                    aws_secret_access_key="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",
+                )
+                s3.upload_fileobj(receipt, "fuelopt-s3-main", receipt.name)
+                s3.download_file("fuelopt-s3-main", receipt.name, "backend/static/reviews/" + receipt.name)
+                price, type_of_fuel, date = read_receipt("backend/static/reviews/" + receipt.name)
+
+                setattr(fuel_prices, type_of_fuel + "_price", str(price))
+                setattr(user_review, type_of_fuel + "_price", str(price))
+                fuel_prices.save()
+                user_review.save()
+                # create new review
+                return JsonResponse({ 'status':'true', 'message': 'Receipt submitted' }, status=200)
+            except Exception as e:
+                return JsonResponse({ 'status':'false', 'message': str(e) }, status=500)
+        else:
             if request.POST['unleaded_price'] != "":
                 unleaded_price = float(request.POST['unleaded_price']) # Decimal
                 if not check_and_update('unleaded_price', unleaded_price, fuel_prices, user_review):
@@ -374,86 +382,3 @@ def review(request):
             user_review.save()
             return JsonResponse({'status':'true', 'message': 'Good.'}, status=200)
 
-# calculate the travel duration to this station
-def get_duration_distance(lat1, lng1, lat2, lng2):
-    bingMapsKey = "Aiiv3MUtA8Fq3gGOuwLYLrzz_FRSm1xXUEgDZxO6-R8wg73PKwV50hxqwSrbBhXY"
-    routeUrl = "http://dev.virtualearth.net/REST/V1/Routes/Driving?wp.0=" + str(lat1) + "," + str(
-        lng1) + "&wp.1=" + str(lat2) + "," + str(lng2) + "&key=" + bingMapsKey
-    # http://dev.virtualearth.net/REST/V1/Routes/Driving?wp.0=51.0,-0.1,&wp.1=51.5,-0.12&key=Aiiv3MUtA8Fq3gGOuwLYLrzz_FRSm1xXUEgDZxO6-R8wg73PKwV50hxqwSrbBhXY
-    request = urllib.request.Request(routeUrl)
-    response = urllib.request.urlopen(request)
-
-    r = response.read().decode(encoding="utf-8")
-    result = json.loads(r)
-    duration_with_traffic = result['resourceSets'][0]['resources'][0]['travelDurationTraffic'] # units: s
-    distance = result['resourceSets'][0]['resources'][0]['travelDistance'] # units: km
-
-    # return the duration and distance
-    return duration_with_traffic, distance
-
-
-def sort_by_price(preferences_list, travel_traffic_durations, travel_distance, preferred_fuel_prices):
-    """
-    preferences_list(query object): list of potential station candidates
-    """
-    weighted_prices = dict()
-    for index, fuel_price in enumerate(preferences_list):
-        weighted_prices[fuel_price.station.pk] = \
-            preferred_fuel_prices[index] + \
-            Decimal(travel_traffic_durations[fuel_price.station.pk] * 0.00184) + \
-            Decimal(travel_distance[fuel_price.station.pk] * 0.0822)
-
-    sorted_weighted_prices = {k: v for k, v in sorted(weighted_prices.items(), key=lambda item: item[1])}
-    sorted_station_pks = list(sorted_weighted_prices.keys())
-
-    return sorted_station_pks
-
-def geocoding(location):
-    location_iq_key = "pk.bd315221041f3e0a99e6464f9de0157a"
-    routeUrl = "https://eu1.locationiq.com/v1/search.php?key=" + location_iq_key + "&q=" + str(
-        location.replace(' ', '%20')) + "&format=json"
-
-    request = urllib.request.Request(routeUrl)
-    response = urllib.request.urlopen(request)
-
-    r = response.read().decode(encoding="utf-8")
-    result = json.loads(r)
-
-    if result[0]['lat']:
-        return float(result[0]['lat']), float(result[0]['lon'])
-    else:
-        raise ValueError('Unable to geocode')
-
-
-def query_sorted_order(pk_list):
-    """ Query stations in sorted order and append into a list. """
-    preferences_list = []
-    for pk in pk_list:
-        preferences_list.append(FuelPrice.objects.get(station_id=pk))
-        
-    return preferences_list
-
-def create_response(preferences_list,travel_traffic_durations,travel_distance,carbon_emission):
-    response = []
-    for fuel_price in preferences_list[:20]:
-        station_response = fuel_price.station.serialize()
-        station_response['prices'] = fuel_price.serialize()
-        station_response['duration'] = str(int(travel_traffic_durations[fuel_price.station.pk]/60)) + 'mins'
-        station_response['distance'] = str(travel_distance[fuel_price.station.pk]) + 'km'
-        station_response['emission'] = str(round(carbon_emission[fuel_price.station.pk],2)) + 'kgCO2'
-        response.append(station_response)
-    
-    return response
-
-def check_and_update(fuel_type, price, fuel_prices, user_review):
-    if (price < getattr(fuel_prices, fuel_type) * 1.05 and \
-        price > getattr(fuel_prices, fuel_type)* 0.95) or price == 0:
-        if price == 0:
-            setattr(fuel_prices, fuel_type, None)
-            setattr(user_review, fuel_type, None)
-        else:
-            setattr(fuel_prices, fuel_type, price)
-            setattr(user_review, fuel_type, price)
-        return True
-    else:
-        return False
