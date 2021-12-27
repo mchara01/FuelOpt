@@ -31,7 +31,7 @@ class FuelTypePreferenceModel extends ChangeNotifier {
 }
 
 class DistancePreferenceModel extends ChangeNotifier {
-  double distancePreference = 50;
+  double distancePreference = 30;
 
   void setDistancePreference(double distancePreference) {
     this.distancePreference = distancePreference;

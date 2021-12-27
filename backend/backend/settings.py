@@ -20,7 +20,7 @@ ALLOWED_HOSTS = [
     '10.0.2.2',  # needed for android emulator
     'localhost',
     '127.0.0.1',
-    '3.8.3.44',
+    '18.170.63.134',
 ]
 
 # Application definition
@@ -82,17 +82,28 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 env_var = os.environ['env'] if "env" in os.environ else ""
 logging.info("env_var: " + env_var)
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'db_fuelopt',
-        'USER': 'fuelopt_main',
-        'PASSWORD': "N;vZu!93Gh",
-        'HOST': '192.168.100.20',
-        'PORT': '3333',
+if env_var and env_var == "PRODUCTION":
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.mysql',
+            'NAME': 'db_fuelopt',
+            'USER': 'fuelopt_main',
+            'PASSWORD': 'N7vZu493Gh',
+            'HOST': '192.168.100.20',
+            'PORT': '3306',
+        }
     }
-}
-
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.mysql',
+            'NAME': 'db_fuelopt',
+            'USER': 'fuelopt_main',
+            'PASSWORD': 'N7vZu493Gh',
+            'HOST': '18.170.63.134',
+            'PORT': '3333',
+        }
+    }
 
 # Password validation
 # https://docs.djangoproject.com/en/3.2/ref/settings/#auth-password-validators

@@ -12,11 +12,10 @@ class DistanceOptions extends StatefulWidget {
 }
 
 class _DistanceOptionsState extends State<DistanceOptions> {
-  double distance = 50;
+  double distance = 30;
 
   @override
   Widget build(BuildContext context) {
-
     return Stack(children: [
       Padding(
         padding: const EdgeInsets.only(right: 40.0),
@@ -24,21 +23,26 @@ class _DistanceOptionsState extends State<DistanceOptions> {
           builder: (context, distancePreferenceModel, childWidget) {
             return Column(
               children: [
-                Expanded(child: Text(distancePreferenceModel.distancePreference.round().toString() + ' km')),
+                Expanded(
+                    child: Text(distancePreferenceModel.distancePreference
+                            .round()
+                            .toString() +
+                        ' km')),
                 Expanded(
                   child: Slider(
                     value: distancePreferenceModel.distancePreference,
                     min: 0,
-                    max: 100,
-                    divisions: 100,
+                    max: 50,
+                    divisions: 50,
                     onChanged: (newDistance) {
-                      distancePreferenceModel.setDistancePreference(newDistance);
+                      distancePreferenceModel
+                          .setDistancePreference(newDistance);
                     },
                   ),
                 ),
               ],
             );
-    },
+          },
         ),
       ),
       Align(

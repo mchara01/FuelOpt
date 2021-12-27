@@ -5,14 +5,30 @@ import re
 from user_information import new_price
 from datetime import datetime
 
-# image of receipt of user
-
 def read_receipt(filepath):
+    """
+    :param filepath: path of receipt file
+    :return: tuple of price, fuel type and datetime found in the receipt, if some of these information
+    is not visible it will return None
+    """
     # image of receipt of user
-    receipt = cv2.imread(filepath)
-    text = pytesseract.image_to_string(receipt)
+    text = pytesseract.image_to_string(filepath)
     text = text.splitlines()
 
+    price = None
+
+    elements = []
+    for line in text:
+        # find line that mentions @
+        if '@' in line:
+            elements = line.split()
+
+    for i in range(len(elements)):
+        if elements[i] == '@':
+            try:
+                price = elements[i+1]
+            except Exception:
+                pass
     elements = []
     for line in text:
         # find line that mentions price
@@ -20,24 +36,19 @@ def read_receipt(filepath):
             elements = line.split()
 
     # search for float value in price line
-    price = -1
     for e in elements:
         try:
             # remove currency icon and replace coma with dot
-            e = re.sub('£', '', e)
-            e = re.sub('\$', '', e)
+            e = re.sub('£', '',e)
+            e = re.sub('\$', '',e)
+            e = re.sub('€', '', e)
             e = re.sub(',', '.', e)
             price = float(str(e))
         except ValueError:
             continue
 
-    # if no price is found exit as this receipt cannot be used
-    if price == -1:
-        print("No price provided in receipt")
-        sys.exit()
-
     # find line that mentions product
-    type = ''
+    type_of_fuel = None
     elements = []
     for line in text:
         if 'PRODUCT' in line:
@@ -45,35 +56,37 @@ def read_receipt(filepath):
 
     # the word after product is the type of fuel
     if len(elements) > 1:
-        type = elements[1]
-
-    # if no type of fuel is found exit as this receipt cannot be used
-    if type == '':
-        print("No type of fuel provided in receipt")
-        sys.exit()
+        type_of_fuel = elements[1]
 
     # change capital letters and shorted words to normal wording
-    if type == 'UNLEADED' or type == 'UNLD':
-        type = 'unleaded'
+    if type_of_fuel == 'UNLEADED' or type_of_fuel == 'UNLD':
+        type_of_fuel = 'unleaded'
 
-    if type == 'DIESEL' or type == 'DSL':
-        type = 'diesel'
+    if type_of_fuel == 'DIESEL' or type_of_fuel == 'DSL' or type_of_fuel == 'Regular Diesel'\
+            or type_of_fuel == 'REGULAR DIESEL':
+        type_of_fuel = 'diesel'
 
-    if type == 'SUPER UNLEADED' or type == 'SUNLD':
-        type = 'super_unleaded'
+    if type_of_fuel == 'SUPER UNLEADED' or type_of_fuel == 'SUNLD':
+        type_of_fuel = 'super_unleaded'
 
-    if type == 'PREMIUM UNLEADED' or type == 'PDSL':
-        type = 'premium_diesel'
+    if type_of_fuel == 'PREMIUM UNLEADED' or type_of_fuel == 'PDSL':
+        type_of_fuel = 'premium_diesel'
 
-    # TODO get station id based on location
-    station_id = 0
-
-    date = ''
+    date = None
     for t in text:
-        try:
-            date = datetime.strptime(t, '%Y/%m/%d')
-        except ValueError:
-            continue
+            text2 = t.split(' ')
+            for i in range(len(text2)):
+                try:
+                    date = datetime.strptime(text2[i], '%d/%m/%Y')
+                except ValueError:
+                    pass
+                try:
+                    date = datetime.strptime(text2[i], '%d/%m/%y')
+                except ValueError:
+                    pass
+                try:
+                    date = datetime.strptime(text2[i], '%Y/%m/%d')
+                except ValueError:
+                    pass
 
-    # update station data using receipt
-    new_price(station_id, type, price)
+    return price, type_of_fuel, date

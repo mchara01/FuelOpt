@@ -1,4 +1,6 @@
+import 'dart:collection';
 import 'dart:convert';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fuel_opt/model/search_result.dart';
@@ -23,7 +25,7 @@ class StationsProvider with ChangeNotifier {
 
   fetchTasks() async {
     // Android Emulator
-    final url = Uri.parse('http://10.0.2.2:8000/apis/v1/?format=json');
+    final url = Uri.parse('http://18.170.63.134:8000/apis/v1/?format=json');
 
     // Chrome Emulator
     //final url = Uri.parse('http://localhost:8000/apis/v1/?format=json');
@@ -54,7 +56,7 @@ class FuelStationDataService {
 
   Future<Station> getStationDetail(var stationId) async {
     String urlstring =
-        'http://10.0.2.2:8000/apis/station/' + stationId.toString();
+        'http://18.170.63.134:8000/apis/station/' + stationId.toString();
     final url = Uri.parse(urlstring);
 
     var request = http.Request('GET', url);
@@ -78,7 +80,7 @@ class FuelStationDataService {
     String minLat = latLngBounds.southwest.latitude.toString();
     String minLng = latLngBounds.southwest.longitude.toString();
 
-    String urlstring = 'http://127.0.0.1:8000/apis/home/?' +
+    String urlstring = 'http://18.170.63.134:8000/apis/home/?' +
         'lat_max=' +
         maxLat +
         '&lat_min=' +
@@ -116,7 +118,7 @@ class FuelStationDataService {
       String sortByPreference,
       String fuelTypePreference,
       String distancePreference) async {
-    String urlstring = 'http://127.0.0.1:8000/apis/nearest/?' +
+    String urlstring = 'http://18.170.63.134:8000/apis/search/?' +
         'user_preference=' +
         sortByPreference +
         '&location=' +
@@ -124,7 +126,8 @@ class FuelStationDataService {
         '&fuel_type=' +
         fuelTypePreference +
         '&distance=' +
-        distancePreference.toString();
+        distancePreference.toString() +
+        '&amenities=';
 
     final url = Uri.parse(urlstring);
     print(url);
@@ -143,6 +146,74 @@ class FuelStationDataService {
       // throw Exception('Failed to load data');
     }
   }
+
+  Future<int> updateInfo(
+    int staionId,
+    HashMap info,
+    String token,
+  ) async {
+    String urlstring = 'http://18.170.63.134:8000/apis/review/?' +
+        'station=' +
+        staionId.toString() +
+        '&close=' +
+        info['closed'] +
+        '&congestion=' +
+        info['congestion'] +
+        '&unleaded_price=' +
+        info['unleaded'] +
+        '&diesel_price=' +
+        info['diesel'] +
+        '&super_unleaded_price=' +
+        info['superUnleaded'] +
+        '&premium_diesel_price=' +
+        info['premiumDiesel'];
+
+    final url = Uri.parse(urlstring);
+    print(url);
+    print(token);
+    final response = await http.post(
+      url,
+      headers: {"Authorization": 'Token ' + token},
+    );
+    print(response.statusCode);
+    if (response.statusCode == 200) {
+      return 1;
+    } else if (response.statusCode == 500) {
+      // anomalous price
+      return 2;
+    } else {
+      return 0;
+    }
+  }
+
+  Future<bool> updateImage(
+    int staionId,
+    File image,
+    String token,
+  ) async {
+    String urlstring = 'http://18.170.63.134:8000/apis/review/?' +
+        'station=' +
+        staionId.toString();
+
+    final url = Uri.parse(urlstring);
+    print(url);
+    var request = http.MultipartRequest(
+      'POST',
+      url,
+    );
+    var headers = {'Token': token};
+    var pic = await http.MultipartFile.fromPath("file_field", image.path);
+    request.files.add(pic);
+    request.headers.addAll(headers);
+    http.StreamedResponse response = await request.send();
+
+    print(response.statusCode);
+    if (response.statusCode == 200) {
+      return true;
+    } else {
+      return false;
+    }
+  }
 }
 
 class AccountFunctionality {
@@ -156,7 +227,7 @@ class AccountFunctionality {
   AccountFunctionality._internal();
 
   Future<bool> login(String username, String password) async {
-    String urlstring = 'http://10.0.2.2:8000/rest-auth/login/';
+    String urlstring = 'http://18.170.63.134:8000/rest-auth/login/';
     final url = Uri.parse(urlstring);
 
     var headers = {
@@ -182,7 +253,7 @@ class AccountFunctionality {
 
   Future<bool> register(
       String username, String password1, String password2) async {
-    String urlstring = 'http://10.0.2.2:8000/rest-auth/registration/';
+    String urlstring = 'http://18.170.63.134:8000/rest-auth/registration/';
     final url = Uri.parse(urlstring);
     var headers = {
       'Cookie':
