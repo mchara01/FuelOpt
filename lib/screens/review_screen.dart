@@ -177,7 +177,7 @@ class _ReviewScreenState extends State<ReviewScreen> {
         setState(() {
           bool test = value ?? false;
           isClosed = test;
-          if (isClosed){
+          if (isClosed) {
             isOpen = false;
           }
         });
@@ -190,7 +190,7 @@ class _ReviewScreenState extends State<ReviewScreen> {
         setState(() {
           bool test = value ?? false;
           isOpen = test;
-          if (isOpen){
+          if (isOpen) {
             isClosed = false;
           }
         });
@@ -302,8 +302,12 @@ class _ReviewScreenState extends State<ReviewScreen> {
                     Text("")
                   ]),
                   SizedBox(height: 20),
-                  Row(children: <Widget>[isItOpenButton,Text("Open"),isItClosedButton, Text("Closed")]),
-                  
+                  Row(children: <Widget>[
+                    isItOpenButton,
+                    Text("Open"),
+                    isItClosedButton,
+                    Text("Closed")
+                  ]),
                   SizedBox(height: 20),
                   submitButton
                 ],
@@ -354,39 +358,44 @@ class _ReviewScreenState extends State<ReviewScreen> {
       info["congestion"] = '';
     }
 
-    if(isClosed){
-      info["closed"] = '1';
-    } else if(isOpen) {
-      info["closed"] = '0';
+    if (isClosed) {
+      info["open"] = '0';
+    } else if (isOpen) {
+      info["open"] = '1';
     } else {
-      info["closed"] = '';
+      info["open"] = '';
     }
 
-    if (info.isNotEmpty) {
-      print(info);
-      FuelStationDataService fuelStationDataService = FuelStationDataService();
+    bool infoNoValues = true;
 
-      int succuess = await fuelStationDataService.updateInfo(
-          widget.stationId, info, widget.token);
-      if (succuess == 1) {
-        Fluttertoast.showToast(msg: "Update Successful");
-      } else if (succuess == 2) {
-        Fluttertoast.showToast(
-            msg: "Price is too high/low, please check your input");
-      } else {
-        Fluttertoast.showToast(msg: "Failed to Update");
+    info.forEach((key, value) {
+      if (value != "") {
+        infoNoValues = false;
       }
-      debugPrint('submit prices not implemented');
-    } else {
+    });
+    if (infoNoValues) {
       debugPrint("Sanity Check");
       Fluttertoast.showToast(
-          msg: "This is Center Short Toast",
+          msg: "Please provide information.",
           toastLength: Toast.LENGTH_SHORT,
           gravity: ToastGravity.CENTER,
           timeInSecForIosWeb: 1,
           backgroundColor: Colors.red,
           textColor: Colors.white,
           fontSize: 16.0);
+    }
+    print(info);
+    FuelStationDataService fuelStationDataService = FuelStationDataService();
+
+    int success = await fuelStationDataService.updateInfo(
+        widget.stationId, info, widget.token);
+    if (success == 1) {
+      Fluttertoast.showToast(msg: "Update Successful");
+    } else if (success == 2) {
+      Fluttertoast.showToast(
+          msg: "Price is too high/low, please check your input");
+    } else {
+      Fluttertoast.showToast(msg: "Failed to Update");
     }
   }
 }

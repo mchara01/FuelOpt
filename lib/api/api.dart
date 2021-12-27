@@ -143,31 +143,26 @@ class FuelStationDataService {
   }
 
   Future<int> updateInfo(
-    int staionId,
+    int stationId,
     HashMap info,
     String token,
   ) async {
-    String urlstring = 'http://18.170.63.134:8000/apis/review/?' +
-        'station=' +
-        staionId.toString() +
-        '&close=' +
-        info['closed'] +
-        '&congestion=' +
-        info['congestion'] +
-        '&unleaded_price=' +
-        info['unleaded'] +
-        '&diesel_price=' +
-        info['diesel'] +
-        '&super_unleaded_price=' +
-        info['superUnleaded'] +
-        '&premium_diesel_price=' +
-        info['premiumDiesel'];
+    String urlstring = 'http://18.170.63.134:8000/apis/review/?';
 
     final url = Uri.parse(urlstring);
     print(url);
     print(token);
     final response = await http.post(
       url,
+      body: {
+        "station": stationId.toString(),
+        'open': info['open'],
+        'congestion': info['congestion'],
+        'unleaded_price': info['unleaded'],
+        'diesel_price': info['diesel'],
+        'super_unleaded_price': info['superUnleaded'],
+        'premium_diesel_price': info['premiumDiesel'],
+      },
       headers: {"Authorization": 'Token ' + token},
     );
     print(response.statusCode);
