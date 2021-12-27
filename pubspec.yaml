@@ -54,9 +54,7 @@ dev_dependencies:
 # The following section is specific to Flutter.
 flutter:
   assets:
-    - assets/trends.png
-    - assets/graph.png
-    - assets/trends_stats.txt
+    - assets/
 
 
   # The following line ensures that the Material Icons font is
