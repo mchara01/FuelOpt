@@ -29,6 +29,7 @@ class _ReviewScreenState extends State<ReviewScreen> {
   bool submitAvailable = false;
 
   bool isClosed = false;
+  bool isOpen = false;
 
   double? unleadedPrice;
   double? dieselPrice;
@@ -176,6 +177,22 @@ class _ReviewScreenState extends State<ReviewScreen> {
         setState(() {
           bool test = value ?? false;
           isClosed = test;
+          if (isClosed){
+            isOpen = false;
+          }
+        });
+      },
+    );
+
+    final isItOpenButton = Checkbox(
+      value: isOpen,
+      onChanged: (value) {
+        setState(() {
+          bool test = value ?? false;
+          isOpen = test;
+          if (isOpen){
+            isClosed = false;
+          }
         });
       },
     );
@@ -285,7 +302,8 @@ class _ReviewScreenState extends State<ReviewScreen> {
                     Text("")
                   ]),
                   SizedBox(height: 20),
-                  Row(children: <Widget>[isItClosedButton, Text("Closed")]),
+                  Row(children: <Widget>[isItOpenButton,Text("Open"),isItClosedButton, Text("Closed")]),
+                  
                   SizedBox(height: 20),
                   submitButton
                 ],
@@ -297,57 +315,59 @@ class _ReviewScreenState extends State<ReviewScreen> {
 
   // login function
   _submitReview() async {
-    var toSubmit = HashMap<String, String>();
+    var info = HashMap<String, String>();
     if (unleadedNotAvailable) {
-      toSubmit["unleaded"] = '0';
+      info["unleaded"] = '0';
     } else if (double.tryParse(unleadedController.text) != null) {
-      toSubmit["unleaded"] = unleadedController.text.toString();
+      info["unleaded"] = unleadedController.text.toString();
     } else {
-      toSubmit["unleaded"] = '';
+      info["unleaded"] = '';
     }
 
     if (dieselNotAvailable) {
-      toSubmit["diesel"] = '0';
+      info["diesel"] = '0';
     } else if (double.tryParse(dieselController.text) != null) {
-      toSubmit["diesel"] = dieselController.text.toString();
+      info["diesel"] = dieselController.text.toString();
     } else {
-      toSubmit["diesel"] = '';
+      info["diesel"] = '';
     }
 
     if (superUnleadedNotAvailable) {
-      toSubmit["superUnleaded"] = '0';
+      info["superUnleaded"] = '0';
     } else if (double.tryParse(superUnleadedController.text) != null) {
-      toSubmit["superUnleaded"] = superUnleadedController.text.toString();
+      info["superUnleaded"] = superUnleadedController.text.toString();
     } else {
-      toSubmit["superUnleaded"] = '';
+      info["superUnleaded"] = '';
     }
 
     if (premiumDieselNotAvailable) {
-      toSubmit["premiumDiesel"] = '0';
+      info["premiumDiesel"] = '0';
     } else if (double.tryParse(premiumDieselController.text) != null) {
-      toSubmit["premiumDiesel"] = premiumDieselController.text.toString();
+      info["premiumDiesel"] = premiumDieselController.text.toString();
     } else {
-      toSubmit["premiumDiesel"] = '';
+      info["premiumDiesel"] = '';
     }
 
     if (int.tryParse(congestionController.text) != null) {
-      toSubmit["congestion"] = congestionController.text.toString();
+      info["congestion"] = congestionController.text.toString();
     } else {
-      toSubmit["congestion"] = '';
+      info["congestion"] = '';
     }
 
-    if (isClosed) {
-      toSubmit["closed"] = '1';
+    if(isClosed){
+      info["closed"] = '1';
+    } else if(isOpen) {
+      info["closed"] = '0';
     } else {
-      toSubmit["closed"] = '0';
+      info["closed"] = '';
     }
 
-    if (toSubmit.isNotEmpty) {
-      print(toSubmit);
+    if (info.isNotEmpty) {
+      print(info);
       FuelStationDataService fuelStationDataService = FuelStationDataService();
 
       int succuess = await fuelStationDataService.updateInfo(
-          widget.stationId, toSubmit, widget.token);
+          widget.stationId, info, widget.token);
       if (succuess == 1) {
         Fluttertoast.showToast(msg: "Update Successful");
       } else if (succuess == 2) {
