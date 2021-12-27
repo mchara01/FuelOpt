@@ -14,7 +14,8 @@ import 'package:image_picker/image_picker.dart';
 class ReviewScreen extends StatefulWidget {
   final int stationId;
   final String token;
-  const ReviewScreen(this.stationId, this.token);
+  final String name;
+  const ReviewScreen(this.stationId, this.token, this.name);
 
   @override
   _ReviewScreenState createState() => _ReviewScreenState();
@@ -34,7 +35,7 @@ class _ReviewScreenState extends State<ReviewScreen> {
   double? superUnleadedPrice;
   double? premiumDieselPrice;
 
-  String updateTitle = "Update Prices for " + "<Station>";
+  String updateTitle = "Update Prices for ";
 
   // Form key
   final _formKey = GlobalKey<FormState>();
@@ -248,7 +249,7 @@ class _ReviewScreenState extends State<ReviewScreen> {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: <Widget>[
                   Text(
-                    updateTitle,
+                    updateTitle + widget.name,
                     style: TextStyle(
                         color: appColors.PrimaryBlue,
                         fontWeight: FontWeight.w800,
