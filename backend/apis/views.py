@@ -2,6 +2,7 @@ import pandas as pd
 import time
 import math
 import boto3
+import requests
 from stations.models import FuelPrice, Station, UserReview
 from rest_framework import generics
 from rest_framework.decorators import api_view, permission_classes
@@ -241,14 +242,16 @@ def search(request):
         carbon_emission, travel_distance, travel_traffic_durations = dict(), dict(), dict()
         emission_factor=0.2 #kgCO2/km
         bing_key = 'a'
+        s = requests.Session()
+
         for index, fuel_price in enumerate(preferences_list):
-            if index%20:
+            if index%5:
                 if bing_key == 'a':
                     bing_key = 'b'
                 else:
                     bing_key = 'a'
             
-            travel_traffic_durations[fuel_price.station.pk], travel_distance[fuel_price.station.pk] = get_duration_distance(user_lat, user_lng, fuel_price.station.lat, fuel_price.station.lng, bing_key)
+            travel_traffic_durations[fuel_price.station.pk], travel_distance[fuel_price.station.pk] = get_duration_distance(user_lat, user_lng, fuel_price.station.lat, fuel_price.station.lng, bing_key, s)
             try:
                 congestion = UserReview.objects.get(station=fuel_price.station).congestion
             # Include congestion time specified by User Reviews
