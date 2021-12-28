@@ -5,6 +5,9 @@ import 'dart:collection';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:fuel_opt/model/search_result.dart';
+import 'package:fuel_opt/screens/stations_detail.dart';
+import '../model/stations_model.dart';
 import '../utils/appColors.dart' as appColors;
 import 'package:fuel_opt/api/api.dart';
 import 'upload_receipt.dart';
@@ -34,7 +37,7 @@ class _ReviewScreenState extends State<ReviewScreen> {
   double? superUnleadedPrice;
   double? premiumDieselPrice;
 
-  String updateTitle = "Update Prices for " + "<Station>";
+  String updateTitle = "Update Prices for " + "Station";
 
   // Form key
   final _formKey = GlobalKey<FormState>();
@@ -347,11 +350,25 @@ class _ReviewScreenState extends State<ReviewScreen> {
 
       int succuess = await fuelStationDataService.updateInfo(
           widget.stationId, toSubmit, widget.token);
+      Station newStation = await fuelStationDataService.getStationDetail(
+          widget.stationId);
       if (succuess == 1) {
         Fluttertoast.showToast(msg: "Update Successful");
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+              builder: (context) =>
+                  StationsDetail(newStation)),
+        );
       } else if (succuess == 2) {
         Fluttertoast.showToast(
             msg: "Price is too high/low, please check your input");
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+              builder: (context) =>
+                  UploadReceiptScreen(widget.stationId, widget.token)),
+        );
       } else {
         Fluttertoast.showToast(msg: "Failed to Update");
       }

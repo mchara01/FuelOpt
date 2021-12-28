@@ -45,9 +45,9 @@ class _FuelStationsBottomSheetState extends State<FuelStationsBottomSheet> {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider(
-          create: (context) => SearchQueryModel(),
-        ),
+        // ChangeNotifierProvider(
+        //   create: (context) => SearchQueryModel(),
+        // ),
         ChangeNotifierProvider(
           create: (context) => SortByPreferenceModel(),
         ),
@@ -56,6 +56,9 @@ class _FuelStationsBottomSheetState extends State<FuelStationsBottomSheet> {
         ),
         ChangeNotifierProvider(
           create: (context) => DistancePreferenceModel(),
+        ),
+        ChangeNotifierProvider(
+          create: (context) => FacilitiesPreferenceModel(),
         ),
         ChangeNotifierProvider(
           create: (context) => SearchResultModel(),

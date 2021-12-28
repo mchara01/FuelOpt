@@ -24,6 +24,7 @@ class _SearchState extends State<SearchBar> {
     final sortByPreference = Provider.of<SortByPreferenceModel>(context);
     final fuelTypePreference = Provider.of<FuelTypePreferenceModel>(context);
     final distancePreference = Provider.of<DistancePreferenceModel>(context);
+    final facilitiesPreference = Provider.of<FacilitiesPreferenceModel>(context);
     final searchResult = Provider.of<SearchResultModel>(context);
 
     return FractionallySizedBox(
@@ -65,8 +66,9 @@ class _SearchState extends State<SearchBar> {
                           searchQuery.searchQuery.toString(),
                           sortByPreference.sortByPreference.string,
                           fuelTypePreference.fuelTypePreference.string,
-                          distancePreference.distancePreference.toString());
-                  // searchResult.stations = stations;
+                          distancePreference.distancePreference.toString(),
+                          facilitiesPreference.facilitiesPreference.toString(),
+                      );
                   searchResult.setSearchResult(stations);
                   // return Center(child: SearchResultList(stations: stations));
                   // print(stations);

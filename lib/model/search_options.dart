@@ -39,6 +39,25 @@ class DistancePreferenceModel extends ChangeNotifier {
   }
 }
 
+class FacilitiesPreferenceModel extends ChangeNotifier {
+  Set<String> facilitiesPreference = {};
+
+  void setFacilitiesPreference(Set<String> facilitiesPreference) {
+    this.facilitiesPreference = facilitiesPreference;
+    notifyListeners();
+  }
+
+  void addFacilitiesPreference(String facility){
+    facilitiesPreference.add(facility);
+    notifyListeners();
+  }
+
+  void removeFacilitiesPreference(String facility){
+    facilitiesPreference.remove(facility);
+    notifyListeners();
+  }
+}
+
 class SearchResultModel extends ChangeNotifier {
   List<StationResult> stations = [];
 

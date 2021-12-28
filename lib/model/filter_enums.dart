@@ -2,7 +2,7 @@ enum SortByPreference { NONE, PRICE, TIME_TO_ARRIVAL }
 
 extension SortByPreferenceExtension on SortByPreference {
   String get string {
-    return ['none', 'price', 'duration'][index];
+    return ['none', 'price', 'time'][index];
   }
 }
 

@@ -49,6 +49,31 @@ class FuelStationDataService {
     return [..._stations];
   }
 
+  Future<List> address2Coordinates(String location) async {
+    String urlstring =
+        "https://eu1.locationiq.com/v1/search.php?key=pk.bd315221041f3e0a99e6464f9de0157a" +
+            "&q=" +
+            location.toString().replaceAll(' ', '%20') +
+            "&format=json";
+    final url = Uri.parse(urlstring);
+    var request = http.Request('GET', url);
+    http.StreamedResponse response = await request.send();
+
+    if (response.statusCode == 200) {
+      var data = json.decode(await response.stream.bytesToString());
+      final validMap =
+          json.decode(json.encode(data[0])) as Map<String, dynamic>;
+      if (validMap.containsKey('lat')) {
+        return [validMap['lat'], validMap['lon']];
+      } else {
+        return [];
+      }
+    } else {
+      print(response.reasonPhrase);
+      return [];
+    }
+  }
+
   Future<Station> getStationDetail(var stationId) async {
     String urlstring =
         'http://18.170.63.134:8000/apis/station/' + stationId.toString();
@@ -112,7 +137,8 @@ class FuelStationDataService {
       String address,
       String sortByPreference,
       String fuelTypePreference,
-      String distancePreference) async {
+      String distancePreference,
+      String facilitiesPreference) async {
     String urlstring = 'http://18.170.63.134:8000/apis/search/?' +
         'user_preference=' +
         sortByPreference +
@@ -122,7 +148,11 @@ class FuelStationDataService {
         fuelTypePreference +
         '&distance=' +
         distancePreference.toString() +
-        '&amenities=';
+        '&amenities=' +
+        facilitiesPreference
+            .replaceAll('{', "")
+            .replaceAll("}", "")
+            .replaceAll(" ", "");
 
     final url = Uri.parse(urlstring);
     print(url);
@@ -147,33 +177,28 @@ class FuelStationDataService {
     HashMap info,
     String token,
   ) async {
-    String urlstring = 'http://18.170.63.134:8000/apis/review/?' +
-        'station=' +
-        staionId.toString() +
-        '&close=' +
-        info['closed'] +
-        '&congestion=' +
-        info['congestion'] +
-        '&unleaded_price=' +
-        info['unleaded'] +
-        '&diesel_price=' +
-        info['diesel'] +
-        '&super_unleaded_price=' +
-        info['superUnleaded'] +
-        '&premium_diesel_price=' +
-        info['premiumDiesel'];
+    String urlstring = 'http://18.170.63.134:8000/apis/review/';
 
     final url = Uri.parse(urlstring);
-    print(url);
-    print(token);
+
     final response = await http.post(
       url,
+      body: {
+        'station': staionId.toString(),
+        'close': info['closed'],
+        'congestion': info['congestion'],
+        'unleaded_price': info['unleaded'],
+        'diesel_price': info['diesel'],
+        'super_unleaded_price': info['superUnleaded'],
+        'premium_diesel_price': info['premiumDiesel'],
+      },
       headers: {"Authorization": 'Token ' + token},
     );
+
     print(response.statusCode);
     if (response.statusCode == 200) {
       return 1;
-    } else if (response.statusCode == 500) {
+    } else if (response.statusCode == 555) {
       // anomalous price
       return 2;
     } else {

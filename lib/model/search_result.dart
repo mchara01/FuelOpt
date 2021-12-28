@@ -3,7 +3,6 @@ import 'package:fuel_opt/model/stations_model.dart';
 
 class StationResult extends Station {
   final String duration;
-  final FuelPrice price;
   final String distance;
 
   StationResult({
@@ -31,8 +30,8 @@ class StationResult extends Station {
     required int electric_car_charging,
     required int repair_garage,
     required int shower_facilities,
+    required FuelPrice price,
     required this.duration,
-    required this.price,
     required this.distance,
   }) : super(
           station_id: station_id,
@@ -59,6 +58,7 @@ class StationResult extends Station {
           electric_car_charging: electric_car_charging,
           repair_garage: repair_garage,
           shower_facilities: shower_facilities,
+      price: price,
         );
 
   factory StationResult.fromJson(Map<String, dynamic> json) {

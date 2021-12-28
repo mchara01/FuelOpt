@@ -9,6 +9,8 @@ import 'package:fuel_opt/screens/trend_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
+import 'model/search_options.dart';
+
 final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
     FlutterLocalNotificationsPlugin();
 
@@ -31,8 +33,15 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (context) => StationsProvider(),
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(
+          create: (context) => SearchQueryModel(),
+        ),
+        ChangeNotifierProvider(
+          create: (context) => StationsProvider(),
+        )
+      ],
       child: MaterialApp(
         title: 'FuelOpt',
         theme: ThemeData(

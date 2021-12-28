@@ -21,7 +21,7 @@ class _UploadReceiptScreenState extends State<UploadReceiptScreen> {
   String receiptButtonText = "Select Image";
   String uploadReceiptTitle = "Upload Receipt";
   String uploadReceiptText =
-      "Please upload an image of your receipt to verify the change of price.";
+      "The price you input is too high or low. Please upload an image of your receipt to verify the change of price.";
   // Form key
   final _formKey = GlobalKey<FormState>();
 
@@ -51,7 +51,8 @@ class _UploadReceiptScreenState extends State<UploadReceiptScreen> {
               fontWeight: FontWeight.bold,
             ),
           ),
-        ));
+        )
+    );
 
     final submitButton = Material(
         elevation: 5,
@@ -76,6 +77,16 @@ class _UploadReceiptScreenState extends State<UploadReceiptScreen> {
 
     return Scaffold(
         backgroundColor: Colors.white,
+        appBar: AppBar(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          leading: IconButton(
+            icon: Icon(Icons.arrow_back, color: appColors.PrimaryBlue),
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+          ),
+        ),
         body: Center(
           child: SingleChildScrollView(
               child: Padding(

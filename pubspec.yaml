@@ -32,17 +32,18 @@ dependencies:
   flutter:
     sdk: flutter
   flutter_keyboard_visibility: ^5.1.0
+  flutter_local_notifications: ^9.1.4
   fluttertoast: ^8.0.8
   google_maps_flutter: ^2.0.11
   google_maps_flutter_web: ^0.3.2
   gzx_dropdown_menu: ^3.1.0
   http: ^0.13.4
+  image_picker: ^0.8.4+4
   location: ^4.2.0
+  path_provider: ^2.0.8
   provider: ^6.0.1
   snapping_sheet: ^3.1.0
-  image_picker: ^0.8.4+4
-  flutter_local_notifications: ^9.1.4
-  path_provider: ^2.0.8
+  url_launcher: ^6.0.17
 
 dev_dependencies:
   flutter_lints: ^1.0.0
@@ -57,7 +58,6 @@ flutter:
     - assets/trends.png
     - assets/graph.png
     - assets/trends_stats.txt
-
 
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
