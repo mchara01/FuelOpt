@@ -1,3 +1,5 @@
+import 'fuelprice_model.dart';
+
 class Station {
   final int station_id;
   final String name;
@@ -23,6 +25,8 @@ class Station {
   final int electric_car_charging;
   final int repair_garage;
   final int shower_facilities;
+  final FuelPrice price;
+
 
   Station({
     required this.station_id,
@@ -49,6 +53,7 @@ class Station {
     required this.electric_car_charging,
     required this.repair_garage,
     required this.shower_facilities,
+    required this.price,
   });
 
   factory Station.fromJson(Map<String, dynamic> json) {
@@ -78,6 +83,7 @@ class Station {
       electric_car_charging: json['electric_car_charging'],
       repair_garage: json['repair_garage'],
       shower_facilities: json['shower_facilities'],
+      price: FuelPrice.fromJson(json['prices']),
     );
   }
 }
