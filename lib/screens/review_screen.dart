@@ -391,9 +391,15 @@ class _ReviewScreenState extends State<ReviewScreen> {
         widget.stationId, info, widget.token);
     if (success == 1) {
       Fluttertoast.showToast(msg: "Update Successful");
+      // go back to search results by going back twice
+      int count = 0;
+      Navigator.of(context).popUntil((_) => count++ >=2);
     } else if (success == 2) {
       Fluttertoast.showToast(
-          msg: "Price is too high/low, please check your input");
+          msg: "Price is too high/low, please upload receipt to accept price.");
+      Navigator.of(context).push(MaterialPageRoute(
+                            builder: (context) =>
+                                UploadReceiptScreen(widget.stationId, info, widget.token)));
     } else {
       Fluttertoast.showToast(msg: "Failed to Update");
     }
