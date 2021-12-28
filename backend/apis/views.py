@@ -372,8 +372,8 @@ def review(request):
                 if not check_and_update('premium_diesel_price', premium_diesel_price, fuel_prices, user_review):
                     return JsonResponse({'status':'false', 'message': 'Exceeded threshold. Please submit receipt.'}, status=500)
 
-            if request.POST['close'] != "":
-                user_review.opening = not bool(int(request.POST['close']))
+            if request.POST['open'] != "":
+                user_review.opening = bool(int(request.POST['open']))
 
             if request.POST['congestion'] != "":
                 user_review.congestion = int(request.POST['congestion'])

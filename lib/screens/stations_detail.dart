@@ -262,24 +262,24 @@ class StationsDetail extends StatelessWidget {
                       AccountFunctionality accountFunctionality =
                           AccountFunctionality();
                       String token =
-                          await accountFunctionality.getAccessToken();
+                          accountFunctionality.getAccessToken();
                       // token = 'Token 50ccba64d862962d71639294c5bb1f83808e6cd1';
 
                       if (token == 'None') {
                         Navigator.of(context).push(MaterialPageRoute(
-                            builder: (context) => LoginScreen()));
+                            builder: (context) => const LoginScreen()));
                       } else {
                         Navigator.of(context).push(MaterialPageRoute(
                             builder: (context) =>
-                                ReviewScreen(station.station_id, token)));
+                                ReviewScreen(station.station_id, token,station.name)));
                       }
                     },
-                    icon: Icon(
+                    icon: const Icon(
                       Icons.map_rounded,
                       color: appColors.COLOR_White,
                     ),
-                    label: Text(
-                      'Review Stations',
+                    label: const Text(
+                      'Update Price/Status',
                       style: TextStyle(
                           color: appColors.COLOR_White,
                           fontWeight: FontWeight.bold),
