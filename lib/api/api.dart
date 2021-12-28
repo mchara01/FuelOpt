@@ -143,38 +143,33 @@ class FuelStationDataService {
   }
 
   Future<int> updateInfo(
-    int staionId,
+    int stationId,
     HashMap info,
     String token,
   ) async {
-    String urlstring = 'http://18.170.63.134:8000/apis/review/?' +
-        'station=' +
-        staionId.toString() +
-        '&close=' +
-        info['closed'] +
-        '&congestion=' +
-        info['congestion'] +
-        '&unleaded_price=' +
-        info['unleaded'] +
-        '&diesel_price=' +
-        info['diesel'] +
-        '&super_unleaded_price=' +
-        info['superUnleaded'] +
-        '&premium_diesel_price=' +
-        info['premiumDiesel'];
+    String urlstring = 'http://18.170.63.134:8000/apis/review/?';
 
     final url = Uri.parse(urlstring);
     print(url);
     print(token);
     final response = await http.post(
       url,
+      body: {
+        "station": stationId.toString(),
+        'open': info['open'],
+        'congestion': info['congestion'],
+        'unleaded_price': info['unleaded'],
+        'diesel_price': info['diesel'],
+        'super_unleaded_price': info['superUnleaded'],
+        'premium_diesel_price': info['premiumDiesel'],
+      },
       headers: {"Authorization": 'Token ' + token},
     );
     print(response.statusCode);
+    // if the receipt got accepted 
     if (response.statusCode == 200) {
       return 1;
     } else if (response.statusCode == 500) {
-      // anomalous price
       return 2;
     } else {
       return 0;
@@ -182,29 +177,32 @@ class FuelStationDataService {
   }
 
   Future<bool> updateImage(
-    int staionId,
+    int stationId,
     File image,
     String token,
   ) async {
     String urlstring = 'http://18.170.63.134:8000/apis/review/?' +
         'station=' +
-        staionId.toString();
+        stationId.toString();
 
     final url = Uri.parse(urlstring);
     print(url);
     var request = http.MultipartRequest(
       'POST',
       url,
-    );
-    var headers = {'Token': token};
-    var pic = await http.MultipartFile.fromPath("file_field", image.path);
+    )
+    ..fields["station"] =  stationId.toString();
+    var headers = {"Authorization": 'Token ' + token};
+    var pic = await http.MultipartFile.fromPath("receipt", image.path);
     request.files.add(pic);
     request.headers.addAll(headers);
     http.StreamedResponse response = await request.send();
 
     print(response.statusCode);
+    // if the receipt was accepted
     if (response.statusCode == 200) {
       return true;
+    // if the receipt was not accepted or errored out
     } else {
       return false;
     }

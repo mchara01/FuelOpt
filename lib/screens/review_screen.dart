@@ -14,7 +14,8 @@ import 'package:image_picker/image_picker.dart';
 class ReviewScreen extends StatefulWidget {
   final int stationId;
   final String token;
-  const ReviewScreen(this.stationId, this.token);
+  final String name;
+  const ReviewScreen(this.stationId, this.token, this.name);
 
   @override
   _ReviewScreenState createState() => _ReviewScreenState();
@@ -28,13 +29,14 @@ class _ReviewScreenState extends State<ReviewScreen> {
   bool submitAvailable = false;
 
   bool isClosed = false;
+  bool isOpen = false;
 
   double? unleadedPrice;
   double? dieselPrice;
   double? superUnleadedPrice;
   double? premiumDieselPrice;
 
-  String updateTitle = "Update Prices for " + "<Station>";
+  String updateTitle = "Update Prices for ";
 
   // Form key
   final _formKey = GlobalKey<FormState>();
@@ -175,6 +177,22 @@ class _ReviewScreenState extends State<ReviewScreen> {
         setState(() {
           bool test = value ?? false;
           isClosed = test;
+          if (isClosed) {
+            isOpen = false;
+          }
+        });
+      },
+    );
+
+    final isItOpenButton = Checkbox(
+      value: isOpen,
+      onChanged: (value) {
+        setState(() {
+          bool test = value ?? false;
+          isOpen = test;
+          if (isOpen) {
+            isClosed = false;
+          }
         });
       },
     );
@@ -248,7 +266,7 @@ class _ReviewScreenState extends State<ReviewScreen> {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: <Widget>[
                   Text(
-                    updateTitle,
+                    updateTitle + widget.name,
                     style: TextStyle(
                         color: appColors.PrimaryBlue,
                         fontWeight: FontWeight.w800,
@@ -284,7 +302,12 @@ class _ReviewScreenState extends State<ReviewScreen> {
                     Text("")
                   ]),
                   SizedBox(height: 20),
-                  Row(children: <Widget>[isItClosedButton, Text("Closed")]),
+                  Row(children: <Widget>[
+                    isItOpenButton,
+                    Text("Open"),
+                    isItClosedButton,
+                    Text("Closed")
+                  ]),
                   SizedBox(height: 20),
                   submitButton
                 ],
@@ -296,76 +319,89 @@ class _ReviewScreenState extends State<ReviewScreen> {
 
   // login function
   _submitReview() async {
-    var toSubmit = HashMap<String, String>();
+    var info = HashMap<String, String>();
     if (unleadedNotAvailable) {
-      toSubmit["unleaded"] = '0';
+      info["unleaded"] = '0';
     } else if (double.tryParse(unleadedController.text) != null) {
-      toSubmit["unleaded"] = unleadedController.text.toString();
+      info["unleaded"] = unleadedController.text.toString();
     } else {
-      toSubmit["unleaded"] = '';
+      info["unleaded"] = '';
     }
 
     if (dieselNotAvailable) {
-      toSubmit["diesel"] = '0';
+      info["diesel"] = '0';
     } else if (double.tryParse(dieselController.text) != null) {
-      toSubmit["diesel"] = dieselController.text.toString();
+      info["diesel"] = dieselController.text.toString();
     } else {
-      toSubmit["diesel"] = '';
+      info["diesel"] = '';
     }
 
     if (superUnleadedNotAvailable) {
-      toSubmit["superUnleaded"] = '0';
+      info["superUnleaded"] = '0';
     } else if (double.tryParse(superUnleadedController.text) != null) {
-      toSubmit["superUnleaded"] = superUnleadedController.text.toString();
+      info["superUnleaded"] = superUnleadedController.text.toString();
     } else {
-      toSubmit["superUnleaded"] = '';
+      info["superUnleaded"] = '';
     }
 
     if (premiumDieselNotAvailable) {
-      toSubmit["premiumDiesel"] = '0';
+      info["premiumDiesel"] = '0';
     } else if (double.tryParse(premiumDieselController.text) != null) {
-      toSubmit["premiumDiesel"] = premiumDieselController.text.toString();
+      info["premiumDiesel"] = premiumDieselController.text.toString();
     } else {
-      toSubmit["premiumDiesel"] = '';
+      info["premiumDiesel"] = '';
     }
 
     if (int.tryParse(congestionController.text) != null) {
-      toSubmit["congestion"] = congestionController.text.toString();
+      info["congestion"] = congestionController.text.toString();
     } else {
-      toSubmit["congestion"] = '';
+      info["congestion"] = '';
     }
 
     if (isClosed) {
-      toSubmit["closed"] = '1';
+      info["open"] = '0';
+    } else if (isOpen) {
+      info["open"] = '1';
     } else {
-      toSubmit["closed"] = '0';
+      info["open"] = '';
     }
 
-    if (toSubmit.isNotEmpty) {
-      print(toSubmit);
-      FuelStationDataService fuelStationDataService = FuelStationDataService();
+    bool infoNoValues = true;
 
-      int succuess = await fuelStationDataService.updateInfo(
-          widget.stationId, toSubmit, widget.token);
-      if (succuess == 1) {
-        Fluttertoast.showToast(msg: "Update Successful");
-      } else if (succuess == 2) {
-        Fluttertoast.showToast(
-            msg: "Price is too high/low, please check your input");
-      } else {
-        Fluttertoast.showToast(msg: "Failed to Update");
+    info.forEach((key, value) {
+      if (value != "") {
+        infoNoValues = false;
       }
-      debugPrint('submit prices not implemented');
-    } else {
+    });
+    if (infoNoValues) {
       debugPrint("Sanity Check");
       Fluttertoast.showToast(
-          msg: "This is Center Short Toast",
+          msg: "Please provide information.",
           toastLength: Toast.LENGTH_SHORT,
           gravity: ToastGravity.CENTER,
           timeInSecForIosWeb: 1,
           backgroundColor: Colors.red,
           textColor: Colors.white,
           fontSize: 16.0);
+    }
+    print(info);
+    FuelStationDataService fuelStationDataService = FuelStationDataService();
+
+    int success = await fuelStationDataService.updateInfo(
+        widget.stationId, info, widget.token);
+    if (success == 1) {
+      Fluttertoast.showToast(msg: "Update Successful");
+      // go back to search results by going back twice
+      int count = 0;
+      Navigator.of(context).popUntil((_) => count++ >=2);
+    } else if (success == 2) {
+      Fluttertoast.showToast(
+          msg: "Price is too high/low, please upload receipt to accept price.");
+      Navigator.of(context).push(MaterialPageRoute(
+                            builder: (context) =>
+                                UploadReceiptScreen(widget.stationId, info, widget.token)));
+    } else {
+      Fluttertoast.showToast(msg: "Failed to Update");
     }
   }
 }
