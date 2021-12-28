@@ -10,7 +10,7 @@ from datetime import datetime
 
 
 # Calculate the travel duration to this station
-def get_duration_distance(lat1, lng1, lat2, lng2, key):
+def get_duration_distance(lat1, lng1, lat2, lng2, key, s):
     a = "Aiiv3MUtA8Fq3gGOuwLYLrzz_FRSm1xXUEgDZxO6-R8wg73PKwV50hxqwSrbBhXY"
     b = "AtgHYr66s1ywNPEIHRUMJtP4wPwrzZSka4L1Vl7EQl_lf9JuIAXWThc2CxJx411o"
     
@@ -22,11 +22,10 @@ def get_duration_distance(lat1, lng1, lat2, lng2, key):
     routeUrl = "http://dev.virtualearth.net/REST/V1/Routes/Driving?wp.0=" + str(lat1) + "," + str(
         lng1) + "&wp.1=" + str(lat2) + "," + str(lng2) + "&key=" + bingMapsKey
     # http://dev.virtualearth.net/REST/V1/Routes/Driving?wp.0=51.0,-0.1&wp.1=51.1,-0.12&key=Aiiv3MUtA8Fq3gGOuwLYLrzz_FRSm1xXUEgDZxO6-R8wg73PKwV50hxqwSrbBhXY
-    request = urllib.request.Request(routeUrl)
-    response = urllib.request.urlopen(request)
-    print('lat2')
-    r = response.read().decode(encoding="utf-8")
-    result = json.loads(r)
+    # request = urllib.request.Request(routeUrl)
+    response = s.get(routeUrl)
+    # r = response.read().decode(encoding="utf-8")
+    result = response.json()
 
     duration_with_traffic = result['resourceSets'][0]['resources'][0]['travelDurationTraffic'] # units: s
     distance = result['resourceSets'][0]['resources'][0]['travelDistance'] # units: km
