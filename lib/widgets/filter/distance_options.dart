@@ -32,8 +32,8 @@ class _DistanceOptionsState extends State<DistanceOptions> {
                   child: Slider(
                     value: distancePreferenceModel.distancePreference,
                     min: 0,
-                    max: 50,
-                    divisions: 50,
+                    max: 20,
+                    divisions: 20,
                     onChanged: (newDistance) {
                       distancePreferenceModel
                           .setDistancePreference(newDistance);
