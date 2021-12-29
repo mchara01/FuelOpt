@@ -355,22 +355,22 @@ def review(request):
             if request.POST['unleaded_price'] != "":
                 unleaded_price = float(request.POST['unleaded_price']) # Decimal
                 if not check_and_update('unleaded_price', unleaded_price, fuel_prices, user_review):
-                    return JsonResponse({'status':'false', 'message': 'Exceeded threshold. Please submit receipt.'}, status=500)
+                    return JsonResponse({'status':'false', 'message': 'Exceeded threshold. Please submit receipt.'}, status=555)
 
             if request.POST['diesel_price'] != "":
                 diesel_price = float(request.POST['diesel_price']) # Decimal
                 if not check_and_update('diesel_price', diesel_price, fuel_prices, user_review):
-                    return JsonResponse({'status':'false', 'message': 'Exceeded threshold. Please submit receipt.'}, status=500)
+                    return JsonResponse({'status':'false', 'message': 'Exceeded threshold. Please submit receipt.'}, status=555)
 
             if request.POST['super_unleaded_price'] != "":
                 super_unleaded_price = float(request.POST['super_unleaded_price']) # Decimal
                 if not check_and_update('super_unleaded_price', super_unleaded_price, fuel_prices, user_review):
-                    return JsonResponse({'status':'false', 'message': 'Exceeded threshold. Please submit receipt.'}, status=500)
+                    return JsonResponse({'status':'false', 'message': 'Exceeded threshold. Please submit receipt.'}, status=555)
 
             if request.POST['premium_diesel_price'] != "":
                 premium_diesel_price = float(request.POST['premium_diesel_price']) # Decimal
                 if not check_and_update('premium_diesel_price', premium_diesel_price, fuel_prices, user_review):
-                    return JsonResponse({'status':'false', 'message': 'Exceeded threshold. Please submit receipt.'}, status=500)
+                    return JsonResponse({'status':'false', 'message': 'Exceeded threshold. Please submit receipt.'}, status=555)
 
             if request.POST['open'] != "":
                 user_review.opening = bool(int(request.POST['open']))
