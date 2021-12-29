@@ -7,6 +7,8 @@ import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:fuel_opt/model/search_result.dart';
 import 'package:fuel_opt/screens/stations_detail.dart';
+import 'package:provider/provider.dart';
+import 'package:fuel_opt/model/search_options.dart';
 import '../model/stations_model.dart';
 import '../utils/appColors.dart' as appColors;
 import 'package:fuel_opt/api/api.dart';
@@ -223,28 +225,109 @@ class _ReviewScreenState extends State<ReviewScreen> {
         elevation: 5,
         borderRadius: BorderRadius.circular(30),
         color: appColors.PrimaryBlue,
-        child: MaterialButton(
-          padding: EdgeInsets.fromLTRB(20, 15, 20, 15),
-          minWidth: MediaQuery.of(context).size.width,
-          onPressed: () {
-            _submitReview();
-            // Navigator.push(
-            //   context,
-            //   MaterialPageRoute(
-            //       builder: (context) =>
-            //           UploadReceiptScreen(widget.stationId, widget.token)),
-            // );
-          },
-          child: Text(
-            "Submit",
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: 20,
-              color: Colors.white,
-              fontWeight: FontWeight.bold,
+        child: Consumer<SearchResultModel>(
+            builder: (context, searchResultModel, childWidget) {
+          return MaterialButton(
+            padding: EdgeInsets.fromLTRB(20, 15, 20, 15),
+            minWidth: MediaQuery.of(context).size.width,
+            onPressed: () async {
+              var info = HashMap<String, String>();
+              if (unleadedNotAvailable) {
+                info["unleaded"] = '0';
+              } else if (double.tryParse(unleadedController.text) != null) {
+                info["unleaded"] = double.tryParse(unleadedController.text)!.toStringAsFixed(2).toString();
+              } else {
+                info["unleaded"] = '';
+              }
+
+              if (dieselNotAvailable) {
+                info["diesel"] = '0';
+              } else if (double.tryParse(dieselController.text) != null) {
+                info["diesel"] = double.tryParse(dieselController.text)!.toStringAsFixed(2).toString();
+              } else {
+                info["diesel"] = '';
+              }
+
+              if (superUnleadedNotAvailable) {
+                info["superUnleaded"] = '0';
+              } else if (double.tryParse(superUnleadedController.text) != null) {
+                info["superUnleaded"] = double.tryParse(superUnleadedController.text)!.toStringAsFixed(2).toString();
+              } else {
+                info["superUnleaded"] = '';
+              }
+
+              if (premiumDieselNotAvailable) {
+                info["premiumDiesel"] = '0';
+              } else if (double.tryParse(premiumDieselController.text) != null) {
+                info["premiumDiesel"] = double.tryParse(premiumDieselController.text)!.toStringAsFixed(2).toString();
+              } else {
+                info["premiumDiesel"] = '';
+              }
+
+              if (int.tryParse(congestionController.text) != null) {
+                info["congestion"] = congestionController.text.toString();
+              } else {
+                info["congestion"] = '';
+              }
+
+              if (isClosed) {
+                info["open"] = '0';
+              } else if (isOpen) {
+                info["open"] = '1';
+              } else {
+                info["open"] = '';
+              }
+
+              bool infoNoValues = true;
+
+              info.forEach((key, value) {
+                if (value != "") {
+                  infoNoValues = false;
+                }
+              });
+              if (infoNoValues) {
+                debugPrint("Sanity Check");
+                Fluttertoast.showToast(
+                    msg: "Please provide information.",
+                    toastLength: Toast.LENGTH_SHORT,
+                    gravity: ToastGravity.CENTER,
+                    timeInSecForIosWeb: 1,
+                    backgroundColor: Colors.red,
+                    textColor: Colors.white,
+                    fontSize: 16.0);
+              }
+              print(info);
+              FuelStationDataService fuelStationDataService = FuelStationDataService();
+
+              int success = await fuelStationDataService.updateInfo(
+                  widget.stationId, info, widget.token);
+              if (success == 1) {
+                Fluttertoast.showToast(msg: "Update Successful");
+                // go back to search results by going back twice
+                searchResultModel.updateSearchResult(widget.stationId, info);
+                int count = 0;
+                Navigator.of(context).popUntil((_) => count++ >= 2);
+              } else if (success == 2) {
+                Fluttertoast.showToast(
+                    msg: "Price is too high/low, please upload receipt to accept price.");
+                Navigator.of(context).push(MaterialPageRoute(
+                    builder: (context) =>
+                        UploadReceiptScreen(widget.stationId, info, widget.token)));
+              } else {
+                Fluttertoast.showToast(msg: "Failed to Update");
+              }
+            },
+            child: Text(
+              "Submit",
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 20,
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
             ),
-          ),
-        ));
+          );
+        }));
 
     return Scaffold(
         backgroundColor: Colors.white,
@@ -321,90 +404,91 @@ class _ReviewScreenState extends State<ReviewScreen> {
   }
 
   // login function
-  _submitReview() async {
-    var info = HashMap<String, String>();
-    if (unleadedNotAvailable) {
-      info["unleaded"] = '0';
-    } else if (double.tryParse(unleadedController.text) != null) {
-      info["unleaded"] = unleadedController.text.toString();
-    } else {
-      info["unleaded"] = '';
-    }
-
-    if (dieselNotAvailable) {
-      info["diesel"] = '0';
-    } else if (double.tryParse(dieselController.text) != null) {
-      info["diesel"] = dieselController.text.toString();
-    } else {
-      info["diesel"] = '';
-    }
-
-    if (superUnleadedNotAvailable) {
-      info["superUnleaded"] = '0';
-    } else if (double.tryParse(superUnleadedController.text) != null) {
-      info["superUnleaded"] = superUnleadedController.text.toString();
-    } else {
-      info["superUnleaded"] = '';
-    }
-
-    if (premiumDieselNotAvailable) {
-      info["premiumDiesel"] = '0';
-    } else if (double.tryParse(premiumDieselController.text) != null) {
-      info["premiumDiesel"] = premiumDieselController.text.toString();
-    } else {
-      info["premiumDiesel"] = '';
-    }
-
-    if (int.tryParse(congestionController.text) != null) {
-      info["congestion"] = congestionController.text.toString();
-    } else {
-      info["congestion"] = '';
-    }
-
-    if (isClosed) {
-      info["open"] = '0';
-    } else if (isOpen) {
-      info["open"] = '1';
-    } else {
-      info["open"] = '';
-    }
-
-    bool infoNoValues = true;
-
-    info.forEach((key, value) {
-      if (value != "") {
-        infoNoValues = false;
-      }
-    });
-    if (infoNoValues) {
-      debugPrint("Sanity Check");
-      Fluttertoast.showToast(
-          msg: "Please provide information.",
-          toastLength: Toast.LENGTH_SHORT,
-          gravity: ToastGravity.CENTER,
-          timeInSecForIosWeb: 1,
-          backgroundColor: Colors.red,
-          textColor: Colors.white,
-          fontSize: 16.0);
-    }
-    print(info);
-    FuelStationDataService fuelStationDataService = FuelStationDataService();
-
-    int success = await fuelStationDataService.updateInfo(
-        widget.stationId, info, widget.token);
-    if (success == 1) {
-      Fluttertoast.showToast(msg: "Update Successful");
-      // go back to search results by going back twice
-      int count = 0;
-      Navigator.of(context).popUntil((_) => count++ >= 2);
-    } else if (success == 2) {
-      Fluttertoast.showToast(
-          msg: "Price is too high/low, please upload receipt to accept price.");
-      Navigator.of(context).push(MaterialPageRoute(
-          builder: (context) =>
-              UploadReceiptScreen(widget.stationId, info, widget.token)));
-    } else {
-      Fluttertoast.showToast(msg: "Failed to Update");
-    }
-  }
+  // _submitReview() async {
+  //   var info = HashMap<String, String>();
+  //   if (unleadedNotAvailable) {
+  //     info["unleaded"] = '0';
+  //   } else if (double.tryParse(unleadedController.text) != null) {
+  //     info["unleaded"] = unleadedController.text.toString();
+  //   } else {
+  //     info["unleaded"] = '';
+  //   }
+  //
+  //   if (dieselNotAvailable) {
+  //     info["diesel"] = '0';
+  //   } else if (double.tryParse(dieselController.text) != null) {
+  //     info["diesel"] = dieselController.text.toString();
+  //   } else {
+  //     info["diesel"] = '';
+  //   }
+  //
+  //   if (superUnleadedNotAvailable) {
+  //     info["superUnleaded"] = '0';
+  //   } else if (double.tryParse(superUnleadedController.text) != null) {
+  //     info["superUnleaded"] = superUnleadedController.text.toString();
+  //   } else {
+  //     info["superUnleaded"] = '';
+  //   }
+  //
+  //   if (premiumDieselNotAvailable) {
+  //     info["premiumDiesel"] = '0';
+  //   } else if (double.tryParse(premiumDieselController.text) != null) {
+  //     info["premiumDiesel"] = premiumDieselController.text.toString();
+  //   } else {
+  //     info["premiumDiesel"] = '';
+  //   }
+  //
+  //   if (int.tryParse(congestionController.text) != null) {
+  //     info["congestion"] = congestionController.text.toString();
+  //   } else {
+  //     info["congestion"] = '';
+  //   }
+  //
+  //   if (isClosed) {
+  //     info["open"] = '0';
+  //   } else if (isOpen) {
+  //     info["open"] = '1';
+  //   } else {
+  //     info["open"] = '';
+  //   }
+  //
+  //   bool infoNoValues = true;
+  //
+  //   info.forEach((key, value) {
+  //     if (value != "") {
+  //       infoNoValues = false;
+  //     }
+  //   });
+  //   if (infoNoValues) {
+  //     debugPrint("Sanity Check");
+  //     Fluttertoast.showToast(
+  //         msg: "Please provide information.",
+  //         toastLength: Toast.LENGTH_SHORT,
+  //         gravity: ToastGravity.CENTER,
+  //         timeInSecForIosWeb: 1,
+  //         backgroundColor: Colors.red,
+  //         textColor: Colors.white,
+  //         fontSize: 16.0);
+  //   }
+  //   print(info);
+  //   FuelStationDataService fuelStationDataService = FuelStationDataService();
+  //
+  //   int success = await fuelStationDataService.updateInfo(
+  //       widget.stationId, info, widget.token);
+  //   if (success == 1) {
+  //     Fluttertoast.showToast(msg: "Update Successful");
+  //     // go back to search results by going back twice
+  //     searchResultModel.updateSearchResult();
+  //     int count = 0;
+  //     Navigator.of(context).popUntil((_) => count++ >= 2);
+  //   } else if (success == 2) {
+  //     Fluttertoast.showToast(
+  //         msg: "Price is too high/low, please upload receipt to accept price.");
+  //     Navigator.of(context).push(MaterialPageRoute(
+  //         builder: (context) =>
+  //             UploadReceiptScreen(widget.stationId, info, widget.token)));
+  //   } else {
+  //     Fluttertoast.showToast(msg: "Failed to Update");
+  //   }
+  // }
 }

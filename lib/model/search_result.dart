@@ -4,6 +4,7 @@ import 'package:fuel_opt/model/stations_model.dart';
 class StationResult extends Station {
   final String duration;
   final String distance;
+  final String emission;
 
   StationResult({
     required int station_id,
@@ -33,6 +34,7 @@ class StationResult extends Station {
     required FuelPrice price,
     required this.duration,
     required this.distance,
+    required this.emission,
   }) : super(
           station_id: station_id,
           name: name,
@@ -90,6 +92,7 @@ class StationResult extends Station {
         shower_facilities: json['shower_facilities'],
         duration: json['duration'],
         price: FuelPrice.fromJson(json['prices']),
-        distance: json['distance']);
+        distance: json['distance'],
+        emission: json['emission']);
   }
 }

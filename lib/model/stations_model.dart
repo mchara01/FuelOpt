@@ -25,7 +25,7 @@ class Station {
   final int electric_car_charging;
   final int repair_garage;
   final int shower_facilities;
-  final FuelPrice price;
+  late final FuelPrice price;
 
 
   Station({

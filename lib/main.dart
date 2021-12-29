@@ -40,7 +40,10 @@ class MyApp extends StatelessWidget {
         ),
         ChangeNotifierProvider(
           create: (context) => StationsProvider(),
-        )
+        ),
+        ChangeNotifierProvider(
+          create: (context) => SearchResultModel(),
+        ),
       ],
       child: MaterialApp(
         title: 'FuelOpt',

@@ -60,9 +60,9 @@ class _FuelStationsBottomSheetState extends State<FuelStationsBottomSheet> {
         ChangeNotifierProvider(
           create: (context) => FacilitiesPreferenceModel(),
         ),
-        ChangeNotifierProvider(
-          create: (context) => SearchResultModel(),
-        )
+        // ChangeNotifierProvider(
+        //   create: (context) => SearchResultModel(),
+        // )
       ],
       child: SnappingSheet(
         controller: snappingSheetController,
