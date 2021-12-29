@@ -40,14 +40,15 @@ class MapState extends State<Map> {
   late GoogleMapController mapController;
   final LocationManager _locationManager = LocationManager();
 
+  // set initial position at imperial college london
   final CameraPosition _initialCameraPosition = const CameraPosition(
-    target: LatLng(51.5074, 0.1278),
-    zoom: 10,
+    target: LatLng(51.498843, -0.177153),
+    zoom: 13,
   );
 
   final Set<Marker> _markers = <Marker>{};
 
-  int _markerIdCounter = 1;
+  int _markerIdCounter = 0;
 
   late BitmapDescriptor fuelStationIcon;
 
@@ -57,12 +58,6 @@ class MapState extends State<Map> {
     createFuelStationIcon('assets/gas_station.png', const Color(0xFF002060))
         .then((BitmapDescriptor icon) {
       fuelStationIcon = icon;
-      setState(() {
-        _markers.add(Marker(
-            markerId: MarkerId('0'),
-            position: LatLng(51.5074, 0.1278),
-            icon: fuelStationIcon));
-      });
     });
   }
 
@@ -95,7 +90,7 @@ class MapState extends State<Map> {
               //       CameraPosition(
               //           target: LatLng(locationData.latitude as double,
               //               locationData.longitude as double),
-              //           zoom: 15)));
+              //           zoom: 13)));
               // }
               FuelStationDataService fuelStationDataService =
                   FuelStationDataService();
