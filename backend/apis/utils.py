@@ -55,7 +55,7 @@ def sort_by_price(preferences_list, travel_traffic_durations, travel_distance, p
 def geocoding(location):
     location_iq_key = "pk.bd315221041f3e0a99e6464f9de0157a"
     routeUrl = "https://eu1.locationiq.com/v1/search.php?key=" + location_iq_key + "&q=" + str(
-        location.replace(' ', '%20')) + "&format=json"
+        location.replace(' ', '%20')) + "%20UK" + "&format=json"
 
     request = urllib.request.Request(routeUrl)
     response = urllib.request.urlopen(request)
@@ -90,6 +90,11 @@ def create_response(preferences_list,travel_traffic_durations,travel_distance,ca
     return response
 
 def check_and_update(fuel_type, price, fuel_prices, user_review):
+    # If price was previously None
+    if getattr(fuel_prices, fuel_type) is None:
+        return False
+
+    # If price was previously available
     if (price < float(getattr(fuel_prices, fuel_type)) * 1.05 and \
         price > float(getattr(fuel_prices, fuel_type)) * 0.95) or price == 0:
         if price == 0:

@@ -9,6 +9,7 @@ from rest_framework.decorators import api_view, permission_classes
 from django.contrib import messages
 from django.db import connection
 from django.http import JsonResponse
+from django.conf import settings
 from django.shortcuts import render, redirect
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from stations import models
@@ -345,8 +346,13 @@ def review(request):
                     aws_secret_access_key="pi4Pr4nnz81yhLVi3LLkF5P57Ag6cEywz758Ptza",
                 )
                 s3.upload_fileobj(receipt, "fuelopt-s3-main", receipt.name)
-                s3.download_file("fuelopt-s3-main", receipt.name, "backend/static/reviews/" + receipt.name)
-                price, type_of_fuel, date = read_receipt("backend/static/reviews/" + receipt.name)
+
+                if settings.TESTING:
+                    receipt_path = "static/reviews/" + receipt.name
+                else:
+                    receipt_path = "backend/static/reviews/" + receipt.name
+                s3.download_file("fuelopt-s3-main", receipt.name, receipt_path)
+                price, type_of_fuel, date = read_receipt(receipt_path)
 
                 setattr(fuel_prices, type_of_fuel + "_price", str(price))
                 setattr(user_review, type_of_fuel + "_price", str(price))
@@ -357,6 +363,14 @@ def review(request):
             except Exception as e:
                 return JsonResponse({ 'status':'false', 'message': str(e) }, status=500)
         else:
+            if request.POST['open'] != "":
+                user_review.opening = bool(int(request.POST['open']))
+
+            if request.POST['congestion'] != "":
+                user_review.congestion = int(request.POST['congestion'])
+
+            user_review.save()
+
             if request.POST['unleaded_price'] != "":
                 unleaded_price = float(request.POST['unleaded_price']) # Decimal
                 if not check_and_update('unleaded_price', unleaded_price, fuel_prices, user_review):
@@ -376,12 +390,6 @@ def review(request):
                 premium_diesel_price = float(request.POST['premium_diesel_price']) # Decimal
                 if not check_and_update('premium_diesel_price', premium_diesel_price, fuel_prices, user_review):
                     return JsonResponse({'status':'false', 'message': 'Exceeded threshold. Please submit receipt.'}, status=555)
-
-            if request.POST['open'] != "":
-                user_review.opening = bool(int(request.POST['open']))
-
-            if request.POST['congestion'] != "":
-                user_review.congestion = int(request.POST['congestion'])
 
             fuel_prices.save()
             user_review.save()
