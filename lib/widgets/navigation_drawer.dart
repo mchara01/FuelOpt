@@ -34,7 +34,7 @@ class NavigationDrawerWidget extends StatelessWidget {
                 buildMenuItem(
                     text: 'Sign Out',
                     icon: Icons.logout,
-                    onClicked: () => selectedItem(context, 0)),
+                    onClicked: () => selectedItem(context, 3)),
               ],
             )));
   }
@@ -66,6 +66,14 @@ class NavigationDrawerWidget extends StatelessWidget {
             .push(MaterialPageRoute(builder: (context) => TrendScreen()));
         break;
       case 1:
+        Navigator.of(context)
+            .push(MaterialPageRoute(builder: (context) => LoginScreen()));
+        break;
+      case 2:
+        Navigator.of(context)
+            .push(MaterialPageRoute(builder: (context) => LoginScreen()));
+        break;
+      case 3:
         Navigator.of(context)
             .push(MaterialPageRoute(builder: (context) => LoginScreen()));
         break;
