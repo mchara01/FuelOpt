@@ -2,7 +2,7 @@ enum SortByPreference { NONE, PRICE, TIME_TO_ARRIVAL }
 
 extension SortByPreferenceExtension on SortByPreference {
   String get string {
-    return ['none', 'price', 'time'][index];
+    return ['', 'price', 'time'][index];
   }
 }
 
@@ -17,7 +17,7 @@ enum FuelTypePreference {
 extension FuelTypePreferenceExtension on FuelTypePreference {
   String get string {
     return [
-      'none',
+      '',
       'unleaded',
       'super_unleaded',
       'diesel',
