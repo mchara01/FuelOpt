@@ -74,24 +74,23 @@ class MapState extends State<Map> {
             initialCameraPosition: _initialCameraPosition,
             onMapCreated: (GoogleMapController controller) async {
               mapController = controller;
-              // await _locationManager.checkAndRequestService();
-              // await _locationManager.checkAndRequestPermission();
-              // _locationManager.setOnLocationChanged((LocationData newLocation) {
-              //   print('location changed');
-              //   print('lat' + newLocation.latitude.toString());
-              //   print('long' + newLocation.longitude.toString());
-              //   mapController.animateCamera(CameraUpdate.newCameraPosition(
-              //       CameraPosition(target: LatLng(newLocation.latitude as double,
-              //           newLocation.longitude as double), zoom: 15)));
-              // });
-              // LocationData? locationData = await _locationManager.getLocation();
-              // if (locationData != null) {
-              //   mapController.animateCamera(CameraUpdate.newCameraPosition(
-              //       CameraPosition(
-              //           target: LatLng(locationData.latitude as double,
-              //               locationData.longitude as double),
-              //           zoom: 13)));
-              // }
+              // ask for permission for location
+              await _locationManager.checkAndRequestService();
+              await _locationManager.checkAndRequestPermission();
+
+              // if permission given, move to user's position
+              LocationData? locationData = await _locationManager.getLocation();
+              if (locationData != null) {
+                mapController.animateCamera(CameraUpdate.newCameraPosition(
+                    CameraPosition(
+                        target: LatLng(locationData.latitude as double,
+                            locationData.longitude as double),
+                        zoom: 13)));
+              }
+              _controller.complete(controller);
+            },
+            markers: _markers,
+            onCameraIdle: () async {
               FuelStationDataService fuelStationDataService =
                   FuelStationDataService();
               LatLngBounds mapBounds = await mapController.getVisibleRegion();
@@ -107,11 +106,11 @@ class MapState extends State<Map> {
                       icon: fuelStationIcon));
                 });
                 print(stations.length);
+
+                // needed to apply the previous code onfirst run
                 setState(() {});
               }
-              _controller.complete(controller);
             },
-            markers: _markers,
           ),
           const FuelStationsBottomSheet(),
           Builder(builder: (context) {
