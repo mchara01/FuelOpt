@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:fuel_opt/screens/login_screen.dart';
 import 'package:fuel_opt/screens/trend_screen.dart';
+import 'package:provider/provider.dart';
 
+import '../model/search_options.dart';
 import '../utils/app_colors.dart' as appColors;
 
 class NavigationDrawerWidget extends StatelessWidget {
@@ -31,10 +33,17 @@ class NavigationDrawerWidget extends StatelessWidget {
                     text: 'My Profile',
                     icon: Icons.people,
                     onClicked: () => selectedItem(context, 0)),
-                buildMenuItem(
-                    text: 'Sign Out',
-                    icon: Icons.logout,
-                    onClicked: () => selectedItem(context, 3)),
+                Consumer<SearchResultModel>(
+                    builder: (context, searchResultModel, childWidget) {
+                  return buildMenuItem(
+                      text: 'Sign Out',
+                      icon: Icons.logout,
+                      onClicked: () {
+                        searchResultModel.setSearchResult([]);
+                        Navigator.of(context).push(MaterialPageRoute(
+                            builder: (context) => LoginScreen()));
+                      });
+                })
               ],
             )));
   }
