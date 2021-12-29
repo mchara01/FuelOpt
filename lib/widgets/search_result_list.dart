@@ -177,7 +177,7 @@ class _SearchResultListState extends State<SearchResultList> {
                                                   SizedBox(height: 7),
                                                   Row(children: [
                                                     Icon(
-                                                      Icons.attach_money,
+                                                      Icons.money,
                                                       size: 15,
                                                     ),
                                                     SizedBox(width: 5),
