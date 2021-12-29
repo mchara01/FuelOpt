@@ -1,8 +1,8 @@
-enum SortByPreference { NONE, PRICE, TIME_TO_ARRIVAL }
+enum SortByPreference { NONE, PRICE, TIME_TO_ARRIVAL, ECO }
 
 extension SortByPreferenceExtension on SortByPreference {
   String get string {
-    return ['', 'price', 'time'][index];
+    return ['', 'price', 'time', 'eco'][index];
   }
 }
 
