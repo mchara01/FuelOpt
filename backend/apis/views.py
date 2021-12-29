@@ -210,6 +210,7 @@ def search(request):
             return JsonResponse({ 'status':'false', 'message': 'Location not in range!' }, status=500)
 
         # (ii) Opening Hours: remove stations that are not open from preferences_list
+        closed_station = []
         for fuel_price in preferences_list:
             try:
                 opening = UserReview.objects.get(station=fuel_price.station).opening
@@ -217,7 +218,8 @@ def search(request):
                 opening = True
 
             if not opening:
-                fuel_price.delete()
+                closed_station.append(fuel_price.id)
+        preferences_list = preferences_list.exclude(id__in=closed_station)
 
         # (iii) Fuel Type: show only stations that have the preferred fuel (if specified)
         if fuel_type:
