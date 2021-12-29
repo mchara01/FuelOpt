@@ -283,7 +283,7 @@ def search(request):
             # Query stations in sorted order
             preferences_list = query_sorted_order(sorted_station_pks)
             # API Response
-            response = create_response(preferences_list, travel_traffic_durations, travel_distance)
+            response = create_response(preferences_list, travel_traffic_durations, travel_distance, carbon_emission)
 
         # c. Fuel Price
         if user_preference == 'price' or user_preference == '':
