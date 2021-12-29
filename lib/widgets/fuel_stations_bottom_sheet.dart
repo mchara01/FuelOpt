@@ -101,8 +101,9 @@ class _FuelStationsBottomSheetState extends State<FuelStationsBottomSheet> {
               ),
             ),
             draggable: true),
-        initialSnappingPosition:
-            const SnappingPosition.factor(positionFactor: 0.4),
+        initialSnappingPosition: const SnappingPosition.factor(
+            positionFactor: 0.0,
+            grabbingContentOffset: GrabbingContentOffset.top),
         snappingPositions: const [
           SnappingPosition.factor(
               positionFactor: 0.0,
