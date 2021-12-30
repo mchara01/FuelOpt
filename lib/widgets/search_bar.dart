@@ -24,7 +24,8 @@ class _SearchState extends State<SearchBar> {
     final sortByPreference = Provider.of<SortByPreferenceModel>(context);
     final fuelTypePreference = Provider.of<FuelTypePreferenceModel>(context);
     final distancePreference = Provider.of<DistancePreferenceModel>(context);
-    final facilitiesPreference = Provider.of<FacilitiesPreferenceModel>(context);
+    final facilitiesPreference =
+        Provider.of<FacilitiesPreferenceModel>(context);
     final searchResult = Provider.of<SearchResultModel>(context);
 
     return FractionallySizedBox(
@@ -47,7 +48,7 @@ class _SearchState extends State<SearchBar> {
                 return TextField(
                   controller: _textEditingController,
                   decoration: const InputDecoration(
-                      hintText: 'Current Location', border: InputBorder.none),
+                      hintText: 'Starting Point', border: InputBorder.none),
                   onTap: widget.searchOnTap,
                   onChanged: (value) {
                     searchQueryModel.setSearchQuery(value);
@@ -56,19 +57,19 @@ class _SearchState extends State<SearchBar> {
               },
             )),
             IconButton(
-              padding: const EdgeInsets.all(8.0),
+                padding: const EdgeInsets.all(8.0),
                 constraints: const BoxConstraints(),
                 onPressed: () async {
                   FuelStationDataService fuelStationDataService =
                       FuelStationDataService();
                   List<StationResult> stations =
                       await fuelStationDataService.getSearchResults(
-                          searchQuery.searchQuery.toString(),
-                          sortByPreference.sortByPreference.string,
-                          fuelTypePreference.fuelTypePreference.string,
-                          distancePreference.distancePreference.toString(),
-                          facilitiesPreference.facilitiesPreference.toString(),
-                      );
+                    searchQuery.searchQuery.toString(),
+                    sortByPreference.sortByPreference.string,
+                    fuelTypePreference.fuelTypePreference.string,
+                    distancePreference.distancePreference.toString(),
+                    facilitiesPreference.facilitiesPreference.toString(),
+                  );
                   searchResult.setSearchResult(stations);
                   // return Center(child: SearchResultList(stations: stations));
                   // print(stations);

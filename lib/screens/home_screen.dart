@@ -40,14 +40,15 @@ class MapState extends State<Map> {
   late GoogleMapController mapController;
   final LocationManager _locationManager = LocationManager();
 
+  // set initial position at imperial college london
   final CameraPosition _initialCameraPosition = const CameraPosition(
-    target: LatLng(51.5074, 0.1278),
-    zoom: 10,
+    target: LatLng(51.498843, -0.177153),
+    zoom: 13,
   );
 
   final Set<Marker> _markers = <Marker>{};
 
-  int _markerIdCounter = 1;
+  int _markerIdCounter = 0;
 
   late BitmapDescriptor fuelStationIcon;
 
@@ -57,12 +58,6 @@ class MapState extends State<Map> {
     createFuelStationIcon('assets/gas_station.png', const Color(0xFF002060))
         .then((BitmapDescriptor icon) {
       fuelStationIcon = icon;
-      setState(() {
-        _markers.add(Marker(
-            markerId: MarkerId('0'),
-            position: LatLng(51.5074, 0.1278),
-            icon: fuelStationIcon));
-      });
     });
   }
 
@@ -79,24 +74,30 @@ class MapState extends State<Map> {
             initialCameraPosition: _initialCameraPosition,
             onMapCreated: (GoogleMapController controller) async {
               mapController = controller;
-              // await _locationManager.checkAndRequestService();
-              // await _locationManager.checkAndRequestPermission();
-              // _locationManager.setOnLocationChanged((LocationData newLocation) {
-              //   print('location changed');
-              //   print('lat' + newLocation.latitude.toString());
-              //   print('long' + newLocation.longitude.toString());
-              //   mapController.animateCamera(CameraUpdate.newCameraPosition(
-              //       CameraPosition(target: LatLng(newLocation.latitude as double,
-              //           newLocation.longitude as double), zoom: 15)));
-              // });
-              // LocationData? locationData = await _locationManager.getLocation();
-              // if (locationData != null) {
-              //   mapController.animateCamera(CameraUpdate.newCameraPosition(
-              //       CameraPosition(
-              //           target: LatLng(locationData.latitude as double,
-              //               locationData.longitude as double),
-              //           zoom: 15)));
-              // }
+              // ask for permission for location
+              await _locationManager.checkAndRequestService();
+              await _locationManager.checkAndRequestPermission();
+
+              // if permission given, move to user's position
+              LocationData? locationData = await _locationManager.getLocation();
+              if (locationData != null) {
+                mapController.animateCamera(CameraUpdate.newCameraPosition(
+                    CameraPosition(
+                        target: LatLng(locationData.latitude as double,
+                            locationData.longitude as double),
+                        zoom: 13)));
+              }
+              _controller.complete(controller);
+            },
+            markers: _markers,
+            zoomControlsEnabled: false,
+            myLocationButtonEnabled: false,
+            myLocationEnabled: true,
+            compassEnabled: true,
+            tiltGesturesEnabled: true,
+            minMaxZoomPreference: MinMaxZoomPreference(12, 20),
+            trafficEnabled: true,
+            onCameraIdle: () async {
               FuelStationDataService fuelStationDataService =
                   FuelStationDataService();
               LatLngBounds mapBounds = await mapController.getVisibleRegion();
@@ -112,11 +113,11 @@ class MapState extends State<Map> {
                       icon: fuelStationIcon));
                 });
                 print(stations.length);
+
+                // needed to apply the previous code onfirst run
                 setState(() {});
               }
-              _controller.complete(controller);
             },
-            markers: _markers,
           ),
           const FuelStationsBottomSheet(),
           Builder(builder: (context) {
@@ -134,6 +135,33 @@ class MapState extends State<Map> {
                 ),
                 onPressed: () {
                   Scaffold.of(context).openDrawer();
+                },
+              ),
+            );
+          }),
+          Builder(builder: (context) {
+            return Positioned(
+              top: 70,
+              width: size.width * 0.2,
+              child: TextButton(
+                style: TextButton.styleFrom(
+                  backgroundColor: appColors.PrimaryBlue,
+                  shape: CircleBorder(),
+                ),
+                child: Icon(
+                  Icons.my_location,
+                  color: appColors.COLOR_White,
+                ),
+                onPressed: () async {
+                  LocationData? locationData =
+                      await _locationManager.getLocation();
+                  if (locationData != null) {
+                    mapController.animateCamera(CameraUpdate.newCameraPosition(
+                        CameraPosition(
+                            target: LatLng(locationData.latitude as double,
+                                locationData.longitude as double),
+                            zoom: 13)));
+                  }
                 },
               ),
             );
