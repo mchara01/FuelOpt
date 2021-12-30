@@ -1,4 +1,4 @@
-enum SortByPreference { NONE, PRICE, TIME_TO_ARRIVAL, ECO }
+enum SortByPreference { NONE, PRICE, TIME_TO_ARRIVAL, CARBON_EMISSION }
 
 extension SortByPreferenceExtension on SortByPreference {
   String get string {

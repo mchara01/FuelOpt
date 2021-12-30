@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:fuel_opt/model/filter_enums.dart';
 import 'package:fuel_opt/model/search_options.dart';
 import 'package:fuel_opt/model/search_result.dart';
@@ -24,7 +25,8 @@ class _SearchState extends State<SearchBar> {
     final sortByPreference = Provider.of<SortByPreferenceModel>(context);
     final fuelTypePreference = Provider.of<FuelTypePreferenceModel>(context);
     final distancePreference = Provider.of<DistancePreferenceModel>(context);
-    final facilitiesPreference = Provider.of<FacilitiesPreferenceModel>(context);
+    final facilitiesPreference =
+        Provider.of<FacilitiesPreferenceModel>(context);
     final searchResult = Provider.of<SearchResultModel>(context);
 
     return FractionallySizedBox(
@@ -56,26 +58,29 @@ class _SearchState extends State<SearchBar> {
               },
             )),
             IconButton(
-              padding: const EdgeInsets.all(8.0),
+                padding: const EdgeInsets.all(8.0),
                 constraints: const BoxConstraints(),
                 onPressed: () async {
-                  FuelStationDataService fuelStationDataService =
-                      FuelStationDataService();
-                  List<StationResult> stations =
-                      await fuelStationDataService.getSearchResults(
-                          searchQuery.searchQuery.toString(),
-                          sortByPreference.sortByPreference.string,
-                          fuelTypePreference.fuelTypePreference.string,
-                          distancePreference.distancePreference.toString(),
-                          facilitiesPreference.facilitiesPreference.toString(),
-                      );
-                  searchResult.setSearchResult(stations);
-                  // return Center(child: SearchResultList(stations: stations));
-                  // print(stations);
-                  // await Navigator.of(context).push(MaterialPageRoute(
-                  //   builder: (context) =>
-                  //       SearchResultList(stations: stations),
-                  // ));
+                  if (sortByPreference.sortByPreference.string == 'price' &&
+                      fuelTypePreference.fuelTypePreference.string.isEmpty) {
+                    Fluttertoast.showToast(msg: "Please select a fuel type");
+                  } else {
+                    FuelStationDataService fuelStationDataService =
+                        FuelStationDataService();
+                    List coordinates = await fuelStationDataService.address2Coordinates(searchQuery.searchQuery.toString());
+                    if (coordinates.isEmpty) {
+                      Fluttertoast.showToast(msg: "Please input a valid location");
+                    } else{
+                    List<StationResult> stations =
+                        await fuelStationDataService.getSearchResults(
+                      searchQuery.searchQuery.toString(),
+                      sortByPreference.sortByPreference.string,
+                      fuelTypePreference.fuelTypePreference.string,
+                      distancePreference.distancePreference.toString(),
+                      facilitiesPreference.facilitiesPreference.toString(),
+                    );
+                    searchResult.setSearchResult(stations);
+                  }}
                 },
                 icon: const Icon(
                   Icons.search,

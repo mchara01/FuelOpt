@@ -108,7 +108,7 @@ class SortByOptions extends StatelessWidget {
                 Consumer<SortByPreferenceModel>(
                   builder: (context, sortByPreferenceModel, childWidget) {
                     bool isSortByEco = sortByPreferenceModel.sortByPreference ==
-                        SortByPreference.ECO;
+                        SortByPreference.CARBON_EMISSION;
                     return TextButton(
                         onPressed: () {
                           if (isSortByEco) {
@@ -116,7 +116,7 @@ class SortByOptions extends StatelessWidget {
                                 .setSortByPreference(SortByPreference.NONE);
                           } else {
                             sortByPreferenceModel
-                                .setSortByPreference(SortByPreference.ECO);
+                                .setSortByPreference(SortByPreference.CARBON_EMISSION);
                           }
                         },
                         style: ButtonStyle(
@@ -128,7 +128,7 @@ class SortByOptions extends StatelessWidget {
                                 RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(10)))),
                         child: Text(
-                          'Eco',
+                          'Carbon Emission',
                           style: TextStyle(
                               color: isSortByEco
                                   ? selectedTextColor
