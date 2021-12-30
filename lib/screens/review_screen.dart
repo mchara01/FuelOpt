@@ -6,15 +6,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:fuel_opt/model/search_result.dart';
-import 'package:fuel_opt/screens/stations_detail.dart';
 import 'package:provider/provider.dart';
 import 'package:fuel_opt/model/search_options.dart';
-import '../model/stations_model.dart';
 import '../utils/appColors.dart' as appColors;
 import 'package:fuel_opt/api/api.dart';
 import 'upload_receipt.dart';
 import 'dart:io';
-import 'package:image_picker/image_picker.dart';
 
 class ReviewScreen extends StatefulWidget {
   final int stationId;
@@ -44,15 +41,11 @@ class _ReviewScreenState extends State<ReviewScreen> {
   String updateTitle = "Update Prices for ";
 
   // Form key
-  final _formKey = GlobalKey<FormState>();
-  final TextEditingController unleadedController = new TextEditingController();
-  final TextEditingController dieselController = new TextEditingController();
-  final TextEditingController superUnleadedController =
-      new TextEditingController();
-  final TextEditingController premiumDieselController =
-      new TextEditingController();
-  final TextEditingController congestionController =
-      new TextEditingController();
+  final TextEditingController unleadedController = TextEditingController();
+  final TextEditingController dieselController = TextEditingController();
+  final TextEditingController superUnleadedController = TextEditingController();
+  final TextEditingController premiumDieselController = TextEditingController();
+  final TextEditingController congestionController = TextEditingController();
 
   /// Variables
   File? imageFile;
@@ -304,7 +297,9 @@ class _ReviewScreenState extends State<ReviewScreen> {
               if (success == 1) {
                 Fluttertoast.showToast(msg: "Update Successful");
                 // go back to search results by going back twice
-                searchResultModel.updateSearchResult(widget.stationId, info);
+                if(searchResultModel.stations is List<StationResult>) {
+                  searchResultModel.updateSearchResult(widget.stationId, info);
+                }
                 int count = 0;
                 Navigator.of(context).popUntil((_) => count++ >= 2);
               } else if (success == 2) {

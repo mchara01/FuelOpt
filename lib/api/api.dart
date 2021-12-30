@@ -1,14 +1,10 @@
 import 'dart:collection';
 import 'dart:convert';
 import 'dart:io';
-import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:fuel_opt/model/fuelprice_model.dart';
-import 'package:fuel_opt/model/search_options.dart';
 import 'package:fuel_opt/model/search_result.dart';
-import 'package:fuel_opt/widgets/search_result_list.dart';
+import 'package:fuel_opt/model/stations_data_model.dart';
+import 'package:fuel_opt/model/top_3_station_result.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import '../model/stations_model.dart';
 import 'package:http/http.dart' as http;
 
 /*

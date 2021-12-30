@@ -74,7 +74,7 @@ class _SearchState extends State<SearchBar> {
                       Fluttertoast.showToast(
                           msg: "Please input a valid location");
                     } else {
-                      List<StationResult> stations =
+                      List<Station> stations =
                           await fuelStationDataService.getSearchResults(
                         searchQuery.searchQuery.toString(),
                         sortByPreference.sortByPreference.string,

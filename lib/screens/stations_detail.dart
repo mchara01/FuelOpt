@@ -1,16 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:fuel_opt/model/search_result.dart';
 import 'package:fuel_opt/screens/login_screen.dart';
-import 'package:fuel_opt/screens/registration_screen.dart';
 import 'package:fuel_opt/screens/review_screen.dart';
 import 'package:fuel_opt/widgets/border_box.dart';
-import 'package:fuel_opt/widgets/options_button.dart';
 import 'package:provider/provider.dart';
 import '../model/search_options.dart';
 import '../utils/appColors.dart' as appColors;
 import '../utils/theme.dart' as appTheme;
 import 'package:fuel_opt/api/api.dart';
-import 'package:fuel_opt/model/stations_model.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class StationsDetail extends StatelessWidget {

@@ -24,14 +24,14 @@ extension FuelTypePreferenceExtension on FuelTypePreference {
       'premium_diesel'
     ][index];
   }
-}
 
-String get displayString {
-  return [
-    '',
-    'Unleaded',
-    'Super Unleaded',
-    'Diesel Price',
-    'Premium Diesel'
-  ][index];
+  String get displayString {
+    return [
+      '',
+      'Unleaded',
+      'Super Unleaded',
+      'Diesel Price',
+      'Premium Diesel'
+    ][index];
+  }
 }
