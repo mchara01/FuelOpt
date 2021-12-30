@@ -90,6 +90,13 @@ class MapState extends State<Map> {
               _controller.complete(controller);
             },
             markers: _markers,
+            zoomControlsEnabled: false,
+            myLocationButtonEnabled: false,
+            myLocationEnabled: true,
+            compassEnabled: true,
+            tiltGesturesEnabled: true,
+            minMaxZoomPreference: MinMaxZoomPreference(12, 20),
+            trafficEnabled: true,
             onCameraIdle: () async {
               FuelStationDataService fuelStationDataService =
                   FuelStationDataService();
@@ -128,6 +135,33 @@ class MapState extends State<Map> {
                 ),
                 onPressed: () {
                   Scaffold.of(context).openDrawer();
+                },
+              ),
+            );
+          }),
+          Builder(builder: (context) {
+            return Positioned(
+              top: 70,
+              width: size.width * 0.2,
+              child: TextButton(
+                style: TextButton.styleFrom(
+                  backgroundColor: appColors.PrimaryBlue,
+                  shape: CircleBorder(),
+                ),
+                child: Icon(
+                  Icons.my_location,
+                  color: appColors.COLOR_White,
+                ),
+                onPressed: () async {
+                  LocationData? locationData =
+                      await _locationManager.getLocation();
+                  if (locationData != null) {
+                    mapController.animateCamera(CameraUpdate.newCameraPosition(
+                        CameraPosition(
+                            target: LatLng(locationData.latitude as double,
+                                locationData.longitude as double),
+                            zoom: 13)));
+                  }
                 },
               ),
             );
