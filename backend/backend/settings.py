@@ -1,5 +1,6 @@
 import os
 import logging
+import sys
 
 from pathlib import Path
 from django.contrib.messages import constants as messages
@@ -166,3 +167,4 @@ MESSAGE_TAGS = {
 
 
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+TESTING = len(sys.argv) > 1 and sys.argv[1] == 'test'

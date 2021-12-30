@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:fuel_opt/api/api.dart';
 import 'package:fuel_opt/screens/login_screen.dart';
 import 'package:fuel_opt/screens/trend_screen.dart';
+import 'package:fuel_opt/screens/instructions_screen.dart';
+import 'package:provider/provider.dart';
 
+import '../model/search_options.dart';
 import '../utils/app_colors.dart' as appColors;
 
 class NavigationDrawerWidget extends StatelessWidget {
@@ -23,18 +28,14 @@ class NavigationDrawerWidget extends StatelessWidget {
                 buildMenuItem(
                     text: 'Instructions',
                     icon: Icons.help,
-                    onClicked: () => selectedItem(context, 0)),
+                    onClicked: () => selectedItem(context, 1)),
                 Divider(
                   color: Colors.white,
                 ),
                 buildMenuItem(
-                    text: 'My Profile',
-                    icon: Icons.people,
-                    onClicked: () => selectedItem(context, 0)),
-                buildMenuItem(
                     text: 'Sign Out',
-                    icon: Icons.logout,
-                    onClicked: () => selectedItem(context, 0)),
+                    icon: Icons.help,
+                    onClicked: () => selectedItem(context, 2)),
               ],
             )));
   }
@@ -59,13 +60,23 @@ class NavigationDrawerWidget extends StatelessWidget {
     );
   }
 
-  selectedItem(BuildContext context, int index) {
+  selectedItem(BuildContext context, int index) async {
     switch (index) {
       case 0:
         Navigator.of(context)
             .push(MaterialPageRoute(builder: (context) => TrendScreen()));
         break;
       case 1:
+        Navigator.of(context).push(
+            MaterialPageRoute(builder: (context) => InstructionsScreen()));
+        break;
+      case 2:
+        AccountFunctionality accountFunctionality = AccountFunctionality();
+
+        bool output = await accountFunctionality.logout();
+        if (output) {
+          Fluttertoast.showToast(msg: "Logout Successful");
+        }
         Navigator.of(context)
             .push(MaterialPageRoute(builder: (context) => LoginScreen()));
         break;

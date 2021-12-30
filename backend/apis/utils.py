@@ -10,7 +10,7 @@ from datetime import datetime
 
 
 # Calculate the travel duration to this station
-def get_duration_distance(lat1, lng1, lat2, lng2, key):
+def get_duration_distance(lat1, lng1, lat2, lng2, key, s):
     a = "Aiiv3MUtA8Fq3gGOuwLYLrzz_FRSm1xXUEgDZxO6-R8wg73PKwV50hxqwSrbBhXY"
     b = "AtgHYr66s1ywNPEIHRUMJtP4wPwrzZSka4L1Vl7EQl_lf9JuIAXWThc2CxJx411o"
     
@@ -22,11 +22,10 @@ def get_duration_distance(lat1, lng1, lat2, lng2, key):
     routeUrl = "http://dev.virtualearth.net/REST/V1/Routes/Driving?wp.0=" + str(lat1) + "," + str(
         lng1) + "&wp.1=" + str(lat2) + "," + str(lng2) + "&key=" + bingMapsKey
     # http://dev.virtualearth.net/REST/V1/Routes/Driving?wp.0=51.0,-0.1&wp.1=51.1,-0.12&key=Aiiv3MUtA8Fq3gGOuwLYLrzz_FRSm1xXUEgDZxO6-R8wg73PKwV50hxqwSrbBhXY
-    request = urllib.request.Request(routeUrl)
-    response = urllib.request.urlopen(request)
-    print('lat2')
-    r = response.read().decode(encoding="utf-8")
-    result = json.loads(r)
+    # request = urllib.request.Request(routeUrl)
+    response = s.get(routeUrl)
+    # r = response.read().decode(encoding="utf-8")
+    result = response.json()
 
     duration_with_traffic = result['resourceSets'][0]['resources'][0]['travelDurationTraffic'] # units: s
     distance = result['resourceSets'][0]['resources'][0]['travelDistance'] # units: km
@@ -53,10 +52,10 @@ def sort_by_price(preferences_list, travel_traffic_durations, travel_distance, p
 
     return sorted_station_pks
 
-def geocoding(location):
+def geocoding_with_name(location):
     location_iq_key = "pk.bd315221041f3e0a99e6464f9de0157a"
     routeUrl = "https://eu1.locationiq.com/v1/search.php?key=" + location_iq_key + "&q=" + str(
-        location.replace(' ', '%20')) + "&format=json"
+        location.replace(' ', '%20')) + "%20London" + "&format=json"
 
     request = urllib.request.Request(routeUrl)
     response = urllib.request.urlopen(request)
@@ -65,10 +64,26 @@ def geocoding(location):
     result = json.loads(r)
 
     if result[0]['lat']:
+        print ('lat lng found')
         return float(result[0]['lat']), float(result[0]['lon'])
     else:
         raise ValueError('Unable to geocode')
 
+def geocoding_with_postcode(postcode):
+    routeUrl = "http://api.getthedata.com/postcode/" + postcode.replace(' ','+')
+    request = urllib.request.Request(routeUrl)
+    response = urllib.request.urlopen(request)
+
+    r = response.read().decode(encoding="utf-8")
+    result = json.loads(r)
+
+    try:
+        latitude = float(result['data']['latitude'])
+        longitude = float(result['data']['longitude'])
+        print ('lat lng found')
+        return latitude, longitude
+    except KeyError:
+        raise ValueError('Unable to geocode')
 
 def query_sorted_order(pk_list):
     """ Query stations in sorted order and append into a list. """
@@ -91,6 +106,11 @@ def create_response(preferences_list,travel_traffic_durations,travel_distance,ca
     return response
 
 def check_and_update(fuel_type, price, fuel_prices, user_review):
+    # If price was previously None
+    if getattr(fuel_prices, fuel_type) is None:
+        return False
+
+    # If price was previously available
     if (price < float(getattr(fuel_prices, fuel_type)) * 1.05 and \
         price > float(getattr(fuel_prices, fuel_type)) * 0.95) or price == 0:
         if price == 0:

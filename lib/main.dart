@@ -9,6 +9,8 @@ import 'package:fuel_opt/screens/trend_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
+import 'model/search_options.dart';
+
 final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
     FlutterLocalNotificationsPlugin();
 
@@ -16,7 +18,7 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   var androidInitialize =
-      new AndroidInitializationSettings('@mipmap-hdpi/ic_launcher.png');
+      new AndroidInitializationSettings('@drawable/ic_launcher_background');
   var iOSInitialize = new IOSInitializationSettings();
 
   var initializationSettings = new InitializationSettings(
@@ -31,12 +33,25 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'FuelOpt',
-      theme: ThemeData(
-        primaryColor: const Color(0xFF002060),
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(
+          create: (context) => SearchQueryModel(),
+        ),
+        ChangeNotifierProvider(
+          create: (context) => StationsProvider(),
+        ),
+        ChangeNotifierProvider(
+          create: (context) => SearchResultModel(),
+        ),
+      ],
+      child: MaterialApp(
+        title: 'FuelOpt',
+        theme: ThemeData(
+          primaryColor: const Color(0xFF002060),
+        ),
+        home: const LoginScreen(),
       ),
-      home: const HomeScreen(),
     );
   }
 

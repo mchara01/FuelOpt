@@ -1,8 +1,8 @@
-enum SortByPreference { NONE, PRICE, TIME_TO_ARRIVAL }
+enum SortByPreference { NONE, PRICE, TIME_TO_ARRIVAL, CARBON_EMISSION }
 
 extension SortByPreferenceExtension on SortByPreference {
   String get string {
-    return ['none', 'price', 'duration'][index];
+    return ['', 'price', 'time', 'eco'][index];
   }
 }
 
@@ -17,21 +17,21 @@ enum FuelTypePreference {
 extension FuelTypePreferenceExtension on FuelTypePreference {
   String get string {
     return [
-      'none',
-      'unleaded_price',
-      'super_unleaded_price',
-      'diesel_price',
-      'premium_diesel_price'
+      '',
+      'unleaded',
+      'super_unleaded',
+      'diesel',
+      'premium_diesel'
     ][index];
   }
+}
 
-  String get displayString {
-    return [
-      'None',
-      'Unleaded',
-      'Super Unleaded',
-      'Diesel Price',
-      'Premium Diesel'
-    ][index];
-  }
+String get displayString {
+  return [
+    '',
+    'Unleaded',
+    'Super Unleaded',
+    'Diesel Price',
+    'Premium Diesel'
+  ][index];
 }

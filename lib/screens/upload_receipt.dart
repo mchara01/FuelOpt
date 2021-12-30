@@ -1,16 +1,21 @@
 // ignore_for_file: prefer_const_constructors
 
+import 'dart:collection';
+
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:fuel_opt/screens/stations_detail.dart';
 import '../utils/appColors.dart' as appColors;
+import 'package:fuel_opt/api/api.dart';
 
 import 'dart:io';
 import 'package:image_picker/image_picker.dart';
 
 class UploadReceiptScreen extends StatefulWidget {
-  // const UploadReceiptScreen({Key? key}) : super(key: key);
   final int stationId;
   final String token;
-  const UploadReceiptScreen(this.stationId, this.token);
+  final HashMap info;
+  const UploadReceiptScreen(this.stationId, this.info, this.token);
 
   @override
   _UploadReceiptScreenState createState() => _UploadReceiptScreenState();
@@ -21,12 +26,12 @@ class _UploadReceiptScreenState extends State<UploadReceiptScreen> {
   String receiptButtonText = "Select Image";
   String uploadReceiptTitle = "Upload Receipt";
   String uploadReceiptText =
-      "Please upload an image of your receipt to verify the change of price.";
+      "The price you input is too high or low. Please upload an image of your receipt to verify the change of price.";
   // Form key
   final _formKey = GlobalKey<FormState>();
 
   /// Variables
-  File? imageFile;
+  File imageFile = File("hello");
 
   @override
   Widget build(BuildContext context) {
@@ -51,7 +56,8 @@ class _UploadReceiptScreenState extends State<UploadReceiptScreen> {
               fontWeight: FontWeight.bold,
             ),
           ),
-        ));
+        )
+    );
 
     final submitButton = Material(
         elevation: 5,
@@ -76,6 +82,16 @@ class _UploadReceiptScreenState extends State<UploadReceiptScreen> {
 
     return Scaffold(
         backgroundColor: Colors.white,
+        appBar: AppBar(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          leading: IconButton(
+            icon: Icon(Icons.arrow_back, color: appColors.PrimaryBlue),
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+          ),
+        ),
         body: Center(
           child: SingleChildScrollView(
               child: Padding(
@@ -100,6 +116,9 @@ class _UploadReceiptScreenState extends State<UploadReceiptScreen> {
                   SizedBox(height: 20),
                   receiptButton,
                   SizedBox(height: 20),
+                  Visibility(
+                      child: Image.file(imageFile), visible: submitAvailable),
+                  SizedBox(height: 20),
                   Visibility(child: submitButton, visible: submitAvailable),
                 ],
               ),
@@ -112,8 +131,6 @@ class _UploadReceiptScreenState extends State<UploadReceiptScreen> {
   _getFromGallery() async {
     XFile? image = await ImagePicker().pickImage(
       source: ImageSource.gallery,
-      maxWidth: 1800,
-      maxHeight: 1800,
     );
     if (image != null) {
       setState(() {
@@ -128,7 +145,22 @@ class _UploadReceiptScreenState extends State<UploadReceiptScreen> {
     }
   }
 
-  _submitReceipt() {
+  _submitReceipt() async {
     debugPrint("submitting image not implemented");
+    FuelStationDataService service = new FuelStationDataService();
+    debugPrint(widget.token);
+    print(widget.info);
+    bool success =
+        await service.updateImage(widget.stationId, imageFile, widget.token);
+    if (success) {
+      Fluttertoast.showToast(msg: "Thank you for updating the price");
+      // go back to the search result page without having to store the name of the page 
+      // by just going back three times...
+      int count = 0;
+      Navigator.of(context).popUntil((_) => count++ >=3);
+      // Navigator.of(context).popUntil((route) => route.settings.name == 'station');
+    } else {
+      Fluttertoast.showToast(msg: "Image not Accepted");
+    }
   }
 }

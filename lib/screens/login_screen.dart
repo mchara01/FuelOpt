@@ -164,6 +164,7 @@ class _LoginScreenState extends State<LoginScreen> {
     bool output = await accountFunctionality.login(username, password);
     if (output) {
       Fluttertoast.showToast(msg: "Login Successful");
+      //Navigator.of(context).pop();
       Navigator.push(
           context, MaterialPageRoute(builder: (context) => HomeScreen()));
     } else {

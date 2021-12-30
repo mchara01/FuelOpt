@@ -2,17 +2,19 @@ import pandas as pd
 import time
 import math
 import boto3
+import requests
 from stations.models import FuelPrice, Station, UserReview
 from rest_framework import generics
 from rest_framework.decorators import api_view, permission_classes
 from django.contrib import messages
 from django.db import connection
 from django.http import JsonResponse
+from django.conf import settings
 from django.shortcuts import render, redirect
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from stations import models
 from .serializers import StationSerializer
-from .utils import get_duration_distance, sort_by_price, geocoding, query_sorted_order, create_response, check_and_update, read_receipt
+from .utils import geocoding_with_postcode, geocoding_with_name, get_duration_distance, sort_by_price, query_sorted_order, create_response, check_and_update, read_receipt
 
 class ListStation(generics.ListCreateAPIView):
     permission_classes = (IsAuthenticated,)
@@ -185,9 +187,12 @@ def search(request):
         amenities_list = request.GET['amenities'].split(',')
 
         try:
-            user_lat, user_lng = geocoding(user_location)
+            user_lat, user_lng = geocoding_with_postcode(user_location)
         except ValueError as e:
-            return JsonResponse({ 'status':'false', 'message': str(e) }, status=500)
+            try:
+                user_lat, user_lng = geocoding_with_name(user_location)
+            except ValueError as e:
+                return JsonResponse({ 'status':'false', 'message': str(e) }, status=500)
 
         # Default distance range
         if max_radius_km == '':
@@ -209,6 +214,7 @@ def search(request):
             return JsonResponse({ 'status':'false', 'message': 'Location not in range!' }, status=500)
 
         # (ii) Opening Hours: remove stations that are not open from preferences_list
+        closed_station = []
         for fuel_price in preferences_list:
             try:
                 opening = UserReview.objects.get(station=fuel_price.station).opening
@@ -216,7 +222,8 @@ def search(request):
                 opening = True
 
             if not opening:
-                fuel_price.delete()
+                closed_station.append(fuel_price.id)
+        preferences_list = preferences_list.exclude(id__in=closed_station)
 
         # (iii) Fuel Type: show only stations that have the preferred fuel (if specified)
         if fuel_type:
@@ -241,14 +248,16 @@ def search(request):
         carbon_emission, travel_distance, travel_traffic_durations = dict(), dict(), dict()
         emission_factor=0.2 #kgCO2/km
         bing_key = 'a'
+        s = requests.Session()
+
         for index, fuel_price in enumerate(preferences_list):
-            if index%20:
+            if index%5:
                 if bing_key == 'a':
                     bing_key = 'b'
                 else:
                     bing_key = 'a'
             
-            travel_traffic_durations[fuel_price.station.pk], travel_distance[fuel_price.station.pk] = get_duration_distance(user_lat, user_lng, fuel_price.station.lat, fuel_price.station.lng, bing_key)
+            travel_traffic_durations[fuel_price.station.pk], travel_distance[fuel_price.station.pk] = get_duration_distance(user_lat, user_lng, fuel_price.station.lat, fuel_price.station.lng, bing_key, s)
             try:
                 congestion = UserReview.objects.get(station=fuel_price.station).congestion
             # Include congestion time specified by User Reviews
@@ -278,7 +287,7 @@ def search(request):
             # Query stations in sorted order
             preferences_list = query_sorted_order(sorted_station_pks)
             # API Response
-            response = create_response(preferences_list, travel_traffic_durations, travel_distance)
+            response = create_response(preferences_list, travel_traffic_durations, travel_distance, carbon_emission)
 
         # c. Fuel Price
         if user_preference == 'price' or user_preference == '':
@@ -340,8 +349,13 @@ def review(request):
                     aws_secret_access_key="pi4Pr4nnz81yhLVi3LLkF5P57Ag6cEywz758Ptza",
                 )
                 s3.upload_fileobj(receipt, "fuelopt-s3-main", receipt.name)
-                s3.download_file("fuelopt-s3-main", receipt.name, "backend/static/reviews/" + receipt.name)
-                price, type_of_fuel, date = read_receipt("backend/static/reviews/" + receipt.name)
+
+                if settings.TESTING:
+                    receipt_path = "static/reviews/" + receipt.name
+                else:
+                    receipt_path = "backend/static/reviews/" + receipt.name
+                s3.download_file("fuelopt-s3-main", receipt.name, receipt_path)
+                price, type_of_fuel, date = read_receipt(receipt_path)
 
                 setattr(fuel_prices, type_of_fuel + "_price", str(price))
                 setattr(user_review, type_of_fuel + "_price", str(price))
@@ -352,31 +366,33 @@ def review(request):
             except Exception as e:
                 return JsonResponse({ 'status':'false', 'message': str(e) }, status=500)
         else:
+            if request.POST['open'] != "":
+                user_review.opening = bool(int(request.POST['open']))
+
+            if request.POST['congestion'] != "":
+                user_review.congestion = int(request.POST['congestion'])
+
+            user_review.save()
+
             if request.POST['unleaded_price'] != "":
                 unleaded_price = float(request.POST['unleaded_price']) # Decimal
                 if not check_and_update('unleaded_price', unleaded_price, fuel_prices, user_review):
-                    return JsonResponse({'status':'false', 'message': 'Exceeded threshold. Please submit receipt.'}, status=500)
+                    return JsonResponse({'status':'false', 'message': 'Exceeded threshold. Please submit receipt.'}, status=555)
 
             if request.POST['diesel_price'] != "":
                 diesel_price = float(request.POST['diesel_price']) # Decimal
                 if not check_and_update('diesel_price', diesel_price, fuel_prices, user_review):
-                    return JsonResponse({'status':'false', 'message': 'Exceeded threshold. Please submit receipt.'}, status=500)
+                    return JsonResponse({'status':'false', 'message': 'Exceeded threshold. Please submit receipt.'}, status=555)
 
             if request.POST['super_unleaded_price'] != "":
                 super_unleaded_price = float(request.POST['super_unleaded_price']) # Decimal
                 if not check_and_update('super_unleaded_price', super_unleaded_price, fuel_prices, user_review):
-                    return JsonResponse({'status':'false', 'message': 'Exceeded threshold. Please submit receipt.'}, status=500)
+                    return JsonResponse({'status':'false', 'message': 'Exceeded threshold. Please submit receipt.'}, status=555)
 
             if request.POST['premium_diesel_price'] != "":
                 premium_diesel_price = float(request.POST['premium_diesel_price']) # Decimal
                 if not check_and_update('premium_diesel_price', premium_diesel_price, fuel_prices, user_review):
-                    return JsonResponse({'status':'false', 'message': 'Exceeded threshold. Please submit receipt.'}, status=500)
-
-            if request.POST['close'] != "":
-                user_review.opening = not bool(int(request.POST['close']))
-
-            if request.POST['congestion'] != "":
-                user_review.congestion = int(request.POST['congestion'])
+                    return JsonResponse({'status':'false', 'message': 'Exceeded threshold. Please submit receipt.'}, status=555)
 
             fuel_prices.save()
             user_review.save()

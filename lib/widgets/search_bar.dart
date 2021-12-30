@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:fuel_opt/model/filter_enums.dart';
 import 'package:fuel_opt/model/search_options.dart';
 import 'package:fuel_opt/model/stations_data_model.dart';
@@ -21,10 +22,12 @@ class _SearchState extends State<SearchBar> {
   @override
   Widget build(BuildContext context) {
     final searchQuery = Provider.of<SearchQueryModel>(context);
-    final sortByPreference = Provider.of<SortByPreferenceModel>(context, listen: false);
-    final fuelTypePreference = Provider.of<FuelTypePreferenceModel>(context, listen: false);
-    final distancePreference = Provider.of<DistancePreferenceModel>(context, listen: false);
-    final searchResult = Provider.of<SearchResultModel>(context, listen: false);
+    final sortByPreference = Provider.of<SortByPreferenceModel>(context);
+    final fuelTypePreference = Provider.of<FuelTypePreferenceModel>(context);
+    final distancePreference = Provider.of<DistancePreferenceModel>(context);
+    final facilitiesPreference =
+        Provider.of<FacilitiesPreferenceModel>(context);
+    final searchResult = Provider.of<SearchResultModel>(context);
 
     return FractionallySizedBox(
       widthFactor: 0.8,
@@ -46,7 +49,7 @@ class _SearchState extends State<SearchBar> {
                 return TextField(
                   controller: _textEditingController,
                   decoration: const InputDecoration(
-                      hintText: 'Current Location', border: InputBorder.none),
+                      hintText: 'Gas stations near...', border: InputBorder.none),
                   onTap: widget.searchOnTap,
                   onChanged: (value) {
                     searchQueryModel.setSearchQuery(value);
@@ -55,25 +58,33 @@ class _SearchState extends State<SearchBar> {
               },
             )),
             IconButton(
-              padding: const EdgeInsets.all(8.0),
+                padding: const EdgeInsets.all(8.0),
                 constraints: const BoxConstraints(),
                 onPressed: () async {
-                  FuelStationDataService fuelStationDataService =
-                      FuelStationDataService();
-                  List<Station> stations =
-                      await fuelStationDataService.getSearchResults(
-                          searchQuery.searchQuery.toString(),
-                          sortByPreference.sortByPreference.string,
-                          fuelTypePreference.fuelTypePreference.string,
-                          distancePreference.distancePreference.toString());
-                  // searchResult.stations = stations;
-                  searchResult.setSearchResult(stations);
-                  // return Center(child: SearchResultList(stations: stations));
-                  // print(stations);
-                  // await Navigator.of(context).push(MaterialPageRoute(
-                  //   builder: (context) =>
-                  //       SearchResultList(stations: stations),
-                  // ));
+                  if (sortByPreference.sortByPreference.string == 'price' &&
+                      fuelTypePreference.fuelTypePreference.string.isEmpty) {
+                    Fluttertoast.showToast(msg: "Please select a fuel type");
+                  } else {
+                    FuelStationDataService fuelStationDataService =
+                        FuelStationDataService();
+                    List coordinates =
+                        await fuelStationDataService.address2Coordinates(
+                            searchQuery.searchQuery.toString());
+                    if (coordinates.isEmpty) {
+                      Fluttertoast.showToast(
+                          msg: "Please input a valid location");
+                    } else {
+                      List<StationResult> stations =
+                          await fuelStationDataService.getSearchResults(
+                        searchQuery.searchQuery.toString(),
+                        sortByPreference.sortByPreference.string,
+                        fuelTypePreference.fuelTypePreference.string,
+                        distancePreference.distancePreference.toString(),
+                        facilitiesPreference.facilitiesPreference.toString(),
+                      );
+                      searchResult.setSearchResult(stations);
+                    }
+                  }
                 },
                 icon: const Icon(
                   Icons.search,

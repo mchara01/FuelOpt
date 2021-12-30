@@ -1,13 +1,15 @@
 import 'dart:collection';
 import 'dart:convert';
 import 'dart:io';
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:fuel_opt/model/fuelprice_model.dart';
+import 'package:fuel_opt/model/search_options.dart';
 import 'package:fuel_opt/model/search_result.dart';
-import 'package:fuel_opt/model/top_3_station_result.dart';
+import 'package:fuel_opt/widgets/search_result_list.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import '../model/stations_data_model.dart';
+import '../model/stations_model.dart';
 import 'package:http/http.dart' as http;
-import 'package:flutter/services.dart' show rootBundle;
 
 /*
 Test
@@ -20,14 +22,32 @@ class FuelStationDataService {
     return [..._stations];
   }
 
-  Future<List<StationResult>> getStationsLocal() async {
-    var jsonText = await rootBundle.loadString('assets/test.json');
-    List data = jsonDecode(jsonText) as List;
-    List<StationResult> stationData = data.map((stationJson) => StationResult.fromJson(stationJson)).toList();
-    return stationData;
+  Future<List> address2Coordinates(String location) async {
+    String urlstring =
+        "https://eu1.locationiq.com/v1/search.php?key=pk.bd315221041f3e0a99e6464f9de0157a" +
+            "&q=" +
+            location.toString().replaceAll(' ', '%20') +
+            "&format=json";
+    final url = Uri.parse(urlstring);
+    var request = http.Request('GET', url);
+    http.StreamedResponse response = await request.send();
+
+    if (response.statusCode == 200) {
+      var data = json.decode(await response.stream.bytesToString());
+      final validMap =
+          json.decode(json.encode(data[0])) as Map<String, dynamic>;
+      if (validMap.containsKey('lat')) {
+        return [validMap['lat'], validMap['lon']];
+      } else {
+        return [];
+      }
+    } else {
+      print(response.reasonPhrase);
+      return [];
+    }
   }
 
-  Future<StationResult> getStationDetail(var stationId) async {
+  Future<Station> getStationDetail(var stationId) async {
     String urlstring =
         'http://18.170.63.134:8000/apis/station/' + stationId.toString();
     final url = Uri.parse(urlstring);
@@ -86,18 +106,12 @@ class FuelStationDataService {
     return Future.value([]);
   }
 
-  Future<List<Top3StationResult>> getTopThreeStationsLocal() async {
-    var jsonText = await rootBundle.loadString('assets/test_top3.json');
-    var jsonData = json.decode(jsonText) as List;
-    List<Top3StationResult> top3StationResults = jsonData.map<Top3StationResult>((top3StationResultJson) => Top3StationResult.fromJson(top3StationResultJson)).toList();
-    return top3StationResults;
-  }
-
   Future<List<Station>> getSearchResults(
       String address,
       String sortByPreference,
       String fuelTypePreference,
-      String distancePreference) async {
+      String distancePreference,
+      String facilitiesPreference) async {
     String urlstring = 'http://18.170.63.134:8000/apis/search/?' +
         'user_preference=' +
         sortByPreference +
@@ -107,7 +121,11 @@ class FuelStationDataService {
         fuelTypePreference +
         '&distance=' +
         distancePreference.toString() +
-        '&amenities=';
+        '&amenities=' +
+        facilitiesPreference
+            .replaceAll('{', "")
+            .replaceAll("}", "")
+            .replaceAll(" ", "");
 
     final url = Uri.parse(urlstring);
     print(url);
@@ -133,37 +151,33 @@ class FuelStationDataService {
   }
 
   Future<int> updateInfo(
-    int staionId,
+    int stationId,
     HashMap info,
     String token,
   ) async {
-    String urlstring = 'http://18.170.63.134:8000/apis/review/?' +
-        'station=' +
-        staionId.toString() +
-        '&close=' +
-        info['closed'] +
-        '&congestion=' +
-        info['congestion'] +
-        '&unleaded_price=' +
-        info['unleaded'] +
-        '&diesel_price=' +
-        info['diesel'] +
-        '&super_unleaded_price=' +
-        info['superUnleaded'] +
-        '&premium_diesel_price=' +
-        info['premiumDiesel'];
+    String urlstring = 'http://18.170.63.134:8000/apis/review/?';
 
     final url = Uri.parse(urlstring);
-    print(url);
-    print(token);
+
     final response = await http.post(
       url,
+      body: {
+        "station": stationId.toString(),
+        'open': info['open'],
+        'congestion': info['congestion'],
+        'unleaded_price': info['unleaded'],
+        'diesel_price': info['diesel'],
+        'super_unleaded_price': info['superUnleaded'],
+        'premium_diesel_price': info['premiumDiesel'],
+      },
       headers: {"Authorization": 'Token ' + token},
     );
+
     print(response.statusCode);
+    // if the receipt got accepted
     if (response.statusCode == 200) {
       return 1;
-    } else if (response.statusCode == 500) {
+    } else if (response.statusCode == 555) {
       // anomalous price
       return 2;
     } else {
@@ -172,29 +186,31 @@ class FuelStationDataService {
   }
 
   Future<bool> updateImage(
-    int staionId,
+    int stationId,
     File image,
     String token,
   ) async {
     String urlstring = 'http://18.170.63.134:8000/apis/review/?' +
         'station=' +
-        staionId.toString();
+        stationId.toString();
 
     final url = Uri.parse(urlstring);
     print(url);
     var request = http.MultipartRequest(
       'POST',
       url,
-    );
-    var headers = {'Token': token};
-    var pic = await http.MultipartFile.fromPath("file_field", image.path);
+    )..fields["station"] = stationId.toString();
+    var headers = {"Authorization": 'Token ' + token};
+    var pic = await http.MultipartFile.fromPath("receipt", image.path);
     request.files.add(pic);
     request.headers.addAll(headers);
     http.StreamedResponse response = await request.send();
 
     print(response.statusCode);
+    // if the receipt was accepted
     if (response.statusCode == 200) {
       return true;
+      // if the receipt was not accepted or errored out
     } else {
       return false;
     }
@@ -210,6 +226,20 @@ class AccountFunctionality {
     return _singleton;
   }
   AccountFunctionality._internal();
+
+  Future<bool> logout() async {
+    String urlstring = 'http://18.170.63.134:8000/rest-auth/logout/';
+    final url = Uri.parse(urlstring);
+    var request = http.MultipartRequest('POST', url);
+    http.StreamedResponse response = await request.send();
+
+    if (response.statusCode == 200) {
+      accessToken = "None";
+      return true;
+    } else {
+      return false;
+    }
+  }
 
   Future<bool> login(String username, String password) async {
     String urlstring = 'http://18.170.63.134:8000/rest-auth/login/';

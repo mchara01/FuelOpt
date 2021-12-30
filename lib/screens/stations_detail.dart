@@ -5,10 +5,13 @@ import 'package:fuel_opt/screens/registration_screen.dart';
 import 'package:fuel_opt/screens/review_screen.dart';
 import 'package:fuel_opt/widgets/border_box.dart';
 import 'package:fuel_opt/widgets/options_button.dart';
+import 'package:provider/provider.dart';
+import '../model/search_options.dart';
 import '../utils/appColors.dart' as appColors;
 import '../utils/theme.dart' as appTheme;
 import 'package:fuel_opt/api/api.dart';
-import 'package:fuel_opt/model/stations_data_model.dart';
+import 'package:fuel_opt/model/stations_model.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class StationsDetail extends StatelessWidget {
   StationResult station;
@@ -19,6 +22,8 @@ class StationsDetail extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final searchQuery = Provider.of<SearchQueryModel>(context);
+
     final Size size = MediaQuery.of(context).size;
     final double padding = 25;
     final EdgeInsets horizontalPadding =
@@ -50,20 +55,28 @@ class StationsDetail extends StatelessWidget {
                                 Navigator.pop(context);
                               },
                             )),
-                        OptionButton(
-                            icon: Icons.directions,
-                            text: "Directions",
-                            width: size.width * 0.4),
+                        TextButton.icon(
+                          onPressed: () {
+                            _launchMap(searchQuery.searchQuery.toString(),
+                                station.latitude, station.longitude);
+                          },
+                          style: ButtonStyle(
+                              backgroundColor: MaterialStateProperty.all<Color>(
+                                  appColors.PrimaryBlue)),
+                          icon: Icon(
+                            Icons.directions,
+                            color: appColors.COLOR_White,
+                          ),
+                          label: Text(
+                            'Directions',
+                            style: TextStyle(
+                                color: appColors.COLOR_White,
+                                fontWeight: FontWeight.bold),
+                          ),
+                        ),
                       ],
                     ),
                   ),
-                  // SizedBox(height: padding),
-                  // Padding(
-                  //     padding: horizontalPadding,
-                  //     child: Text(
-                  //       "Test",
-                  //       style: appTheme.TEXT_THEME_DEFAULT.bodyText2,
-                  //     )),
                   SizedBox(height: 10),
                   Padding(
                       padding: EdgeInsets.symmetric(horizontal: padding),
@@ -83,7 +96,7 @@ class StationsDetail extends StatelessWidget {
                     child: Row(
                       children: [
                         if (station.car_wash == 1) "Car Wash",
-                        if (station.air_and_water == 1) "Air and Water",
+                        if (station.air_and_water == 1) "Air & Water",
                         if (station.car_vacuum == 1) "Car Vacuum",
                         if (station.number_24_7_opening_hours == 1) "24/7",
                         if (station.toilet == 1) "Toilet",
@@ -92,12 +105,12 @@ class StationsDetail extends StatelessWidget {
                         if (station.atm == 1) "ATM",
                         if (station.parking_facilities == 1) "Parking",
                         if (station.disabled_toilet_baby_change == 1)
-                          "Disabled Toilet",
+                          "Disabled Toilet/Baby Change",
                         if (station.alcohol == 1) "Alcohol",
                         if (station.wi_fi == 1) "WIFI",
-                        if (station.hgv_psv_fueling == 1) "Hgv Psv",
+                        if (station.hgv_psv_fueling == 1) "HGV PSV",
                         if (station.fuelservice == 1) "Fuel Service",
-                        if (station.payphone == 1) "Pay by Phone",
+                        if (station.payphone == 1) "Mobile Pay",
                         if (station.restaurant == 1) "Restaurant",
                         if (station.electric_car_charging == 1)
                           "Electric Car Charging",
@@ -242,30 +255,33 @@ class StationsDetail extends StatelessWidget {
                 width: size.width,
                 child: Center(
                   child: TextButton.icon(
+                    style: ButtonStyle(
+                        backgroundColor: MaterialStateProperty.all<Color>(
+                            appColors.PrimaryBlue)),
                     onPressed: () async {
                       AccountFunctionality accountFunctionality =
                           AccountFunctionality();
                       String token =
-                          await accountFunctionality.getAccessToken();
+                          accountFunctionality.getAccessToken();
                       // token = 'Token 50ccba64d862962d71639294c5bb1f83808e6cd1';
 
                       if (token == 'None') {
                         Navigator.of(context).push(MaterialPageRoute(
-                            builder: (context) => LoginScreen()));
+                            builder: (context) => const LoginScreen()));
                       } else {
                         Navigator.of(context).push(MaterialPageRoute(
                             builder: (context) =>
-                                ReviewScreen(station.station_id, token)));
+                                ReviewScreen(station.station_id, token,station.name)));
                       }
                     },
-                    icon: Icon(
+                    icon: const Icon(
                       Icons.map_rounded,
-                      color: appColors.PrimaryBlue,
+                      color: appColors.COLOR_White,
                     ),
-                    label: Text(
-                      'Review Stations',
+                    label: const Text(
+                      'Update Price/Status',
                       style: TextStyle(
-                          color: appColors.PrimaryBlue,
+                          color: appColors.COLOR_White,
                           fontWeight: FontWeight.bold),
                     ),
                   ),
@@ -297,5 +313,30 @@ class ChoiceOption extends StatelessWidget {
       margin: const EdgeInsets.only(left: 10),
       child: Text(text, style: appTheme.TEXT_THEME_DEFAULT.headline5),
     );
+  }
+}
+
+_launchMap(sourceLocation, destinationLatitude, destinationLongitude) async {
+  FuelStationDataService fuelStationDataService = FuelStationDataService();
+  List coordinates =
+      await fuelStationDataService.address2Coordinates(sourceLocation);
+  if (coordinates.length == 2) {
+    String sourceLatitude = coordinates[0];
+    String sourceLongitude = coordinates[1];
+    String mapOptions = [
+      'saddr=$sourceLatitude,$sourceLongitude',
+      'daddr=$destinationLatitude,$destinationLongitude',
+      'travelmode=driving',
+      'dir_action=navigate'
+    ].join('&');
+
+    final url = 'https://www.google.com/maps?$mapOptions';
+    if (await canLaunch(url) != null) {
+      await launch(url);
+    } else {
+      throw 'Could not launch $url';
+    }
+  } else {
+    throw 'Could not decode $sourceLocation';
   }
 }

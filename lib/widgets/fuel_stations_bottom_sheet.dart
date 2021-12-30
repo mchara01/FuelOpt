@@ -46,9 +46,9 @@ class _FuelStationsBottomSheetState extends State<FuelStationsBottomSheet> {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider(
-          create: (context) => SearchQueryModel(),
-        ),
+        // ChangeNotifierProvider(
+        //   create: (context) => SearchQueryModel(),
+        // ),
         ChangeNotifierProvider(
           create: (context) => SortByPreferenceModel(),
         ),
@@ -58,6 +58,12 @@ class _FuelStationsBottomSheetState extends State<FuelStationsBottomSheet> {
         ChangeNotifierProvider(
           create: (context) => DistancePreferenceModel(),
         ),
+        ChangeNotifierProvider(
+          create: (context) => FacilitiesPreferenceModel(),
+        ),
+        // ChangeNotifierProvider(
+        //   create: (context) => SearchResultModel(),
+        // )
       ],
       child: SnappingSheet(
         controller: snappingSheetController,
@@ -85,8 +91,9 @@ class _FuelStationsBottomSheetState extends State<FuelStationsBottomSheet> {
         sheetBelow: SnappingSheetContent(
             child: const StationSheetBelow(),
             draggable: true),
-        initialSnappingPosition:
-            const SnappingPosition.factor(positionFactor: 0.4),
+        initialSnappingPosition: const SnappingPosition.factor(
+            positionFactor: 0.0,
+            grabbingContentOffset: GrabbingContentOffset.top),
         snappingPositions: const [
           SnappingPosition.factor(
               positionFactor: 0.0,
