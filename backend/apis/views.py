@@ -13,7 +13,7 @@ from django.shortcuts import render, redirect
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from stations import models
 from .serializers import StationSerializer
-from .utils import get_duration_distance, sort_by_price, geocoding, query_sorted_order, create_response, check_and_update, read_receipt
+from .utils import geocoding_with_postcode, geocoding_with_name, get_duration_distance, sort_by_price, query_sorted_order, create_response, check_and_update, read_receipt
 
 class ListStation(generics.ListCreateAPIView):
     permission_classes = (IsAuthenticated,)
@@ -186,9 +186,12 @@ def search(request):
         amenities_list = request.GET['amenities'].split(',')
 
         try:
-            user_lat, user_lng = geocoding(user_location)
+            user_lat, user_lng = geocoding_with_postcode(user_location)
         except ValueError as e:
-            return JsonResponse({ 'status':'false', 'message': str(e) }, status=500)
+            try:
+                user_lat, user_lng = geocoding_with_name(user_location)
+            except ValueError as e:
+                return JsonResponse({ 'status':'false', 'message': str(e) }, status=500)
 
         # Default distance range
         if max_radius_km == '':
