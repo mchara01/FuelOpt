@@ -106,6 +106,11 @@ def create_response(preferences_list,travel_traffic_durations,travel_distance,ca
     return response
 
 def check_and_update(fuel_type, price, fuel_prices, user_review):
+    # If price was previously None
+    if getattr(fuel_prices, fuel_type) is None:
+        return False
+
+    # If price was previously available
     if (price < float(getattr(fuel_prices, fuel_type)) * 1.05 and \
         price > float(getattr(fuel_prices, fuel_type)) * 0.95) or price == 0:
         if price == 0:

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:fuel_opt/model/search_options.dart';
 import 'package:provider/provider.dart';
+import '../../utils/app_colors.dart' as appColors;
 
 class DistanceOptions extends StatefulWidget {
   final void Function() onTapClose;
@@ -12,7 +13,6 @@ class DistanceOptions extends StatefulWidget {
 }
 
 class _DistanceOptionsState extends State<DistanceOptions> {
-  double distance = 30;
 
   @override
   Widget build(BuildContext context) {
@@ -31,9 +31,11 @@ class _DistanceOptionsState extends State<DistanceOptions> {
                 Expanded(
                   child: Slider(
                     value: distancePreferenceModel.distancePreference,
-                    min: 0,
-                    max: 50,
-                    divisions: 50,
+                    activeColor: appColors.PrimaryBlue, // The color to use for the portion of the slider track that is active.
+                    thumbColor: appColors.PrimaryBlue,
+                    min: 1,
+                    max: 20,
+                    divisions: 19,
                     onChanged: (newDistance) {
                       distancePreferenceModel
                           .setDistancePreference(newDistance);

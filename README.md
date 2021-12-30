@@ -30,6 +30,8 @@ samples, guidance on mobile development, and a full API reference.
 * **Alicia Jiayun Law** - *ajl115@ic.ac.uk*
 * **Dimosthenis Tsormpatzoudis** - *dt521@ic.ac.uk*
 * **Nadim Rahman** - *nr421@ic.ac.uk*
+* **Dennis Duka** - *dn321@ic.ac.uk*
+* **Ye Liu** - *yl10321@ic.ac.uk*
 * **ENTER YOUR NAMES AND EMAILS**
 
 ## License
