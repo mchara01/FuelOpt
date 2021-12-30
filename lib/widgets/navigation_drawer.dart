@@ -77,8 +77,6 @@ class NavigationDrawerWidget extends StatelessWidget {
         if (output) {
           Fluttertoast.showToast(msg: "Logout Successful");
         }
-        Navigator.of(context)
-            .push(MaterialPageRoute(builder: (context) => LoginScreen()));
         break;
     }
   }
