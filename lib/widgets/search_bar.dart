@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:fuel_opt/model/filter_enums.dart';
 import 'package:fuel_opt/model/search_options.dart';
-import 'package:fuel_opt/model/search_result.dart';
+import 'package:fuel_opt/model/stations_data_model.dart';
 import 'package:provider/provider.dart';
 import '../utils/app_colors.dart' as appColors;
 import 'package:fuel_opt/api/api.dart';
@@ -21,10 +21,10 @@ class _SearchState extends State<SearchBar> {
   @override
   Widget build(BuildContext context) {
     final searchQuery = Provider.of<SearchQueryModel>(context);
-    final sortByPreference = Provider.of<SortByPreferenceModel>(context);
-    final fuelTypePreference = Provider.of<FuelTypePreferenceModel>(context);
-    final distancePreference = Provider.of<DistancePreferenceModel>(context);
-    final searchResult = Provider.of<SearchResultModel>(context);
+    final sortByPreference = Provider.of<SortByPreferenceModel>(context, listen: false);
+    final fuelTypePreference = Provider.of<FuelTypePreferenceModel>(context, listen: false);
+    final distancePreference = Provider.of<DistancePreferenceModel>(context, listen: false);
+    final searchResult = Provider.of<SearchResultModel>(context, listen: false);
 
     return FractionallySizedBox(
       widthFactor: 0.8,
@@ -60,7 +60,7 @@ class _SearchState extends State<SearchBar> {
                 onPressed: () async {
                   FuelStationDataService fuelStationDataService =
                       FuelStationDataService();
-                  List<StationResult> stations =
+                  List<Station> stations =
                       await fuelStationDataService.getSearchResults(
                           searchQuery.searchQuery.toString(),
                           sortByPreference.sortByPreference.string,

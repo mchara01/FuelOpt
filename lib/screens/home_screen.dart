@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:fuel_opt/api/api.dart';
-import 'package:fuel_opt/main.dart';
 import 'package:fuel_opt/model/search_options.dart';
 import 'package:fuel_opt/model/search_result.dart';
 import 'package:fuel_opt/model/stations_data_model.dart';
@@ -13,14 +12,8 @@ import 'package:fuel_opt/widgets/dialog.dart';
 import 'package:fuel_opt/widgets/fuel_stations_bottom_sheet.dart';
 import 'package:fuel_opt/widgets/navigation_drawer.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:http/http.dart';
-import 'package:location/location.dart';
-import 'package:fuel_opt/widgets/options_button.dart';
 import 'package:provider/provider.dart';
 import '../utils/appColors.dart' as appColors;
-import 'package:fluttertoast/fluttertoast.dart';
-import 'package:path_provider/path_provider.dart';
-import 'dart:io';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -51,7 +44,7 @@ class MapState extends State<Map> {
 
   final Set<Marker> _markers = <Marker>{};
 
-  int _markerIdCounter = 1;
+  int _markerIdCounter = 0;
 
   late BitmapDescriptor fuelStationIcon;
 
@@ -61,12 +54,6 @@ class MapState extends State<Map> {
     createFuelStationIcon('assets/gas_station.png', const Color(0xFF002060))
         .then((BitmapDescriptor icon) {
       fuelStationIcon = icon;
-      setState(() {
-        _markers.add(Marker(
-            markerId: MarkerId('0'),
-            position: LatLng(51.5074, 0.1278),
-            icon: fuelStationIcon));
-      });
     });
   }
 
@@ -80,49 +67,73 @@ class MapState extends State<Map> {
         create: (context) => SearchResultModel(),
         child: Stack(
           children: [
-            GoogleMap(
-              mapType: MapType.normal,
-              initialCameraPosition: _initialCameraPosition,
-              onMapCreated: (GoogleMapController controller) async {
-                mapController = controller;
-                // await _locationManager.checkAndRequestService();
-                // await _locationManager.checkAndRequestPermission();
-                // _locationManager.setOnLocationChanged((LocationData newLocation) {
-                //   print('location changed');
-                //   print('lat' + newLocation.latitude.toString());
-                //   print('long' + newLocation.longitude.toString());
-                //   mapController.animateCamera(CameraUpdate.newCameraPosition(
-                //       CameraPosition(target: LatLng(newLocation.latitude as double,
-                //           newLocation.longitude as double), zoom: 15)));
-                // });
-                // LocationData? locationData = await _locationManager.getLocation();
-                // if (locationData != null) {
-                //   mapController.animateCamera(CameraUpdate.newCameraPosition(
-                //       CameraPosition(
-                //           target: LatLng(locationData.latitude as double,
-                //               locationData.longitude as double),
-                //           zoom: 15)));
-                // }
-                FuelStationDataService fuelStationDataService =
-                    FuelStationDataService();
-                LatLngBounds mapBounds = await mapController.getVisibleRegion();
-                List<StationResult>? stations =
-                    await fuelStationDataService.getStations(mapBounds);
-                if (stations != null) {
-                  print(stations.length);
-                  stations.forEach((station) {
+            Consumer<SearchResultModel>(
+              builder: (context, searchResult, childWidget) {
+                _markerIdCounter = 0;
+                _markers.clear();
+                List<Station> stations = searchResult.stations;
+                if(stations is List<Top3StationResult>) {
+                  List<Top3StationResult> top3ResultList = stations.cast<Top3StationResult>();
+                  for (var top3Result in top3ResultList) {
+                    for (var station in top3Result.top3Stations) {
+                      final String _markerIdValue = 'marker_id_$_markerIdCounter';
+                      _markerIdCounter++;
+                      _markers.add(Marker(
+                          markerId: MarkerId(_markerIdValue),
+                          position: LatLng(
+                              station.latitude, station.longitude),
+                          icon: fuelStationIcon));
+                    }
+                  }
+                }
+                else{
+                  List<StationResult> top3ResultList = stations.cast<StationResult>();
+                  for (var station in top3ResultList) {
                     final String _markerIdValue = 'marker_id_$_markerIdCounter';
                     _markerIdCounter++;
                     _markers.add(Marker(
                         markerId: MarkerId(_markerIdValue),
-                        position: LatLng(station.latitude, station.longitude),
+                        position: LatLng(
+                            station.latitude, station.longitude),
                         icon: fuelStationIcon));
-                  });
+                  }
                 }
-                setState(() {});
-                _controller.complete(controller);
-              },
-              markers: _markers,
+                return GoogleMap(
+                  mapType: MapType.normal,
+                  initialCameraPosition: _initialCameraPosition,
+                  onMapCreated: (GoogleMapController controller) async {
+                    mapController = controller;
+                    // await _locationManager.checkAndRequestService();
+                    // await _locationManager.checkAndRequestPermission();
+                    // _locationManager.setOnLocationChanged((LocationData newLocation) {
+                    //   print('location changed');
+                    //   print('lat' + newLocation.latitude.toString());
+                    //   print('long' + newLocation.longitude.toString());
+                    //   mapController.animateCamera(CameraUpdate.newCameraPosition(
+                    //       CameraPosition(target: LatLng(newLocation.latitude as double,
+                    //           newLocation.longitude as double), zoom: 15)));
+                    // });
+                    // LocationData? locationData = await _locationManager.getLocation();
+                    // if (locationData != null) {
+                    //   mapController.animateCamera(CameraUpdate.newCameraPosition(
+                    //       CameraPosition(
+                    //           target: LatLng(locationData.latitude as double,
+                    //               locationData.longitude as double),
+                    //           zoom: 15)));
+                    // }
+                    FuelStationDataService fuelStationDataService =
+                    FuelStationDataService();
+                    LatLngBounds mapBounds = await mapController
+                        .getVisibleRegion();
+                    List<StationResult>? stations =
+                    await fuelStationDataService.getStations(mapBounds);
+                    Provider.of<SearchResultModel>(context, listen: false).setSearchResult(
+                        stations);
+                    _controller.complete(controller);
+                  },
+                  markers: _markers,
+                );
+              }
             ),
             const FuelStationsBottomSheet(),
             Builder(builder: (context) {
@@ -132,11 +143,11 @@ class MapState extends State<Map> {
                 child: TextButton(
                   style: TextButton.styleFrom(
                     backgroundColor: appColors.PrimaryBlue,
-                    shape: CircleBorder(),
+                    shape: const CircleBorder(),
                   ),
-                  child: Icon(
+                  child: const Icon(
                     Icons.menu,
-                    color: appColors.COLOR_White,
+                    color: Colors.white,
                   ),
                   onPressed: () {
                     Scaffold.of(context).openDrawer();
@@ -144,7 +155,7 @@ class MapState extends State<Map> {
                 ),
               );
             }),
-            DialogWidget()
+            const DialogWidget()
           ],
         ),
       ),

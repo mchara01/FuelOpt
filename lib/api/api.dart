@@ -1,7 +1,6 @@
 import 'dart:collection';
 import 'dart:convert';
 import 'dart:io';
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fuel_opt/model/search_result.dart';
 import 'package:fuel_opt/model/top_3_station_result.dart';
@@ -48,7 +47,7 @@ class FuelStationDataService {
     return Future.value(null);
   }
 
-  Future<List<StationResult>?> getStations(LatLngBounds latLngBounds) async {
+  Future<List<StationResult>> getStations(LatLngBounds latLngBounds) async {
     String maxLat = latLngBounds.northeast.latitude.toString();
     String maxLng = latLngBounds.northeast.longitude.toString();
     String minLat = latLngBounds.southwest.latitude.toString();
@@ -84,7 +83,7 @@ class FuelStationDataService {
       print(response.reasonPhrase);
     }
 
-    return Future.value(null);
+    return Future.value([]);
   }
 
   Future<List<Top3StationResult>> getTopThreeStationsLocal() async {
@@ -94,7 +93,7 @@ class FuelStationDataService {
     return top3StationResults;
   }
 
-  Future<List<StationResult>> getSearchResults(
+  Future<List<Station>> getSearchResults(
       String address,
       String sortByPreference,
       String fuelTypePreference,
@@ -117,14 +116,19 @@ class FuelStationDataService {
     print(response.statusCode);
     if (response.statusCode == 200) {
       var data = json.decode(response.body) as List;
-      List<StationResult> stations = data
-          .map<StationResult>((json) => StationResult.fromJson(json))
-          .toList();
-      print(stations);
+      List<Station> stations = [];
+      if(data.isNotEmpty) {
+        var firstElement = data[0] as Map;
+        if(firstElement.containsKey('fuel_type')) {
+          stations = data.map<Top3StationResult>((json) => Top3StationResult.fromJson(json)).toList();
+        }
+        else{
+          stations = data.map<StationResult>((json) => StationResult.fromJson(json)).toList();
+        }
+      }
       return stations;
     } else {
       return [];
-      // throw Exception('Failed to load data');
     }
   }
 
