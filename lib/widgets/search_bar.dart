@@ -49,7 +49,7 @@ class _SearchState extends State<SearchBar> {
                 return TextField(
                   controller: _textEditingController,
                   decoration: const InputDecoration(
-                      hintText: 'Current Location', border: InputBorder.none),
+                      hintText: 'Starting Point', border: InputBorder.none),
                   onTap: widget.searchOnTap,
                   onChanged: (value) {
                     searchQueryModel.setSearchQuery(value);
@@ -67,20 +67,24 @@ class _SearchState extends State<SearchBar> {
                   } else {
                     FuelStationDataService fuelStationDataService =
                         FuelStationDataService();
-                    List coordinates = await fuelStationDataService.address2Coordinates(searchQuery.searchQuery.toString());
+                    List coordinates =
+                        await fuelStationDataService.address2Coordinates(
+                            searchQuery.searchQuery.toString());
                     if (coordinates.isEmpty) {
-                      Fluttertoast.showToast(msg: "Please input a valid location");
-                    } else{
-                    List<StationResult> stations =
-                        await fuelStationDataService.getSearchResults(
-                      searchQuery.searchQuery.toString(),
-                      sortByPreference.sortByPreference.string,
-                      fuelTypePreference.fuelTypePreference.string,
-                      distancePreference.distancePreference.toString(),
-                      facilitiesPreference.facilitiesPreference.toString(),
-                    );
-                    searchResult.setSearchResult(stations);
-                  }}
+                      Fluttertoast.showToast(
+                          msg: "Please input a valid location");
+                    } else {
+                      List<StationResult> stations =
+                          await fuelStationDataService.getSearchResults(
+                        searchQuery.searchQuery.toString(),
+                        sortByPreference.sortByPreference.string,
+                        fuelTypePreference.fuelTypePreference.string,
+                        distancePreference.distancePreference.toString(),
+                        facilitiesPreference.facilitiesPreference.toString(),
+                      );
+                      searchResult.setSearchResult(stations);
+                    }
+                  }
                 },
                 icon: const Icon(
                   Icons.search,

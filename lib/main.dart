@@ -18,7 +18,7 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   var androidInitialize =
-      new AndroidInitializationSettings('@mipmap-hdpi/ic_launcher.png');
+      new AndroidInitializationSettings('@drawable/ic_launcher_background');
   var iOSInitialize = new IOSInitializationSettings();
 
   var initializationSettings = new InitializationSettings(

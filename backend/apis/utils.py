@@ -52,10 +52,10 @@ def sort_by_price(preferences_list, travel_traffic_durations, travel_distance, p
 
     return sorted_station_pks
 
-def geocoding(location):
+def geocoding_with_name(location):
     location_iq_key = "pk.bd315221041f3e0a99e6464f9de0157a"
     routeUrl = "https://eu1.locationiq.com/v1/search.php?key=" + location_iq_key + "&q=" + str(
-        location.replace(' ', '%20')) + "&format=json"
+        location.replace(' ', '%20')) + "%20London" + "&format=json"
 
     request = urllib.request.Request(routeUrl)
     response = urllib.request.urlopen(request)
@@ -64,10 +64,26 @@ def geocoding(location):
     result = json.loads(r)
 
     if result[0]['lat']:
+        print ('lat lng found')
         return float(result[0]['lat']), float(result[0]['lon'])
     else:
         raise ValueError('Unable to geocode')
 
+def geocoding_with_postcode(postcode):
+    routeUrl = "http://api.getthedata.com/postcode/" + postcode.replace(' ','+')
+    request = urllib.request.Request(routeUrl)
+    response = urllib.request.urlopen(request)
+
+    r = response.read().decode(encoding="utf-8")
+    result = json.loads(r)
+
+    try:
+        latitude = float(result['data']['latitude'])
+        longitude = float(result['data']['longitude'])
+        print ('lat lng found')
+        return latitude, longitude
+    except KeyError:
+        raise ValueError('Unable to geocode')
 
 def query_sorted_order(pk_list):
     """ Query stations in sorted order and append into a list. """
@@ -90,6 +106,11 @@ def create_response(preferences_list,travel_traffic_durations,travel_distance,ca
     return response
 
 def check_and_update(fuel_type, price, fuel_prices, user_review):
+    # If price was previously None
+    if getattr(fuel_prices, fuel_type) is None:
+        return False
+
+    # If price was previously available
     if (price < float(getattr(fuel_prices, fuel_type)) * 1.05 and \
         price > float(getattr(fuel_prices, fuel_type)) * 0.95) or price == 0:
         if price == 0:
