@@ -8,7 +8,7 @@ import 'package:fuel_opt/widgets/options_button.dart';
 import '../utils/appColors.dart' as appColors;
 import '../utils/theme.dart' as appTheme;
 import 'package:fuel_opt/api/api.dart';
-import 'package:fuel_opt/model/stations_model.dart';
+import 'package:fuel_opt/model/stations_data_model.dart';
 
 class StationsDetail extends StatelessWidget {
   StationResult station;

@@ -1,6 +1,6 @@
-import 'package:fuel_opt/model/search_result.dart';
 import 'package:flutter/material.dart';
 import 'package:fuel_opt/model/filter_enums.dart';
+import 'package:fuel_opt/model/stations_data_model.dart';
 
 class SearchQueryModel extends ChangeNotifier {
   String searchQuery = '';
@@ -40,9 +40,9 @@ class DistancePreferenceModel extends ChangeNotifier {
 }
 
 class SearchResultModel extends ChangeNotifier {
-  List<StationResult> stations = [];
+  List<Station> stations = [];
 
-  void setSearchResult(List<StationResult> stations) {
+  void setSearchResult(List<Station> stations) {
     this.stations = stations;
     notifyListeners();
   }

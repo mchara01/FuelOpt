@@ -4,41 +4,15 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fuel_opt/model/search_result.dart';
+import 'package:fuel_opt/model/top_3_station_result.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import '../model/stations_model.dart';
+import '../model/stations_data_model.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/services.dart' show rootBundle;
 
 /*
 Test
 */
-class StationsProvider with ChangeNotifier {
-  StationsProvider() {
-    this.fetchTasks();
-  }
-
-  List<Station> _stations = [];
-
-  List<Station> get stations {
-    return [..._stations];
-  }
-
-  fetchTasks() async {
-    // Android Emulator
-    final url = Uri.parse('http://18.170.63.134:8000/apis/v1/?format=json');
-
-    // Chrome Emulator
-    //final url = Uri.parse('http://localhost:8000/apis/v1/?format=json');
-
-    final response = await http.get(url);
-
-    if (response.statusCode == 200) {
-      var data = json.decode(response.body) as List;
-      _stations = data.map<Station>((json) => Station.fromJson(json)).toList();
-      notifyListeners();
-    }
-  }
-}
 
 class FuelStationDataService {
   List<Station> _stations = [];
@@ -54,7 +28,7 @@ class FuelStationDataService {
     return stationData;
   }
 
-  Future<Station> getStationDetail(var stationId) async {
+  Future<StationResult> getStationDetail(var stationId) async {
     String urlstring =
         'http://18.170.63.134:8000/apis/station/' + stationId.toString();
     final url = Uri.parse(urlstring);
@@ -66,7 +40,7 @@ class FuelStationDataService {
     if (response.statusCode == 200) {
       var data = json.decode(await response.stream.bytesToString());
       print(data);
-      Station station = Station.fromJson(data);
+      StationResult station = StationResult.fromJson(data);
       return station;
     } else {
       print(response.reasonPhrase);
@@ -74,7 +48,7 @@ class FuelStationDataService {
     return Future.value(null);
   }
 
-  Future<List<Station>?> getStations(LatLngBounds latLngBounds) async {
+  Future<List<StationResult>?> getStations(LatLngBounds latLngBounds) async {
     String maxLat = latLngBounds.northeast.latitude.toString();
     String maxLng = latLngBounds.northeast.longitude.toString();
     String minLat = latLngBounds.southwest.latitude.toString();
@@ -103,14 +77,21 @@ class FuelStationDataService {
 
     if (response.statusCode == 200) {
       var data = json.decode(await response.stream.bytesToString()) as List;
-      List<Station> stations =
-          data.map<Station>((json) => Station.fromJson(json)).toList();
+      List<StationResult> stations =
+          data.map<StationResult>((json) => StationResult.fromJson(json)).toList();
       return stations;
     } else {
       print(response.reasonPhrase);
     }
 
     return Future.value(null);
+  }
+
+  Future<List<Top3StationResult>> getTopThreeStationsLocal() async {
+    var jsonText = await rootBundle.loadString('assets/test_top3.json');
+    var jsonData = json.decode(jsonText) as List;
+    List<Top3StationResult> top3StationResults = jsonData.map<Top3StationResult>((top3StationResultJson) => Top3StationResult.fromJson(top3StationResultJson)).toList();
+    return top3StationResults;
   }
 
   Future<List<StationResult>> getSearchResults(

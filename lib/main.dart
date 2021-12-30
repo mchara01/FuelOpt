@@ -31,15 +31,12 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (context) => StationsProvider(),
-      child: MaterialApp(
-        title: 'FuelOpt',
-        theme: ThemeData(
-          primaryColor: const Color(0xFF002060),
-        ),
-        home: const HomeScreen(),
+    return MaterialApp(
+      title: 'FuelOpt',
+      theme: ThemeData(
+        primaryColor: const Color(0xFF002060),
       ),
+      home: const HomeScreen(),
     );
   }
 

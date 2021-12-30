@@ -18,10 +18,20 @@ extension FuelTypePreferenceExtension on FuelTypePreference {
   String get string {
     return [
       'none',
-      'unleaded',
-      'super_unleaded',
-      'diesel',
-      'premium_diesel'
+      'unleaded_price',
+      'super_unleaded_price',
+      'diesel_price',
+      'premium_diesel_price'
+    ][index];
+  }
+
+  String get displayString {
+    return [
+      'None',
+      'Unleaded',
+      'Super Unleaded',
+      'Diesel Price',
+      'Premium Diesel'
     ][index];
   }
 }
