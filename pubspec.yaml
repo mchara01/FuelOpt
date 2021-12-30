@@ -28,15 +28,11 @@ environment:
 # versions available, run `flutter pub outdated`.
 dependencies:
   cupertino_icons: ^1.0.2
-  firebase_auth: ^3.1.4
   flutter:
     sdk: flutter
   flutter_keyboard_visibility: ^5.1.0
-  flutter_local_notifications: ^9.1.4
   fluttertoast: ^8.0.8
   google_maps_flutter: ^2.0.11
-  google_maps_flutter_web: ^0.3.2
-  gzx_dropdown_menu: ^3.1.0
   http: ^0.13.4
   image_picker: ^0.8.4+4
   location: ^4.2.0

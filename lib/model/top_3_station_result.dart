@@ -14,7 +14,7 @@ class Top3StationResult extends Station {
   factory Top3StationResult.fromJson(Map<String, dynamic> json) {
     print((json['Top 3 Stations'] as List).map((stationResult) => StationResult.fromJson(stationResult)).toList());
     return Top3StationResult(
-      fuelTypePreference: FuelTypePreference.values.firstWhere((e) => e.string == json['fuel_type'] as String),
+      fuelTypePreference: FuelTypePreference.values.firstWhere((e) => e.string + '_price' == json['fuel_type'] as String),
       top3Stations: (json['Top 3 Stations'] as List).map((stationResult) => StationResult.fromJson(stationResult)).toList()
     );
   }
