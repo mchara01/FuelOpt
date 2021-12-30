@@ -249,6 +249,20 @@ class AccountFunctionality {
   }
   AccountFunctionality._internal();
 
+  Future<bool> logout() async {
+    String urlstring = 'http://18.170.63.134:8000/rest-auth/logout/';
+    final url = Uri.parse(urlstring);
+    var request = http.MultipartRequest('POST', url);
+    http.StreamedResponse response = await request.send();
+
+    if (response.statusCode == 200) {
+      accessToken = "None";
+      return true;
+    } else {
+      return false;
+    }
+  }
+
   Future<bool> login(String username, String password) async {
     String urlstring = 'http://18.170.63.134:8000/rest-auth/login/';
     final url = Uri.parse(urlstring);
