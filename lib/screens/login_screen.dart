@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:fuel_opt/screens/home_screen.dart';
 import 'package:fuel_opt/screens/registration_screen.dart';
+import 'package:provider/provider.dart';
+import '../model/user_model.dart';
 import '../utils/app_colors.dart' as appColors;
 import 'package:fuel_opt/api/api.dart';
 
@@ -22,6 +24,8 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final user = Provider.of<UserModel>(context);
+
     // Email field
     final usernameField = TextFormField(
       autofocus: false,
@@ -77,8 +81,18 @@ class _LoginScreenState extends State<LoginScreen> {
         child: MaterialButton(
           padding: EdgeInsets.fromLTRB(20, 15, 20, 15),
           minWidth: MediaQuery.of(context).size.width,
-          onPressed: () {
-            login(usernameController.text, passwordController.text);
+          onPressed: () async {
+            AccountFunctionality accountFunctionality = AccountFunctionality();
+
+            bool output = await accountFunctionality.login(
+                usernameController.text, passwordController.text);
+            if (output) {
+              Fluttertoast.showToast(msg: "Login Successful");
+              user.setUser(usernameController.text, passwordController.text);
+              Navigator.of(context).pop();
+            } else {
+              Fluttertoast.showToast(msg: "Login Unsuccessful");
+            }
           },
           child: Text(
             "Login",
@@ -164,9 +178,7 @@ class _LoginScreenState extends State<LoginScreen> {
     bool output = await accountFunctionality.login(username, password);
     if (output) {
       Fluttertoast.showToast(msg: "Login Successful");
-      //Navigator.of(context).pop();
-      Navigator.push(
-          context, MaterialPageRoute(builder: (context) => HomeScreen()));
+      Navigator.of(context).pop();
     } else {
       Fluttertoast.showToast(msg: "Login Unsuccessful");
     }

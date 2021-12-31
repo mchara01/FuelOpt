@@ -5,20 +5,26 @@ import 'package:fuel_opt/screens/login_screen.dart';
 import 'package:fuel_opt/screens/trend_screen.dart';
 import 'package:fuel_opt/screens/instructions_screen.dart';
 import 'package:provider/provider.dart';
-
-import '../model/search_options.dart';
+import '../model/user_model.dart';
 import '../utils/app_colors.dart' as appColors;
 
-class NavigationDrawerWidget extends StatelessWidget {
-  final padding = EdgeInsets.symmetric(horizontal: 20);
+class NavigationDrawerWidget extends StatefulWidget {
+  const NavigationDrawerWidget({Key? key}) : super(key: key);
 
   @override
+  _NavigationDrawerState createState() => _NavigationDrawerState();
+}
+
+class _NavigationDrawerState extends State<NavigationDrawerWidget> {
+  @override
   Widget build(BuildContext context) {
+    final user = Provider.of<UserModel>(context);
+
     return Drawer(
         child: Material(
             color: appColors.PrimaryBlue,
             child: ListView(
-              padding: padding,
+              padding: EdgeInsets.symmetric(horizontal: 20),
               children: <Widget>[
                 const SizedBox(height: 48),
                 buildMenuItem(
@@ -32,10 +38,28 @@ class NavigationDrawerWidget extends StatelessWidget {
                 Divider(
                   color: Colors.white,
                 ),
-                buildMenuItem(
-                    text: 'Sign Out',
-                    icon: Icons.help,
-                    onClicked: () => selectedItem(context, 2)),
+                user.name.isEmpty
+                    ? buildMenuItem(
+                        text: 'Log In',
+                        icon: Icons.person,
+                        onClicked: () => selectedItem(context, 3))
+                    : buildMenuItem(
+                        text: 'Sign Out',
+                        icon: Icons.person,
+                        onClicked: () async {
+                          AccountFunctionality accountFunctionality =
+                              AccountFunctionality();
+
+                          bool output = await accountFunctionality.logout();
+                          if (output) {
+                            user.setUser('', '');
+                            Fluttertoast.showToast(msg: "Logout Successful");
+                          } else {
+                            Fluttertoast.showToast(msg: "Logout Unsuccessful");
+                          }
+                        }
+                        // onClicked: () => selectedItem(context, 2)
+                        ),
               ],
             )));
   }
@@ -77,6 +101,8 @@ class NavigationDrawerWidget extends StatelessWidget {
         if (output) {
           Fluttertoast.showToast(msg: "Logout Successful");
         }
+        break;
+      case 3:
         Navigator.of(context)
             .push(MaterialPageRoute(builder: (context) => LoginScreen()));
         break;

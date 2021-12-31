@@ -258,17 +258,15 @@ class StationsDetail extends StatelessWidget {
                     onPressed: () async {
                       AccountFunctionality accountFunctionality =
                           AccountFunctionality();
-                      String token =
-                          accountFunctionality.getAccessToken();
-                      // token = 'Token 50ccba64d862962d71639294c5bb1f83808e6cd1';
+                      String token = accountFunctionality.getAccessToken();
 
                       if (token == 'None') {
                         Navigator.of(context).push(MaterialPageRoute(
                             builder: (context) => const LoginScreen()));
                       } else {
                         Navigator.of(context).push(MaterialPageRoute(
-                            builder: (context) =>
-                                ReviewScreen(station.station_id, token,station.name)));
+                            builder: (context) => ReviewScreen(
+                                station.station_id, token, station.name)));
                       }
                     },
                     icon: const Icon(
