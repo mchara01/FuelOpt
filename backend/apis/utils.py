@@ -8,50 +8,6 @@ import pytesseract
 import re
 from datetime import datetime
 
-
-# Calculate the travel duration to this station
-def get_duration_distance(lat1, lng1, lat2, lng2, key, s):
-    a = "Aiiv3MUtA8Fq3gGOuwLYLrzz_FRSm1xXUEgDZxO6-R8wg73PKwV50hxqwSrbBhXY"
-    b = "AtgHYr66s1ywNPEIHRUMJtP4wPwrzZSka4L1Vl7EQl_lf9JuIAXWThc2CxJx411o"
-    
-    if key == 'a':
-        bingMapsKey = a
-    else:
-        bingMapsKey = b
-    
-    routeUrl = "http://dev.virtualearth.net/REST/V1/Routes/Driving?wp.0=" + str(lat1) + "," + str(
-        lng1) + "&wp.1=" + str(lat2) + "," + str(lng2) + "&key=" + bingMapsKey
-    # http://dev.virtualearth.net/REST/V1/Routes/Driving?wp.0=51.0,-0.1&wp.1=51.1,-0.12&key=Aiiv3MUtA8Fq3gGOuwLYLrzz_FRSm1xXUEgDZxO6-R8wg73PKwV50hxqwSrbBhXY
-    # request = urllib.request.Request(routeUrl)
-    response = s.get(routeUrl)
-    # r = response.read().decode(encoding="utf-8")
-    result = response.json()
-
-    duration_with_traffic = result['resourceSets'][0]['resources'][0]['travelDurationTraffic'] # units: s
-    distance = result['resourceSets'][0]['resources'][0]['travelDistance'] # units: km
-
-    # return the duration and distance
-    return duration_with_traffic, distance
-
-def sort_by_price(preferences_list, travel_traffic_durations, travel_distance, preferred_fuel_prices):
-    """
-    preferences_list(query object): list of potential station candidates
-    """
-    # Assuming average speed = 50miles/hr = 80.47km/hr; 0.057litre per km;  £1.442/litre 
-    # Penalty cost for duration = £0.00184/s
-    # Penalty cost for distance = £0.0822/km
-    weighted_prices = dict()
-    for index,fuel_price in enumerate(preferences_list):
-        weighted_prices[fuel_price.station.pk] = \
-            preferred_fuel_prices[index] + \
-            Decimal(travel_traffic_durations[fuel_price.station.pk] * 0.00184) + \
-            Decimal(travel_distance[fuel_price.station.pk] * 0.0822)
-
-    sorted_weighted_prices = {k: v for k, v in sorted(weighted_prices.items(), key=lambda item: item[1])}
-    sorted_station_pks = list(sorted_weighted_prices.keys())
-
-    return sorted_station_pks
-
 def geocoding_with_name(location):
     location_iq_key = "pk.bd315221041f3e0a99e6464f9de0157a"
     routeUrl = "https://eu1.locationiq.com/v1/search.php?key=" + location_iq_key + "&q=" + str(
@@ -64,7 +20,6 @@ def geocoding_with_name(location):
     result = json.loads(r)
 
     if result[0]['lat']:
-        print ('lat lng found')
         return float(result[0]['lat']), float(result[0]['lon'])
     else:
         raise ValueError('Unable to geocode')
@@ -84,6 +39,49 @@ def geocoding_with_postcode(postcode):
         return latitude, longitude
     except KeyError:
         raise ValueError('Unable to geocode')
+
+# Calculate the travel duration to this station
+def get_duration_distance(lat1, lng1, lat2, lng2, key, s):
+    a = "Aiiv3MUtA8Fq3gGOuwLYLrzz_FRSm1xXUEgDZxO6-R8wg73PKwV50hxqwSrbBhXY"
+    b = "AtgHYr66s1ywNPEIHRUMJtP4wPwrzZSka4L1Vl7EQl_lf9JuIAXWThc2CxJx411o"
+    
+    if key == 'a':
+        bingMapsKey = a
+    else:
+        bingMapsKey = b
+    
+    routeUrl = "http://dev.virtualearth.net/REST/V1/Routes/Driving?wp.0=" + str(lat1) + "," + str(
+        lng1) + "&wp.1=" + str(lat2) + "," + str(lng2) + "&key=" + bingMapsKey
+    # http://dev.virtualearth.net/REST/V1/Routes/Driving?wp.0=51.0,-0.1&wp.1=51.1,-0.12&key=Aiiv3MUtA8Fq3gGOuwLYLrzz_FRSm1xXUEgDZxO6-R8wg73PKwV50hxqwSrbBhXY
+    # request = urllib.request.Request(routeUrl)
+    response = s.get(routeUrl)
+    # r = response.read().decode(encoding="utf-8")
+    result = response.json()
+
+    duration = result['resourceSets'][0]['resources'][0]['travelDuration'] # units: s
+    duration_with_traffic = result['resourceSets'][0]['resources'][0]['travelDurationTraffic'] # units: s
+    distance = result['resourceSets'][0]['resources'][0]['travelDistance'] # units: km
+
+    # return the duration and distance
+    return duration_with_traffic, duration, distance
+
+def sort_by_price(preferences_list, travel_traffic_durations, travel_duration, travel_distance, preferred_fuel_prices):
+    """
+    preferences_list(query object): list of potential station candidates
+    """
+    # Parameters Used:
+        # Fuel Economy: 0.054 litres per km
+        # Idle Consumption: 0.0003157 litres per s
+
+    weighted_prices = dict()
+    for index,fuel_price in enumerate(preferences_list):
+        weighted_prices[fuel_price.station.pk] =  50*preferred_fuel_prices[index] + Decimal(travel_distance[fuel_price.station.pk] * 0.07) * preferred_fuel_prices[index] + Decimal((travel_traffic_durations[fuel_price.station.pk] - travel_duration[fuel_price.station.pk]) * 0.0003157) * preferred_fuel_prices[index]
+
+    sorted_weighted_prices = {k: v for k, v in sorted(weighted_prices.items(), key=lambda item: item[1])}
+    print(sorted_weighted_prices)
+    sorted_station_pks = list(sorted_weighted_prices.keys())
+
+    return sorted_station_pks
 
 def query_sorted_order(pk_list):
     """ Query stations in sorted order and append into a list. """
