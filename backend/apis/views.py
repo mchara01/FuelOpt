@@ -196,7 +196,7 @@ def search(request):
 
         # Default distance range
         if max_radius_km == '':
-            max_radius_km = 10
+            max_radius_km = 5
 
         # (i) Distance Limit: check only for stations that are within user specified radius of the location
         # Convert radius from km to degree [110.574km = 1deg lat/lng]
