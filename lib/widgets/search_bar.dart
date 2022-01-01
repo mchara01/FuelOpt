@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:fuel_opt/model/filter_enums.dart';
@@ -49,7 +50,8 @@ class _SearchState extends State<SearchBar> {
                 return TextField(
                   controller: _textEditingController,
                   decoration: const InputDecoration(
-                      hintText: 'Gas stations near...', border: InputBorder.none),
+                      hintText: 'Gas stations near...',
+                      border: InputBorder.none),
                   onTap: widget.searchOnTap,
                   onChanged: (value) {
                     searchQueryModel.setSearchQuery(value);
@@ -74,6 +76,23 @@ class _SearchState extends State<SearchBar> {
                       Fluttertoast.showToast(
                           msg: "Please input a valid location");
                     } else {
+                      showDialog(
+                        context: context,
+                        builder: (context) => Center(
+                          child: Container(
+                            width: 60.0,
+                            height: 60.0,
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(4.0),
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsets.all(12.0),
+                              child: CupertinoActivityIndicator(),
+                            ),
+                          ),
+                        ),
+                      );
                       List<Station> stations =
                           await fuelStationDataService.getSearchResults(
                         searchQuery.searchQuery.toString(),
@@ -83,6 +102,7 @@ class _SearchState extends State<SearchBar> {
                         facilitiesPreference.facilitiesPreference.toString(),
                       );
                       searchResult.setSearchResult(stations);
+                      Navigator.pop(context);
                     }
                   }
                 },
