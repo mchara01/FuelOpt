@@ -70,7 +70,7 @@ def sort_by_price(preferences_list, travel_traffic_durations, travel_duration, t
     preferences_list(query object): list of potential station candidates
     """
     # Parameters Used:
-        # Fuel Economy: 0.054 litres per km
+        # Fuel Economy: 0.07 litres per km
         # Idle Consumption: 0.0003157 litres per s
 
     weighted_prices = dict()
