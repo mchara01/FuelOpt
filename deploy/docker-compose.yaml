@@ -7,10 +7,10 @@ services:
     volumes:
       - ../../mariadb/data:/var/lib/mysql
     environment:
-      MYSQL_ROOT_PASSWORD: "btrobwssd9"
+      MYSQL_ROOT_PASSWORD_FILE: /run/secrets/db_root_password
       MYSQL_DATABASE: db_fuelopt
       MYSQL_USER: fuelopt_main
-      MYSQL_PASSWORD: "N7vZu493Gh"
+      MYSQL_PASSWORD_FILE: /run/secrets/db_password
       env: "${env}"
     ports:
       - 3333:3306
@@ -18,6 +18,10 @@ services:
       fuelopt_net:
         ipv4_address: 192.168.100.20
     restart: always
+    secrets:
+      - db_root_password
+      - db_password
+
   djangoAPI:
     container_name: api_fuelopt
     image: fueloptapi:latest
@@ -31,6 +35,12 @@ services:
     environment:
       env: "${env}"
     restart: always
+
+secrets:
+   db_password:
+     file: db_password.txt
+   db_root_password:
+     file: db_root_password.txt
 
 networks:
   fuelopt_net:

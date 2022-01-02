@@ -1,6 +1,5 @@
 import urllib.request
 import json
-import time
 import pytesseract
 import re
 
