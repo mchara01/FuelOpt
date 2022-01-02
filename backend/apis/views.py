@@ -190,8 +190,12 @@ def search(request):
         fuel_type = request.GET['fuel_type']
         max_radius_km = request.GET['distance']
         amenities_list = request.GET['amenities'].split(',')
-        user_lat = float(request.GET['lat'])
-        user_lng = float(request.GET['lng'])
+        if request.GET['lat'] != '':
+            user_lat = float(request.GET['lat'])
+            user_lng = float(request.GET['lng'])
+        else:
+            user_lat = ''
+            user_lng = ''
 
         if not user_lat and not user_lng:
             try:
