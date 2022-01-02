@@ -48,3 +48,6 @@ app.*.map.json
 
 # API Keys
 backend/apis/config.py
+backend/backend/config.py
+deploy/db_password.txt
+deploy/db_root_password.txt

@@ -4,6 +4,7 @@ import sys
 
 from pathlib import Path
 from django.contrib.messages import constants as messages
+from .config import DJANGO_SECRET_KEY, DB_PASSWORD
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -12,7 +13,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-=zkc7fzd#bk5m^ufe910_n%4r0daa=8!7!r=^za8bm+2c3k*#%'
+SECRET_KEY = DJANGO_SECRET_KEY
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -45,7 +46,6 @@ INSTALLED_APPS = [
     'rest_auth.registration',
 ]
 SITE_ID = 1
-
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -89,7 +89,7 @@ if env_var and env_var == "PRODUCTION":
             'ENGINE': 'django.db.backends.mysql',
             'NAME': 'db_fuelopt',
             'USER': 'fuelopt_main',
-            'PASSWORD': 'N7vZu493Gh',
+            'PASSWORD': DB_PASSWORD,
             'HOST': '192.168.100.20',
             'PORT': '3306',
         }
@@ -100,7 +100,7 @@ else:
             'ENGINE': 'django.db.backends.mysql',
             'NAME': 'db_fuelopt',
             'USER': 'fuelopt_main',
-            'PASSWORD': 'N7vZu493Gh',
+            'PASSWORD': DB_PASSWORD,
             'HOST': '18.170.63.134',
             'PORT': '3333',
         }
@@ -164,7 +164,6 @@ MESSAGE_TAGS = {
     messages.WARNING: 'alert-warning',
     messages.ERROR: 'alert-danger',
 }
-
 
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 TESTING = len(sys.argv) > 1 and sys.argv[1] == 'test'
