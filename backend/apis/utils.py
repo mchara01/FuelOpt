@@ -82,7 +82,7 @@ def sort_by_price(preferences_list, travel_traffic_durations, travel_duration, t
     for index, fuel_price in enumerate(preferences_list):
         weighted_prices[fuel_price.station.pk] = 50 * preferred_fuel_prices[index] + Decimal(
             travel_distance[fuel_price.station.pk] * 0.07) * preferred_fuel_prices[index] + Decimal(
-            (travel_traffic_durations[fuel_price.station.pk] - travel_duration[fuel_price.station.pk]) * 0.0003157) * \
+            (travel_traffic_durations[fuel_price.station.pk] - travel_duration[fuel_price.station.pk]) * 0.0001735) * \
                                                  preferred_fuel_prices[index]
 
     sorted_weighted_prices = {k: v for k, v in sorted(weighted_prices.items(), key=lambda item: item[1])}

@@ -181,7 +181,7 @@ def search(request):
     nearestStation API returns the client a json list of all the petrol stations nearest to the user-specified location
     according to user preference selection.
     API called via a GET Request.
-    Example API call: http://18.170.63.134:8000/apis/search/?user_preference=time&location=Imperial%20College%20London&fuel_type=unleaded&distance=30&amenities=
+    Example API call: http://18.170.63.134:8000/apis/search/?user_preference=time&location=Imperial%20College%20London&fuel_type=unleaded&distance=30&amenities=&lat=&lng=
     """
     if request.method == 'GET':
         # Get user specifications/ preferences
