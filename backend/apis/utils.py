@@ -1,15 +1,17 @@
 import urllib.request
 import json
 import time
+import pytesseract
+import re
 
 from stations.models import FuelPrice
 from decimal import Decimal
-import pytesseract
-import re
 from datetime import datetime
+from .config import LOCATION_IQ_KEY, KEY_1, KEY_2
+
 
 def geocoding_with_name(location):
-    location_iq_key = "pk.bd315221041f3e0a99e6464f9de0157a"
+    location_iq_key = LOCATION_IQ_KEY
     routeUrl = "https://eu1.locationiq.com/v1/search.php?key=" + location_iq_key + "&q=" + str(
         location.replace(' ', '%20')) + "%20London" + "&format=json"
 
@@ -24,8 +26,9 @@ def geocoding_with_name(location):
     else:
         raise ValueError('Unable to geocode')
 
+
 def geocoding_with_postcode(postcode):
-    routeUrl = "http://api.getthedata.com/postcode/" + postcode.replace(' ','+')
+    routeUrl = "http://api.getthedata.com/postcode/" + postcode.replace(' ', '+')
     request = urllib.request.Request(routeUrl)
     response = urllib.request.urlopen(request)
 
@@ -35,21 +38,22 @@ def geocoding_with_postcode(postcode):
     try:
         latitude = float(result['data']['latitude'])
         longitude = float(result['data']['longitude'])
-        print ('lat lng found')
+        print('lat lng found')
         return latitude, longitude
     except KeyError:
         raise ValueError('Unable to geocode')
 
+
 # Calculate the travel duration to this station
 def get_duration_distance(lat1, lng1, lat2, lng2, key, s):
-    a = "Aiiv3MUtA8Fq3gGOuwLYLrzz_FRSm1xXUEgDZxO6-R8wg73PKwV50hxqwSrbBhXY"
-    b = "AtgHYr66s1ywNPEIHRUMJtP4wPwrzZSka4L1Vl7EQl_lf9JuIAXWThc2CxJx411o"
-    
+    a = KEY_1
+    b = KEY_2
+
     if key == 'a':
         bingMapsKey = a
     else:
         bingMapsKey = b
-    
+
     routeUrl = "http://dev.virtualearth.net/REST/V1/Routes/Driving?wp.0=" + str(lat1) + "," + str(
         lng1) + "&wp.1=" + str(lat2) + "," + str(lng2) + "&key=" + bingMapsKey
     # http://dev.virtualearth.net/REST/V1/Routes/Driving?wp.0=51.0,-0.1&wp.1=51.1,-0.12&key=Aiiv3MUtA8Fq3gGOuwLYLrzz_FRSm1xXUEgDZxO6-R8wg73PKwV50hxqwSrbBhXY
@@ -58,24 +62,28 @@ def get_duration_distance(lat1, lng1, lat2, lng2, key, s):
     # r = response.read().decode(encoding="utf-8")
     result = response.json()
 
-    duration = result['resourceSets'][0]['resources'][0]['travelDuration'] # units: s
-    duration_with_traffic = result['resourceSets'][0]['resources'][0]['travelDurationTraffic'] # units: s
-    distance = result['resourceSets'][0]['resources'][0]['travelDistance'] # units: km
+    duration = result['resourceSets'][0]['resources'][0]['travelDuration']  # units: s
+    duration_with_traffic = result['resourceSets'][0]['resources'][0]['travelDurationTraffic']  # units: s
+    distance = result['resourceSets'][0]['resources'][0]['travelDistance']  # units: km
 
     # return the duration and distance
     return duration_with_traffic, duration, distance
+
 
 def sort_by_price(preferences_list, travel_traffic_durations, travel_duration, travel_distance, preferred_fuel_prices):
     """
     preferences_list(query object): list of potential station candidates
     """
     # Parameters Used:
-        # Fuel Economy: 0.07 litres per km
-        # Idle Consumption: 0.0003157 litres per s
+    # Fuel Economy: 0.07 litres per km
+    # Idle Consumption: 0.0003157 litres per s
 
     weighted_prices = dict()
-    for index,fuel_price in enumerate(preferences_list):
-        weighted_prices[fuel_price.station.pk] =  50*preferred_fuel_prices[index] + Decimal(travel_distance[fuel_price.station.pk] * 0.07) * preferred_fuel_prices[index] + Decimal((travel_traffic_durations[fuel_price.station.pk] - travel_duration[fuel_price.station.pk]) * 0.0003157) * preferred_fuel_prices[index]
+    for index, fuel_price in enumerate(preferences_list):
+        weighted_prices[fuel_price.station.pk] = 50 * preferred_fuel_prices[index] + Decimal(
+            travel_distance[fuel_price.station.pk] * 0.07) * preferred_fuel_prices[index] + Decimal(
+            (travel_traffic_durations[fuel_price.station.pk] - travel_duration[fuel_price.station.pk]) * 0.0003157) * \
+                                                 preferred_fuel_prices[index]
 
     sorted_weighted_prices = {k: v for k, v in sorted(weighted_prices.items(), key=lambda item: item[1])}
     print(sorted_weighted_prices)
@@ -83,25 +91,28 @@ def sort_by_price(preferences_list, travel_traffic_durations, travel_duration, t
 
     return sorted_station_pks
 
+
 def query_sorted_order(pk_list):
     """ Query stations in sorted order and append into a list. """
     preferences_list = []
     for pk in pk_list:
         preferences_list.append(FuelPrice.objects.get(station_id=pk))
-        
+
     return preferences_list
 
-def create_response(preferences_list,travel_traffic_durations,travel_distance,carbon_emission):
+
+def create_response(preferences_list, travel_traffic_durations, travel_distance, carbon_emission):
     response = []
     for fuel_price in preferences_list[:20]:
         station_response = fuel_price.station.serialize()
         station_response['prices'] = fuel_price.serialize()
-        station_response['duration'] = str(int(travel_traffic_durations[fuel_price.station.pk]/60)) + 'mins'
+        station_response['duration'] = str(int(travel_traffic_durations[fuel_price.station.pk] / 60)) + 'mins'
         station_response['distance'] = str(travel_distance[fuel_price.station.pk]) + 'km'
-        station_response['emission'] = str(round(carbon_emission[fuel_price.station.pk],2)) + 'kgCO2'
+        station_response['emission'] = str(round(carbon_emission[fuel_price.station.pk], 2)) + 'kgCO2'
         response.append(station_response)
-    
+
     return response
+
 
 def check_and_update(fuel_type, price, fuel_prices, user_review):
     # If price was previously None
@@ -109,8 +120,7 @@ def check_and_update(fuel_type, price, fuel_prices, user_review):
         return False
 
     # If price was previously available
-    if (price < float(getattr(fuel_prices, fuel_type)) * 1.05 and \
-        price > float(getattr(fuel_prices, fuel_type)) * 0.95) or price == 0:
+    if (float(getattr(fuel_prices, fuel_type)) * 1.05 > price > float(getattr(fuel_prices, fuel_type)) * 0.95) or price == 0:
         if price == 0:
             setattr(fuel_prices, fuel_type, None)
             setattr(user_review, fuel_type, None)
@@ -120,6 +130,7 @@ def check_and_update(fuel_type, price, fuel_prices, user_review):
         return True
     else:
         return False
+
 
 # image of receipt of user
 def read_receipt(filepath):
@@ -138,7 +149,7 @@ def read_receipt(filepath):
     for i in range(len(elements)):
         if elements[i] == '@':
             try:
-                price = elements[i+1]
+                price = elements[i + 1]
             except Exception:
                 pass
     elements = []
@@ -151,8 +162,8 @@ def read_receipt(filepath):
     for e in elements:
         try:
             # remove currency icon and replace coma with dot
-            e = re.sub('£', '',e)
-            e = re.sub('\$', '',e)
+            e = re.sub('£', '', e)
+            e = re.sub('\$', '', e)
             e = re.sub('€', '', e)
             e = re.sub(',', '.', e)
             price = float(str(e))
@@ -174,7 +185,7 @@ def read_receipt(filepath):
     if type_of_fuel == 'UNLEADED' or type_of_fuel == 'UNLD':
         type_of_fuel = 'unleaded'
 
-    if type_of_fuel == 'DIESEL' or type_of_fuel == 'DSL' or type_of_fuel == 'Regular Diesel'\
+    if type_of_fuel == 'DIESEL' or type_of_fuel == 'DSL' or type_of_fuel == 'Regular Diesel' \
             or type_of_fuel == 'REGULAR DIESEL':
         type_of_fuel = 'diesel'
 
@@ -186,19 +197,19 @@ def read_receipt(filepath):
 
     date = None
     for t in text:
-            text2 = t.split(' ')
-            for i in range(len(text2)):
-                try:
-                    date = datetime.strptime(text2[i], '%d/%m/%Y')
-                except ValueError:
-                    pass
-                try:
-                    date = datetime.strptime(text2[i], '%d/%m/%y')
-                except ValueError:
-                    pass
-                try:
-                    date = datetime.strptime(text2[i], '%Y/%m/%d')
-                except ValueError:
-                    pass
+        text2 = t.split(' ')
+        for i in range(len(text2)):
+            try:
+                date = datetime.strptime(text2[i], '%d/%m/%Y')
+            except ValueError:
+                pass
+            try:
+                date = datetime.strptime(text2[i], '%d/%m/%y')
+            except ValueError:
+                pass
+            try:
+                date = datetime.strptime(text2[i], '%Y/%m/%d')
+            except ValueError:
+                pass
 
     return price, type_of_fuel, date
