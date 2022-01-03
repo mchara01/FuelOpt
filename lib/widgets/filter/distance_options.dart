@@ -34,8 +34,8 @@ class _DistanceOptionsState extends State<DistanceOptions> {
                     activeColor: appColors.PrimaryBlue, // The color to use for the portion of the slider track that is active.
                     thumbColor: appColors.PrimaryBlue,
                     min: 1,
-                    max: 20,
-                    divisions: 19,
+                    max: 15,
+                    divisions: 14,
                     onChanged: (newDistance) {
                       distancePreferenceModel
                           .setDistancePreference(newDistance);
