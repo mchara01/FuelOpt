@@ -107,6 +107,8 @@ class MapState extends State<Map> {
                     onMapCreated: (GoogleMapController controller) async {
                         mapController = controller;
 
+                        Provider.of<CurrentLocationModel>(context).setLatLng(_initialCameraPosition.target);
+
                       // ask for permission for location
                       await _locationManager.checkAndRequestService();
                       await _locationManager.checkAndRequestPermission();
