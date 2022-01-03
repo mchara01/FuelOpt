@@ -363,8 +363,8 @@ def review(request):
                 receipt = request.FILES['receipt']
                 s3 = boto3.client(
                     's3',
-                    aws_access_key_id=AWS_ACCESS_KEY_ID,
-                    aws_secret_access_key=AWS_SECRET_ACCESS_KEY
+                    aws_access_key_id="AKIA4O5FKY2EUZ3SY7P4",
+                    aws_secret_access_key="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"
                 )
                 s3.upload_fileobj(receipt, "fuelopt-s3-main", receipt.name)
 
