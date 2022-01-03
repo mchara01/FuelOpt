@@ -22,7 +22,7 @@ class FuelStationDataService {
     String urlstring =
         "https://eu1.locationiq.com/v1/search.php?key=pk.bd315221041f3e0a99e6464f9de0157a" +
             "&q=" +
-            location.toString().replaceAll(' ', '%20') +
+            location.replaceAll(' ', '%20') +
             "&format=json";
     final url = Uri.parse(urlstring);
     var request = http.Request('GET', url);
@@ -38,7 +38,29 @@ class FuelStationDataService {
         return [];
       }
     } else {
-      print(response.reasonPhrase);
+      return [];
+    }
+  }
+
+  Future<List> postcode2Coordinates(String postcode) async {
+    String urlstring =
+        "http://api.getthedata.com/postcode/" + postcode.replaceAll(' ', '+');
+    final url = Uri.parse(urlstring);
+    var request = http.Request('GET', url);
+    http.StreamedResponse response = await request.send();
+
+    if (response.statusCode == 200) {
+      var data = json.decode(await response.stream.bytesToString());
+      if (data.containsKey('data')) {
+        if (data['data'].containsKey('latitude')) {
+          return [data['data']['latitude'], data['data']['longitude']];
+        } else {
+          return [];
+        }
+      } else {
+        return [];
+      }
+    } else {
       return [];
     }
   }
@@ -92,8 +114,9 @@ class FuelStationDataService {
 
     if (response.statusCode == 200) {
       var data = json.decode(await response.stream.bytesToString()) as List;
-      List<StationResult> stations =
-          data.map<StationResult>((json) => StationResult.fromJson(json)).toList();
+      List<StationResult> stations = data
+          .map<StationResult>((json) => StationResult.fromJson(json))
+          .toList();
       return stations;
     } else {
       print(response.reasonPhrase);
@@ -107,7 +130,9 @@ class FuelStationDataService {
       String sortByPreference,
       String fuelTypePreference,
       String distancePreference,
-      String facilitiesPreference) async {
+      String facilitiesPreference,
+      String lat,
+      String lng) async {
     String urlstring = 'http://18.170.63.134:8000/apis/search/?' +
         'user_preference=' +
         sortByPreference +
@@ -121,7 +146,11 @@ class FuelStationDataService {
         facilitiesPreference
             .replaceAll('{', "")
             .replaceAll("}", "")
-            .replaceAll(" ", "");
+            .replaceAll(" ", "") +
+        '&lat=' +
+        lat.toString() +
+        '&lng=' +
+        lng.toString();
 
     final url = Uri.parse(urlstring);
     print(url);
@@ -131,13 +160,17 @@ class FuelStationDataService {
     if (response.statusCode == 200) {
       var data = json.decode(response.body) as List;
       List<Station> stations = [];
-      if(data.isNotEmpty) {
+      if (data.isNotEmpty) {
         var firstElement = data[0] as Map;
-        if(firstElement.containsKey('fuel_type')) {
-          stations = data.map<Top3StationResult>((json) => Top3StationResult.fromJson(json)).toList();
-        }
-        else{
-          stations = data.map<StationResult>((json) => StationResult.fromJson(json)).toList();
+        if (firstElement.containsKey('fuel_type')) {
+          stations = data
+              .map<Top3StationResult>(
+                  (json) => Top3StationResult.fromJson(json))
+              .toList();
+        } else {
+          stations = data
+              .map<StationResult>((json) => StationResult.fromJson(json))
+              .toList();
         }
       }
       return stations;

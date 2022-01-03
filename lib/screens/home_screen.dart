@@ -66,7 +66,7 @@ class MapState extends State<Map> {
     return Scaffold(
       drawer: NavigationDrawerWidget(),
       resizeToAvoidBottomInset: false,
-      body: Provider(
+      body: ChangeNotifierProvider(
         create: (context) => CurrentLocationModel(),
         child: Stack(
             children: [
@@ -107,7 +107,7 @@ class MapState extends State<Map> {
                     onMapCreated: (GoogleMapController controller) async {
                         mapController = controller;
 
-                        Provider.of<CurrentLocationModel>(context).setLatLng(_initialCameraPosition.target);
+                        Provider.of<CurrentLocationModel>(context, listen: false).setLatLng(_initialCameraPosition.target);
 
                       // ask for permission for location
                       await _locationManager.checkAndRequestService();
@@ -121,6 +121,8 @@ class MapState extends State<Map> {
                                 target: LatLng(locationData.latitude as double,
                                     locationData.longitude as double),
                                 zoom: 13)));
+                        Provider.of<CurrentLocationModel>(context, listen: false).setLatLng(LatLng(locationData.latitude!, locationData.longitude!));
+
                       }
 
                       await Future.delayed(const Duration(seconds: 3));

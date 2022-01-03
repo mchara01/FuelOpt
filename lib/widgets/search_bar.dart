@@ -71,9 +71,22 @@ class _SearchState extends State<SearchBar> {
                   } else {
                     FuelStationDataService fuelStationDataService =
                         FuelStationDataService();
-                    List coordinates =
-                        await fuelStationDataService.address2Coordinates(
-                            searchQuery.searchQuery.toString());
+                    List coordinates = [];
+                    if (searchQuery.searchQuery.isEmpty) {
+                      coordinates = [
+                        currentLocation.getLatLng().latitude,
+                        currentLocation.getLatLng().longitude
+                      ];
+                    } else {
+                      List coordinates1 =
+                          await fuelStationDataService.address2Coordinates(
+                              searchQuery.searchQuery.toString());
+                      List coordinates2 =
+                          await fuelStationDataService.postcode2Coordinates(
+                              searchQuery.searchQuery.toString());
+                      coordinates =
+                          coordinates2.isNotEmpty ? coordinates2 : coordinates1;
+                    }
                     if (coordinates.isEmpty) {
                       Fluttertoast.showToast(
                           msg: "Please input a valid location");
@@ -97,11 +110,13 @@ class _SearchState extends State<SearchBar> {
                       );
                       List<Station> stations =
                           await fuelStationDataService.getSearchResults(
-                        searchQuery.searchQuery.toString(),
+                        "",
                         sortByPreference.sortByPreference.string,
                         fuelTypePreference.fuelTypePreference.string,
                         distancePreference.distancePreference.toString(),
                         facilitiesPreference.facilitiesPreference.toString(),
+                        coordinates[0].toString(),
+                        coordinates[1].toString(),
                       );
                       searchResult.setSearchResult(stations);
                       Navigator.pop(context);

@@ -185,14 +185,21 @@ def search(request):
         fuel_type = request.GET['fuel_type']
         max_radius_km = request.GET['distance']
         amenities_list = request.GET['amenities'].split(',')
+        if request.GET['lat'] != '':
+            user_lat = float(request.GET['lat'])
+            user_lng = float(request.GET['lng'])
+        else:
+            user_lat = ''
+            user_lng = ''
 
-        try:
-            user_lat, user_lng = geocoding_with_postcode(user_location)
-        except ValueError as e:
+        if not user_lat and not user_lng:
             try:
-                user_lat, user_lng = geocoding_with_name(user_location)
+                user_lat, user_lng = geocoding_with_postcode(user_location)
             except ValueError as e:
-                return JsonResponse({ 'status':'false', 'message': str(e) }, status=500)
+                try:
+                    user_lat, user_lng = geocoding_with_name(user_location)
+                except ValueError as e:
+                    return JsonResponse({ 'status':'false', 'message': str(e) }, status=500)
 
         # Default distance range
         if max_radius_km == '':
