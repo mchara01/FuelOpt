@@ -142,7 +142,7 @@ class MapState extends State<Map> {
                     minMaxZoomPreference: MinMaxZoomPreference(12, 20),
                     trafficEnabled: true,
                     onCameraMove: (CameraPosition cameraPosition) {
-                      Provider.of<CurrentLocationModel>(context).setLatLng(cameraPosition.target);
+                      Provider.of<CurrentLocationModel>(context, listen: false).setLatLng(cameraPosition.target);
                     },
                   );
                 }
