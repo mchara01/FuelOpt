@@ -6,6 +6,7 @@ class CurrentLocationModel extends ChangeNotifier {
 
   void setLatLng(LatLng latLng) {
     _latLng = latLng;
+    notifyListeners();
   }
 
   LatLng getLatLng() {
