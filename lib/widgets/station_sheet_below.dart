@@ -47,17 +47,21 @@ class StationSheetBelow extends StatelessWidget {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(
-                          Icons.search,
-                          color: Theme.of(context).primaryColor,
-                          size: 100,
+                        Flexible(
+                          child: Icon(
+                            Icons.search,
+                            color: Theme.of(context).primaryColor,
+                            size: 100,
+                          ),
                         ),
-                        const Text(
-                          'No results to display',
-                          style: TextStyle(
-                            color: Colors.black12,
-                            fontSize: 15,
-                            fontWeight: FontWeight.bold,
+                        Flexible(
+                          child: const Text(
+                            'No results to display',
+                            style: TextStyle(
+                              color: Colors.black12,
+                              fontSize: 15,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         )
                       ],

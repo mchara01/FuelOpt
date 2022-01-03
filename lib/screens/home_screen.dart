@@ -111,12 +111,19 @@ class MapState extends State<Map> {
                   // if permission given, move to user's position
                   LocationData? locationData = await _locationManager.getLocation();
                   if (locationData != null) {
-                    mapController.animateCamera(CameraUpdate.newCameraPosition(
+                    await mapController.animateCamera(CameraUpdate.newCameraPosition(
                         CameraPosition(
                             target: LatLng(locationData.latitude as double,
                                 locationData.longitude as double),
                             zoom: 13)));
                   }
+
+                  await Future.delayed(const Duration(seconds: 3));
+
+                  FuelStationDataService fuelStationDataService = FuelStationDataService();
+                  LatLngBounds mapBounds = await mapController.getVisibleRegion();
+                  List<StationResult>? stations = await fuelStationDataService.getStations(mapBounds);
+                  Provider.of<SearchResultModel>(context, listen: false).setSearchResult(stations);
                   _controller.complete(controller);
                 },
                 markers: _markers,
@@ -127,16 +134,9 @@ class MapState extends State<Map> {
                 tiltGesturesEnabled: true,
                 minMaxZoomPreference: MinMaxZoomPreference(12, 20),
                 trafficEnabled: true,
-                onCameraIdle: () async {
-                  FuelStationDataService fuelStationDataService =
-                  FuelStationDataService();
-                  LatLngBounds mapBounds = await mapController
-                      .getVisibleRegion();
-                  List<StationResult>? stations =
-                  await fuelStationDataService.getStations(mapBounds);
-                  Provider.of<SearchResultModel>(context, listen: false).setSearchResult(
-                      stations);
-                }
+                onCameraMove: (CameraPosition cameraPosition) {
+                  //search this area button
+                },
               );
             }
           ),
