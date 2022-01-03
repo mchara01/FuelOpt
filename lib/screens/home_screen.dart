@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:fuel_opt/api/api.dart';
+import 'package:fuel_opt/model/current_location_model.dart';
 import 'package:fuel_opt/model/search_options.dart';
 import 'package:fuel_opt/model/search_result.dart';
 import 'package:fuel_opt/model/stations_data_model.dart';
@@ -65,130 +66,133 @@ class MapState extends State<Map> {
     return Scaffold(
       drawer: NavigationDrawerWidget(),
       resizeToAvoidBottomInset: false,
-      body: Stack(
-        children: [
-          Consumer<SearchResultModel>(
-            builder: (context, searchResult, childWidget) {
-              _markerIdCounter = 0;
-              _markers.clear();
-              List<Station> stations = searchResult.stations;
-              if(stations is List<Top3StationResult>) {
-                var top3ResultList = stations.cast<Top3StationResult>();
-                for (var top3Result in top3ResultList) {
-                  for (var station in top3Result.top3Stations) {
-                    final String _markerIdValue = 'marker_id_$_markerIdCounter';
-                    _markerIdCounter++;
-                    _markers.add(Marker(
-                        markerId: MarkerId(_markerIdValue),
-                        position: LatLng(
-                            station.latitude, station.longitude),
-                        icon: fuelStationIcon));
+      body: Provider(
+        create: (context) => CurrentLocationModel(),
+        child: Stack(
+            children: [
+              Consumer<SearchResultModel>(
+                builder: (context, searchResult, childWidget) {
+                  _markerIdCounter = 0;
+                  _markers.clear();
+                  List<Station> stations = searchResult.stations;
+                  if(stations is List<Top3StationResult>) {
+                    var top3ResultList = stations.cast<Top3StationResult>();
+                    for (var top3Result in top3ResultList) {
+                      for (var station in top3Result.top3Stations) {
+                        final String _markerIdValue = 'marker_id_$_markerIdCounter';
+                        _markerIdCounter++;
+                        _markers.add(Marker(
+                            markerId: MarkerId(_markerIdValue),
+                            position: LatLng(
+                                station.latitude, station.longitude),
+                            icon: fuelStationIcon));
+                      }
+                    }
                   }
-                }
-              }
-              else{
-                List<StationResult> top3ResultList = stations.cast<StationResult>();
-                for (var station in top3ResultList) {
-                  final String _markerIdValue = 'marker_id_$_markerIdCounter';
-                  _markerIdCounter++;
-                  _markers.add(Marker(
-                      markerId: MarkerId(_markerIdValue),
-                      position: LatLng(
-                          station.latitude, station.longitude),
-                      icon: fuelStationIcon));
-                }
-              }
-              return GoogleMap(
-                mapType: MapType.normal,
-                initialCameraPosition: _initialCameraPosition,
-                onMapCreated: (GoogleMapController controller) async {
-                  mapController = controller;
-
-                  // ask for permission for location
-                  await _locationManager.checkAndRequestService();
-                  await _locationManager.checkAndRequestPermission();
-
-                  // if permission given, move to user's position
-                  LocationData? locationData = await _locationManager.getLocation();
-                  if (locationData != null) {
-                    await mapController.animateCamera(CameraUpdate.newCameraPosition(
-                        CameraPosition(
-                            target: LatLng(locationData.latitude as double,
-                                locationData.longitude as double),
-                            zoom: 13)));
+                  else{
+                    List<StationResult> top3ResultList = stations.cast<StationResult>();
+                    for (var station in top3ResultList) {
+                      final String _markerIdValue = 'marker_id_$_markerIdCounter';
+                      _markerIdCounter++;
+                      _markers.add(Marker(
+                          markerId: MarkerId(_markerIdValue),
+                          position: LatLng(
+                              station.latitude, station.longitude),
+                          icon: fuelStationIcon));
+                    }
                   }
+                  return GoogleMap(
+                    mapType: MapType.normal,
+                    initialCameraPosition: _initialCameraPosition,
+                    onMapCreated: (GoogleMapController controller) async {
+                        mapController = controller;
 
-                  await Future.delayed(const Duration(seconds: 3));
+                      // ask for permission for location
+                      await _locationManager.checkAndRequestService();
+                      await _locationManager.checkAndRequestPermission();
 
-                  FuelStationDataService fuelStationDataService = FuelStationDataService();
-                  LatLngBounds mapBounds = await mapController.getVisibleRegion();
-                  List<StationResult>? stations = await fuelStationDataService.getStations(mapBounds);
-                  Provider.of<SearchResultModel>(context, listen: false).setSearchResult(stations);
-                  _controller.complete(controller);
-                },
-                markers: _markers,
-                zoomControlsEnabled: false,
-                myLocationButtonEnabled: false,
-                myLocationEnabled: true,
-                compassEnabled: true,
-                tiltGesturesEnabled: true,
-                minMaxZoomPreference: MinMaxZoomPreference(12, 20),
-                trafficEnabled: true,
-                onCameraMove: (CameraPosition cameraPosition) {
-                  //search this area button
-                },
-              );
-            }
+                      // if permission given, move to user's position
+                      LocationData? locationData = await _locationManager.getLocation();
+                      if (locationData != null) {
+                        await mapController.animateCamera(CameraUpdate.newCameraPosition(
+                            CameraPosition(
+                                target: LatLng(locationData.latitude as double,
+                                    locationData.longitude as double),
+                                zoom: 13)));
+                      }
+
+                      await Future.delayed(const Duration(seconds: 3));
+
+                      FuelStationDataService fuelStationDataService = FuelStationDataService();
+                      LatLngBounds mapBounds = await mapController.getVisibleRegion();
+                      List<StationResult>? stations = await fuelStationDataService.getStations(mapBounds);
+                      Provider.of<SearchResultModel>(context, listen: false).setSearchResult(stations);
+                      _controller.complete(controller);
+                    },
+                    markers: _markers,
+                    zoomControlsEnabled: false,
+                    myLocationButtonEnabled: false,
+                    myLocationEnabled: true,
+                    compassEnabled: true,
+                    tiltGesturesEnabled: true,
+                    minMaxZoomPreference: MinMaxZoomPreference(12, 20),
+                    trafficEnabled: true,
+                    onCameraMove: (CameraPosition cameraPosition) {
+                      Provider.of<CurrentLocationModel>(context).setLatLng(cameraPosition.target);
+                    },
+                  );
+                }
+              ),
+              const FuelStationsBottomSheet(),
+              Builder(builder: (context) {
+                return Positioned(
+                  top: 20,
+                  width: size.width * 0.2,
+                  child: TextButton(
+                    style: TextButton.styleFrom(
+                      backgroundColor: appColors.PrimaryBlue,
+                      shape: const CircleBorder(),
+                    ),
+                    child: const Icon(
+                      Icons.menu,
+                      color: Colors.white,
+                    ),
+                    onPressed: () {
+                      Scaffold.of(context).openDrawer();
+                    },
+                  ),
+                );
+              }),
+              Builder(builder: (context) {
+                return Positioned(
+                  top: 70,
+                  width: size.width * 0.2,
+                  child: TextButton(
+                    style: TextButton.styleFrom(
+                      backgroundColor: appColors.PrimaryBlue,
+                      shape: CircleBorder(),
+                    ),
+                    child: Icon(
+                      Icons.my_location,
+                      color: appColors.COLOR_White,
+                    ),
+                    onPressed: () async {
+                      LocationData? locationData =
+                      await _locationManager.getLocation();
+                      if (locationData != null) {
+                        mapController.animateCamera(CameraUpdate.newCameraPosition(
+                            CameraPosition(
+                                target: LatLng(locationData.latitude as double,
+                                    locationData.longitude as double),
+                                zoom: 13)));
+                      }
+                    },
+                  ),
+                );
+              }),
+              const DialogWidget()
+            ],
           ),
-          const FuelStationsBottomSheet(),
-          Builder(builder: (context) {
-            return Positioned(
-              top: 20,
-              width: size.width * 0.2,
-              child: TextButton(
-                style: TextButton.styleFrom(
-                  backgroundColor: appColors.PrimaryBlue,
-                  shape: const CircleBorder(),
-                ),
-                child: const Icon(
-                  Icons.menu,
-                  color: Colors.white,
-                ),
-                onPressed: () {
-                  Scaffold.of(context).openDrawer();
-                },
-              ),
-            );
-          }),
-          Builder(builder: (context) {
-            return Positioned(
-              top: 70,
-              width: size.width * 0.2,
-              child: TextButton(
-                style: TextButton.styleFrom(
-                  backgroundColor: appColors.PrimaryBlue,
-                  shape: CircleBorder(),
-                ),
-                child: Icon(
-                  Icons.my_location,
-                  color: appColors.COLOR_White,
-                ),
-                onPressed: () async {
-                  LocationData? locationData =
-                  await _locationManager.getLocation();
-                  if (locationData != null) {
-                    mapController.animateCamera(CameraUpdate.newCameraPosition(
-                        CameraPosition(
-                            target: LatLng(locationData.latitude as double,
-                                locationData.longitude as double),
-                            zoom: 13)));
-                  }
-                },
-              ),
-            );
-          }),
-          const DialogWidget()
-        ],
       ),
     );
   }

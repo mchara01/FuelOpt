@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:fuel_opt/model/current_location_model.dart';
 import 'package:fuel_opt/model/filter_enums.dart';
 import 'package:fuel_opt/model/search_options.dart';
 import 'package:fuel_opt/model/stations_data_model.dart';
@@ -29,6 +30,7 @@ class _SearchState extends State<SearchBar> {
     final facilitiesPreference =
         Provider.of<FacilitiesPreferenceModel>(context);
     final searchResult = Provider.of<SearchResultModel>(context);
+    final currentLocation = Provider.of<CurrentLocationModel>(context);
 
     return FractionallySizedBox(
       widthFactor: 0.8,
