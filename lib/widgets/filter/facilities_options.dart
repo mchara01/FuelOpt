@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:fuel_opt/model/filter_enums.dart';
 import 'package:fuel_opt/model/search_options.dart';
 import 'package:provider/provider.dart';
 import '../../utils/app_colors.dart';
 
 class FacilitiesOptions extends StatelessWidget {
   final void Function() onTapClose;
+  final Future<void> Function() search;
 
-  const FacilitiesOptions({Key? key, required this.onTapClose})
+  const FacilitiesOptions(
+      {Key? key, required this.onTapClose, required this.search})
       : super(key: key);
 
   @override
@@ -102,6 +103,7 @@ class FacilitiesOptions extends StatelessWidget {
                         facilitiesPreferenceModel
                             .addFacilitiesPreference("car_wash");
                       }
+                      search();
                     },
                     style: ButtonStyle(
                         backgroundColor: MaterialStateProperty.all<Color>(
@@ -135,6 +137,7 @@ class FacilitiesOptions extends StatelessWidget {
                         facilitiesPreferenceModel
                             .addFacilitiesPreference("air_and_water");
                       }
+                      search();
                     },
                     style: ButtonStyle(
                         backgroundColor: MaterialStateProperty.all<Color>(
@@ -168,6 +171,7 @@ class FacilitiesOptions extends StatelessWidget {
                         facilitiesPreferenceModel
                             .addFacilitiesPreference("car_vacuum");
                       }
+                      search();
                     },
                     style: ButtonStyle(
                         backgroundColor: MaterialStateProperty.all<Color>(
@@ -201,6 +205,7 @@ class FacilitiesOptions extends StatelessWidget {
                         facilitiesPreferenceModel.addFacilitiesPreference(
                             "number_24_7_opening_hours");
                       }
+                      search();
                     },
                     style: ButtonStyle(
                         backgroundColor: MaterialStateProperty.all<Color>(
@@ -234,6 +239,7 @@ class FacilitiesOptions extends StatelessWidget {
                         facilitiesPreferenceModel
                             .addFacilitiesPreference("toilet");
                       }
+                      search();
                     },
                     style: ButtonStyle(
                         backgroundColor: MaterialStateProperty.all<Color>(
@@ -267,6 +273,7 @@ class FacilitiesOptions extends StatelessWidget {
                         facilitiesPreferenceModel
                             .addFacilitiesPreference("convenience_store");
                       }
+                      search();
                     },
                     style: ButtonStyle(
                         backgroundColor: MaterialStateProperty.all<Color>(
@@ -300,6 +307,7 @@ class FacilitiesOptions extends StatelessWidget {
                         facilitiesPreferenceModel
                             .addFacilitiesPreference("atm");
                       }
+                      search();
                     },
                     style: ButtonStyle(
                         backgroundColor: MaterialStateProperty.all<Color>(
@@ -333,6 +341,7 @@ class FacilitiesOptions extends StatelessWidget {
                         facilitiesPreferenceModel
                             .addFacilitiesPreference("parking_facilities");
                       }
+                      search();
                     },
                     style: ButtonStyle(
                         backgroundColor: MaterialStateProperty.all<Color>(
@@ -366,6 +375,7 @@ class FacilitiesOptions extends StatelessWidget {
                         facilitiesPreferenceModel.addFacilitiesPreference(
                             "disabled_toilet_baby_change");
                       }
+                      search();
                     },
                     style: ButtonStyle(
                         backgroundColor: MaterialStateProperty.all<Color>(
@@ -399,6 +409,7 @@ class FacilitiesOptions extends StatelessWidget {
                         facilitiesPreferenceModel
                             .addFacilitiesPreference("alcohol");
                       }
+                      search();
                     },
                     style: ButtonStyle(
                         backgroundColor: MaterialStateProperty.all<Color>(
@@ -432,6 +443,7 @@ class FacilitiesOptions extends StatelessWidget {
                         facilitiesPreferenceModel
                             .addFacilitiesPreference("wi_fi");
                       }
+                      search();
                     },
                     style: ButtonStyle(
                         backgroundColor: MaterialStateProperty.all<Color>(
@@ -465,6 +477,7 @@ class FacilitiesOptions extends StatelessWidget {
                         facilitiesPreferenceModel
                             .addFacilitiesPreference("hgv_psv_fueling");
                       }
+                      search();
                     },
                     style: ButtonStyle(
                         backgroundColor: MaterialStateProperty.all<Color>(
@@ -498,6 +511,7 @@ class FacilitiesOptions extends StatelessWidget {
                         facilitiesPreferenceModel
                             .addFacilitiesPreference("fuelservice");
                       }
+                      search();
                     },
                     style: ButtonStyle(
                         backgroundColor: MaterialStateProperty.all<Color>(
@@ -531,6 +545,7 @@ class FacilitiesOptions extends StatelessWidget {
                         facilitiesPreferenceModel
                             .addFacilitiesPreference("payphone");
                       }
+                      search();
                     },
                     style: ButtonStyle(
                         backgroundColor: MaterialStateProperty.all<Color>(
@@ -564,6 +579,7 @@ class FacilitiesOptions extends StatelessWidget {
                         facilitiesPreferenceModel
                             .addFacilitiesPreference("restaurant");
                       }
+                      search();
                     },
                     style: ButtonStyle(
                         backgroundColor: MaterialStateProperty.all<Color>(
@@ -597,6 +613,7 @@ class FacilitiesOptions extends StatelessWidget {
                         facilitiesPreferenceModel
                             .addFacilitiesPreference("electric_car_charging");
                       }
+                      search();
                     },
                     style: ButtonStyle(
                         backgroundColor: MaterialStateProperty.all<Color>(
@@ -630,6 +647,7 @@ class FacilitiesOptions extends StatelessWidget {
                         facilitiesPreferenceModel
                             .addFacilitiesPreference("repair_garage");
                       }
+                      search();
                     },
                     style: ButtonStyle(
                         backgroundColor: MaterialStateProperty.all<Color>(
@@ -663,6 +681,7 @@ class FacilitiesOptions extends StatelessWidget {
                         facilitiesPreferenceModel
                             .addFacilitiesPreference("shower_facilities");
                       }
+                      search();
                     },
                     style: ButtonStyle(
                         backgroundColor: MaterialStateProperty.all<Color>(

@@ -6,8 +6,11 @@ import '../../utils/app_colors.dart';
 
 class FuelTypeOptions extends StatelessWidget {
   final void Function() onTapClose;
+  final Future<void> Function() search;
 
-  const FuelTypeOptions({Key? key, required this.onTapClose}) : super(key: key);
+  const FuelTypeOptions(
+      {Key? key, required this.onTapClose, required this.search})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -39,6 +42,7 @@ class FuelTypeOptions extends StatelessWidget {
                         fuelTypePreferenceModel.setFuelTypePreference(isUnleaded
                             ? FuelTypePreference.NONE
                             : FuelTypePreference.UNLEADED);
+                        search();
                       },
                       style: ButtonStyle(
                           backgroundColor: MaterialStateProperty.all<Color>(
@@ -68,6 +72,7 @@ class FuelTypeOptions extends StatelessWidget {
                           isSuperUnleaded
                               ? FuelTypePreference.NONE
                               : FuelTypePreference.SUPER_UNLEADED);
+                      search();
                     },
                     style: ButtonStyle(
                         backgroundColor: MaterialStateProperty.all<Color>(
@@ -96,6 +101,7 @@ class FuelTypeOptions extends StatelessWidget {
                         fuelTypePreferenceModel.setFuelTypePreference(isDiesel
                             ? FuelTypePreference.NONE
                             : FuelTypePreference.DIESEL);
+                        search();
                       },
                       style: ButtonStyle(
                           backgroundColor: MaterialStateProperty.all<Color>(
@@ -127,6 +133,7 @@ class FuelTypeOptions extends StatelessWidget {
                             isPremiumDiesel
                                 ? FuelTypePreference.NONE
                                 : FuelTypePreference.PREMIUM_DIESEL);
+                        search();
                       },
                       style: ButtonStyle(
                           backgroundColor: MaterialStateProperty.all<Color>(

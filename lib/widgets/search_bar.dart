@@ -65,10 +65,10 @@ class _SearchState extends State<SearchBar> {
                 padding: const EdgeInsets.all(8.0),
                 constraints: const BoxConstraints(),
                 onPressed: () async {
-                  if (sortByPreference.sortByPreference.string == 'price' &&
-                      fuelTypePreference.fuelTypePreference.string.isEmpty) {
-                    Fluttertoast.showToast(msg: "Please select a fuel type");
-                  } else {
+                  // if (sortByPreference.sortByPreference.string == 'price' &&
+                  //     fuelTypePreference.fuelTypePreference.string.isEmpty) {
+                  //   Fluttertoast.showToast(msg: "Please select a fuel type");
+                  // } else {
                     FuelStationDataService fuelStationDataService =
                         FuelStationDataService();
                     List coordinates = [];
@@ -121,7 +121,7 @@ class _SearchState extends State<SearchBar> {
                       searchResult.setSearchResult(stations);
                       Navigator.pop(context);
                     }
-                  }
+                  // }
                 },
                 icon: const Icon(
                   Icons.search,
