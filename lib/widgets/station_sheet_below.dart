@@ -33,45 +33,66 @@ class StationSheetBelow extends StatelessWidget {
             ),
             Consumer<SearchResultModel>(
               builder: (context, searchResult, childWidget) {
-                if (searchResult.stations.isNotEmpty) {
-                  if (searchResult.stations is List<Top3StationResult>) {
+                if (searchResult.stations is List<Top3StationResult>) {
+                  List<Top3StationResult> top3StationResults = searchResult
+                      .stations as List<Top3StationResult>;
+                  bool allFuelTypesEmpty = top3StationResults.every((
+                      top3StationResult) =>
+                  top3StationResult.top3Stations.isEmpty);
+                  if (allFuelTypesEmpty) {
+                    return const SliverFillRemaining(child: NoStationResults());
+                  }
+                  else {
                     return Top3StationResultList(
                         top3StationResultList: searchResult.stations as List<
                             Top3StationResult>);
                   }
-                  else {
+                }
+                  else if(searchResult.stations.isNotEmpty) {
                     return SearchResultList(stationResultList: searchResult.stations as List<StationResult>);
                   }
-                }
                 else{
-                  return SliverFillRemaining(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Flexible(
-                          child: Icon(
-                            Icons.search,
-                            color: Theme.of(context).primaryColor,
-                            size: 100,
-                          ),
-                        ),
-                        Flexible(
-                          child: const Text(
-                            'No results to display',
-                            style: TextStyle(
-                              color: Colors.black12,
-                              fontSize: 15,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        )
-                      ],
-                    ),
+                  return const SliverFillRemaining(
+                    child: NoStationResults()
                   );
                 }
               }
             )
           ]),
+    );
+  }
+}
+
+class NoStationResults extends StatelessWidget {
+  const NoStationResults({
+    Key? key,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Flexible(
+          child: Icon(
+            Icons.search,
+            color: Theme
+                .of(context)
+                .primaryColor,
+            size: 100,
+          ),
+        ),
+        const Flexible(
+          child: Text(
+            'No results to display',
+            style: TextStyle(
+              color: Colors.black12,
+              fontSize: 15,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        )
+      ],
     );
   }
 }
