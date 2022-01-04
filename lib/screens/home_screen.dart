@@ -51,6 +51,14 @@ class MapState extends State<Map> {
 
   late BitmapDescriptor fuelStationIcon;
 
+  Future<void> moveCamera(double lat, double lng) async {
+    await mapController.animateCamera(CameraUpdate.newCameraPosition(
+        CameraPosition(
+            target: LatLng(lat, lng),
+            zoom: 13)));
+    print(lat.toString()+lng.toString() +'latlng');
+  }
+
   @override
   void initState() {
     super.initState();
@@ -63,6 +71,8 @@ class MapState extends State<Map> {
   @override
   Widget build(BuildContext context) {
     final Size size = MediaQuery.of(context).size;
+    final searchQuery = Provider.of<SearchQueryModel>(context);
+
     return Scaffold(
       drawer: NavigationDrawerWidget(),
       resizeToAvoidBottomInset: false,

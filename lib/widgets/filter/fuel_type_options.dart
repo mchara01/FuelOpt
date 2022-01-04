@@ -144,7 +144,7 @@ class FuelTypeOptions extends StatelessWidget {
                               RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(10)))),
                       child: Text(
-                        'Super Diesel',
+                        'Premium Diesel',
                         style: TextStyle(
                             color: isPremiumDiesel
                                 ? selectedTextColor
