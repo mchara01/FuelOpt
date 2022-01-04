@@ -7,6 +7,7 @@ import 'package:fuel_opt/model/search_options.dart';
 import 'package:fuel_opt/model/search_result.dart';
 import 'package:fuel_opt/model/stations_data_model.dart';
 import 'package:fuel_opt/model/top_3_station_result.dart';
+import 'package:fuel_opt/screens/stations_detail.dart';
 import 'package:fuel_opt/utils/location_manager.dart';
 import 'package:fuel_opt/utils/map_marker_generator.dart';
 import 'package:fuel_opt/widgets/dialog.dart';
@@ -90,6 +91,11 @@ class MapState extends State<Map> {
                             markerId: MarkerId(_markerIdValue),
                             position: LatLng(
                                 station.latitude, station.longitude),
+                            onTap: () {
+                              Navigator.push(context, MaterialPageRoute(builder: (context) {
+                                return StationsDetail(station);
+                              }));
+                            },
                             icon: fuelStationIcon));
                       }
                     }
@@ -103,6 +109,11 @@ class MapState extends State<Map> {
                           markerId: MarkerId(_markerIdValue),
                           position: LatLng(
                               station.latitude, station.longitude),
+                          onTap: () {
+                            Navigator.push(context, MaterialPageRoute(builder: (context) {
+                            return StationsDetail(station);
+                          }));
+                          },
                           icon: fuelStationIcon));
                     }
                   }
