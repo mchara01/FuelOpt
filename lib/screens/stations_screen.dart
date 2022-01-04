@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fuel_opt/api/api.dart';
+import 'package:fuel_opt/model/search_result.dart';
 import 'package:provider/provider.dart';
 
 class StationsScreen extends StatelessWidget {
@@ -7,15 +8,15 @@ class StationsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final stationsP = Provider.of<StationsProvider>(context);
+    final stationsP = Provider.of<List<StationResult>>(context);
     return Scaffold(
       appBar: AppBar(title: const Text('Stations List')),
       body: ListView.builder(
-          itemCount: stationsP.stations.length,
+          itemCount: stationsP.length,
           itemBuilder: (BuildContext context, int index) {
             return ListTile(
-              title: Text(stationsP.stations[index].name),
-              subtitle: Text(stationsP.stations[index].station_id.toString()),
+              title: Text(stationsP[index].name),
+              subtitle: Text(stationsP[index].station_id.toString()),
             );
           }),
     );

@@ -5,15 +5,17 @@ import '../../utils/app_colors.dart' as appColors;
 
 class DistanceOptions extends StatefulWidget {
   final void Function() onTapClose;
+  final Future<void> Function() search;
 
-  const DistanceOptions({Key? key, required this.onTapClose}) : super(key: key);
+  const DistanceOptions(
+      {Key? key, required this.onTapClose, required this.search})
+      : super(key: key);
 
   @override
   State<DistanceOptions> createState() => _DistanceOptionsState();
 }
 
 class _DistanceOptionsState extends State<DistanceOptions> {
-
   @override
   Widget build(BuildContext context) {
     return Stack(children: [
@@ -31,14 +33,18 @@ class _DistanceOptionsState extends State<DistanceOptions> {
                 Expanded(
                   child: Slider(
                     value: distancePreferenceModel.distancePreference,
-                    activeColor: appColors.PrimaryBlue, // The color to use for the portion of the slider track that is active.
+                    activeColor: appColors
+                        .PrimaryBlue, // The color to use for the portion of the slider track that is active.
                     thumbColor: appColors.PrimaryBlue,
                     min: 1,
-                    max: 20,
-                    divisions: 19,
+                    max: 15,
+                    divisions: 14,
                     onChanged: (newDistance) {
                       distancePreferenceModel
                           .setDistancePreference(newDistance);
+                    },
+                    onChangeEnd: (newDistance) {
+                      widget.search();
                     },
                   ),
                 ),
