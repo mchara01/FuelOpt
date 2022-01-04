@@ -123,6 +123,7 @@ class _FilterMenuState extends State<FilterMenu>
       } else {
         showDialog(
           context: context,
+          barrierDismissible: false,
           builder: (context) => Center(
             child: Container(
               width: 60.0,
