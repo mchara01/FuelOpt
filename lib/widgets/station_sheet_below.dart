@@ -19,16 +19,17 @@ class StationSheetBelow extends StatelessWidget {
       child: CustomScrollView(
           keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
           slivers: [
-            const SliverAppBar(
+            SliverAppBar(
               expandedHeight: 50,
               collapsedHeight: 50,
               toolbarHeight: 50,
               floating: true,
-              flexibleSpace: FlexibleSpaceBar(
+              flexibleSpace: const FlexibleSpaceBar(
                 background: FilterMenu(),
               ),
               backgroundColor: Colors.white,
               elevation: 0.0,
+              leading: Container(),
             ),
             Consumer<SearchResultModel>(
               builder: (context, searchResult, childWidget) {

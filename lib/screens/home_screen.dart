@@ -110,25 +110,28 @@ class MapState extends State<Map> {
                         Provider.of<CurrentLocationModel>(context, listen: false).setLatLng(_initialCameraPosition.target);
 
                       // ask for permission for location
-                      await _locationManager.checkAndRequestService();
-                      await _locationManager.checkAndRequestPermission();
-
-                      // if permission given, move to user's position
-                      LocationData? locationData = await _locationManager.getLocation();
-                      if (locationData != null) {
-                        await mapController.animateCamera(CameraUpdate.newCameraPosition(
-                            CameraPosition(
-                                target: LatLng(locationData.latitude as double,
-                                    locationData.longitude as double),
-                                zoom: 13)));
-                        Provider.of<CurrentLocationModel>(context, listen: false).setLatLng(LatLng(locationData.latitude!, locationData.longitude!));
-
-                      }
+                      // await _locationManager.checkAndRequestService();
+                      // await _locationManager.checkAndRequestPermission();
+                      //
+                      final currentLocationModel = Provider.of<CurrentLocationModel>(context, listen: false);
+                      //
+                      // // if permission given, move to user's position
+                      // LocationData? locationData = await _locationManager.getLocation();
+                      // if (locationData != null) {
+                      //   await mapController.animateCamera(CameraUpdate.newCameraPosition(
+                      //       CameraPosition(
+                      //           target: LatLng(locationData.latitude as double,
+                      //               locationData.longitude as double),
+                      //           zoom: 13)));
+                      //
+                      //   currentLocationModel.setLatLng(LatLng(locationData.latitude!, locationData.longitude!));
+                      // }
 
                       await Future.delayed(const Duration(seconds: 3));
 
                       FuelStationDataService fuelStationDataService = FuelStationDataService();
                       LatLngBounds mapBounds = await mapController.getVisibleRegion();
+                      currentLocationModel.setMapBounds(mapBounds);
                       List<StationResult>? stations = await fuelStationDataService.getStations(mapBounds);
                       Provider.of<SearchResultModel>(context, listen: false).setSearchResult(stations);
                       _controller.complete(controller);
@@ -141,15 +144,16 @@ class MapState extends State<Map> {
                     tiltGesturesEnabled: true,
                     minMaxZoomPreference: MinMaxZoomPreference(12, 20),
                     trafficEnabled: true,
-                    onCameraMove: (CameraPosition cameraPosition) {
+                    onCameraMove: (CameraPosition cameraPosition) async {
                       Provider.of<CurrentLocationModel>(context, listen: false).setLatLng(cameraPosition.target);
+                      LatLngBounds mapBounds = await mapController.getVisibleRegion();
+                      Provider.of<CurrentLocationModel>(context, listen: false).setMapBounds(mapBounds);
                     },
                   );
                 }
               ),
               const FuelStationsBottomSheet(),
-              Builder(builder: (context) {
-                return Positioned(
+              Positioned(
                   top: 20,
                   width: size.width * 0.2,
                   child: TextButton(
@@ -165,10 +169,8 @@ class MapState extends State<Map> {
                       Scaffold.of(context).openDrawer();
                     },
                   ),
-                );
-              }),
-              Builder(builder: (context) {
-                return Positioned(
+                ),
+              Positioned(
                   top: 70,
                   width: size.width * 0.2,
                   child: TextButton(
@@ -192,8 +194,7 @@ class MapState extends State<Map> {
                       }
                     },
                   ),
-                );
-              }),
+                ),
               const DialogWidget()
             ],
           ),
