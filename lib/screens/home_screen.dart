@@ -126,22 +126,22 @@ class MapState extends State<Map> {
                         Provider.of<CurrentLocationModel>(context, listen: false).setLatLng(_initialCameraPosition.target);
                         Provider.of<CurrentLocationModel>(context, listen: false).setAnimateCameraFunction(moveCamera);
                       // ask for permission for location
-                      // await _locationManager.checkAndRequestService();
-                      // await _locationManager.checkAndRequestPermission();
-                      //
+                      await _locationManager.checkAndRequestService();
+                      await _locationManager.checkAndRequestPermission();
+
                       final currentLocationModel = Provider.of<CurrentLocationModel>(context, listen: false);
-                      //
-                      // // if permission given, move to user's position
-                      // LocationData? locationData = await _locationManager.getLocation();
-                      // if (locationData != null) {
-                      //   await mapController.animateCamera(CameraUpdate.newCameraPosition(
-                      //       CameraPosition(
-                      //           target: LatLng(locationData.latitude as double,
-                      //               locationData.longitude as double),
-                      //           zoom: 13)));
-                      //
-                      //   currentLocationModel.setLatLng(LatLng(locationData.latitude!, locationData.longitude!));
-                      // }
+
+                      // if permission given, move to user's position
+                      LocationData? locationData = await _locationManager.getLocation();
+                      if (locationData != null) {
+                        await mapController.animateCamera(CameraUpdate.newCameraPosition(
+                            CameraPosition(
+                                target: LatLng(locationData.latitude as double,
+                                    locationData.longitude as double),
+                                zoom: 13)));
+
+                        currentLocationModel.setLatLng(LatLng(locationData.latitude!, locationData.longitude!));
+                      }
 
                       await Future.delayed(const Duration(seconds: 3));
 
