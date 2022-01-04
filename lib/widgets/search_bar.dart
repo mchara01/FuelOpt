@@ -6,6 +6,7 @@ import 'package:fuel_opt/model/filter_enums.dart';
 import 'package:fuel_opt/model/search_options.dart';
 import 'package:fuel_opt/model/stations_data_model.dart';
 import 'package:fuel_opt/widgets/search_bar_search_this_area_button.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:fuel_opt/api/api.dart';
 
@@ -112,10 +113,11 @@ class _SearchState extends State<SearchBar> {
                             fuelTypePreference.fuelTypePreference.string,
                             distancePreference.distancePreference.toString(),
                             facilitiesPreference.facilitiesPreference.toString(),
-                            coordinates[0].toString(),
-                            coordinates[1].toString(),
+                            '',
+                            '',
                           );
                           searchResult.setSearchResult(stations);
+                          currentLocation.animateCameraToPosition(LatLng(double.parse(coordinates[0]), double.parse(coordinates[1])));
                           Navigator.pop(context);
                         }
                         // }

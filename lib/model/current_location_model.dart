@@ -4,6 +4,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 class CurrentLocationModel extends ChangeNotifier {
   late LatLng _latLng;
   late LatLngBounds _latLngBounds;
+  late Future<void> Function(LatLng latLng) _animateMapCamera;
 
   void setLatLng(LatLng latLng) {
     _latLng = latLng;
@@ -21,5 +22,13 @@ class CurrentLocationModel extends ChangeNotifier {
 
   LatLngBounds getLatLngBounds() {
     return _latLngBounds;
+  }
+
+  void setAnimateCameraFunction(Future<void> Function(LatLng latLng) animateCameraFunction) {
+    _animateMapCamera = animateCameraFunction;
+  }
+
+  void animateCameraToPosition(LatLng latLng) {
+    _animateMapCamera(latLng);
   }
 }

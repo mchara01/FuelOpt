@@ -51,12 +51,8 @@ class MapState extends State<Map> {
 
   late BitmapDescriptor fuelStationIcon;
 
-  Future<void> moveCamera(double lat, double lng) async {
-    await mapController.animateCamera(CameraUpdate.newCameraPosition(
-        CameraPosition(
-            target: LatLng(lat, lng),
-            zoom: 13)));
-    print(lat.toString()+lng.toString() +'latlng');
+  Future<void> moveCamera(LatLng latLng) async {
+    await mapController.animateCamera(CameraUpdate.newLatLng(latLng));
   }
 
   @override
@@ -71,7 +67,6 @@ class MapState extends State<Map> {
   @override
   Widget build(BuildContext context) {
     final Size size = MediaQuery.of(context).size;
-    final searchQuery = Provider.of<SearchQueryModel>(context);
 
     return Scaffold(
       drawer: NavigationDrawerWidget(),
@@ -118,7 +113,7 @@ class MapState extends State<Map> {
                         mapController = controller;
 
                         Provider.of<CurrentLocationModel>(context, listen: false).setLatLng(_initialCameraPosition.target);
-
+                        Provider.of<CurrentLocationModel>(context, listen: false).setAnimateCameraFunction(moveCamera);
                       // ask for permission for location
                       // await _locationManager.checkAndRequestService();
                       // await _locationManager.checkAndRequestPermission();
