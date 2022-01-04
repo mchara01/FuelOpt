@@ -1,46 +1,15 @@
 import 'dart:collection';
 import 'dart:convert';
 import 'dart:io';
-import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:fuel_opt/model/fuelprice_model.dart';
-import 'package:fuel_opt/model/search_options.dart';
 import 'package:fuel_opt/model/search_result.dart';
-import 'package:fuel_opt/widgets/search_result_list.dart';
+import 'package:fuel_opt/model/stations_data_model.dart';
+import 'package:fuel_opt/model/top_3_station_result.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import '../model/stations_model.dart';
 import 'package:http/http.dart' as http;
 
 /*
 Test
 */
-class StationsProvider with ChangeNotifier {
-  StationsProvider() {
-    this.fetchTasks();
-  }
-
-  List<Station> _stations = [];
-
-  List<Station> get stations {
-    return [..._stations];
-  }
-
-  fetchTasks() async {
-    // Android Emulator
-    final url = Uri.parse('http://18.170.63.134:8000/apis/v1/?format=json');
-
-    // Chrome Emulator
-    //final url = Uri.parse('http://localhost:8000/apis/v1/?format=json');
-
-    final response = await http.get(url);
-
-    if (response.statusCode == 200) {
-      var data = json.decode(response.body) as List;
-      _stations = data.map<Station>((json) => Station.fromJson(json)).toList();
-      notifyListeners();
-    }
-  }
-}
 
 class FuelStationDataService {
   List<Station> _stations = [];
@@ -53,7 +22,7 @@ class FuelStationDataService {
     String urlstring =
         "https://eu1.locationiq.com/v1/search.php?key=pk.bd315221041f3e0a99e6464f9de0157a" +
             "&q=" +
-            location.toString().replaceAll(' ', '%20') +
+            location.replaceAll(' ', '%20') +
             "&format=json";
     final url = Uri.parse(urlstring);
     var request = http.Request('GET', url);
@@ -69,7 +38,29 @@ class FuelStationDataService {
         return [];
       }
     } else {
-      print(response.reasonPhrase);
+      return [];
+    }
+  }
+
+  Future<List> postcode2Coordinates(String postcode) async {
+    String urlstring =
+        "http://api.getthedata.com/postcode/" + postcode.replaceAll(' ', '+');
+    final url = Uri.parse(urlstring);
+    var request = http.Request('GET', url);
+    http.StreamedResponse response = await request.send();
+
+    if (response.statusCode == 200) {
+      var data = json.decode(await response.stream.bytesToString());
+      if (data.containsKey('data')) {
+        if (data['data'].containsKey('latitude')) {
+          return [data['data']['latitude'], data['data']['longitude']];
+        } else {
+          return [];
+        }
+      } else {
+        return [];
+      }
+    } else {
       return [];
     }
   }
@@ -86,7 +77,7 @@ class FuelStationDataService {
     if (response.statusCode == 200) {
       var data = json.decode(await response.stream.bytesToString());
       print(data);
-      Station station = Station.fromJson(data);
+      StationResult station = StationResult.fromJson(data);
       return station;
     } else {
       print(response.reasonPhrase);
@@ -94,7 +85,7 @@ class FuelStationDataService {
     return Future.value(null);
   }
 
-  Future<List<Station>?> getStations(LatLngBounds latLngBounds) async {
+  Future<List<StationResult>> getStations(LatLngBounds latLngBounds) async {
     String maxLat = latLngBounds.northeast.latitude.toString();
     String maxLng = latLngBounds.northeast.longitude.toString();
     String minLat = latLngBounds.southwest.latitude.toString();
@@ -123,22 +114,25 @@ class FuelStationDataService {
 
     if (response.statusCode == 200) {
       var data = json.decode(await response.stream.bytesToString()) as List;
-      List<Station> stations =
-          data.map<Station>((json) => Station.fromJson(json)).toList();
+      List<StationResult> stations = data
+          .map<StationResult>((json) => StationResult.fromJson(json))
+          .toList();
       return stations;
     } else {
       print(response.reasonPhrase);
     }
 
-    return Future.value(null);
+    return Future.value([]);
   }
 
-  Future<List<StationResult>> getSearchResults(
+  Future<List<Station>> getSearchResults(
       String address,
       String sortByPreference,
       String fuelTypePreference,
       String distancePreference,
-      String facilitiesPreference) async {
+      String facilitiesPreference,
+      String lat,
+      String lng) async {
     String urlstring = 'http://18.170.63.134:8000/apis/search/?' +
         'user_preference=' +
         sortByPreference +
@@ -152,7 +146,11 @@ class FuelStationDataService {
         facilitiesPreference
             .replaceAll('{', "")
             .replaceAll("}", "")
-            .replaceAll(" ", "");
+            .replaceAll(" ", "") +
+        '&lat=' +
+        lat.toString() +
+        '&lng=' +
+        lng.toString();
 
     final url = Uri.parse(urlstring);
     print(url);
@@ -161,14 +159,23 @@ class FuelStationDataService {
     print(response.statusCode);
     if (response.statusCode == 200) {
       var data = json.decode(response.body) as List;
-      List<StationResult> stations = data
-          .map<StationResult>((json) => StationResult.fromJson(json))
-          .toList();
-      print(stations);
+      List<Station> stations = [];
+      if (data.isNotEmpty) {
+        var firstElement = data[0] as Map;
+        if (firstElement.containsKey('fuel_type')) {
+          stations = data
+              .map<Top3StationResult>(
+                  (json) => Top3StationResult.fromJson(json))
+              .toList();
+        } else {
+          stations = data
+              .map<StationResult>((json) => StationResult.fromJson(json))
+              .toList();
+        }
+      }
       return stations;
     } else {
       return [];
-      // throw Exception('Failed to load data');
     }
   }
 

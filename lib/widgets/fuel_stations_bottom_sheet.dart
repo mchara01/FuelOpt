@@ -5,6 +5,7 @@ import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 import 'package:fuel_opt/model/search_options.dart';
 import 'package:fuel_opt/widgets/filter/filter_menu.dart';
 import 'package:fuel_opt/widgets/search_bar.dart';
+import 'package:fuel_opt/widgets/station_sheet_below.dart';
 import 'package:provider/provider.dart';
 import 'package:snapping_sheet/snapping_sheet.dart';
 import 'package:fuel_opt/widgets/search_result_list.dart';
@@ -88,18 +89,7 @@ class _FuelStationsBottomSheetState extends State<FuelStationsBottomSheet> {
         ),
         grabbingHeight: 80,
         sheetBelow: SnappingSheetContent(
-            child: Container(
-              color: Colors.white,
-              child: Stack(
-                children: [
-                  Align(
-                    alignment: Alignment.center,
-                    child: SearchResultList(),
-                  ),
-                  const FilterMenu(),
-                ],
-              ),
-            ),
+            child: const StationSheetBelow(),
             draggable: true),
         initialSnappingPosition: const SnappingPosition.factor(
             positionFactor: 0.0,
