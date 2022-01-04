@@ -31,7 +31,8 @@ class DetailStation(generics.RetrieveUpdateDestroyAPIView):
     queryset = models.Station.objects.all()
     serializer_class = StationSerializer
 
-
+@api_view(['GET'])
+@permission_classes([AllowAny])
 def detailStation(request, station_id):
     """Returns information regarding a specific station."""
     if request.method == 'GET':
@@ -175,7 +176,8 @@ def home(request):
     # returns a Json list of stations within that page
     return JsonResponse(response, safe=False)
 
-
+@api_view(['GET'])
+@permission_classes([AllowAny])
 def search(request):
     """
     nearestStation API returns the client a json list of all the petrol stations nearest to the user-specified location

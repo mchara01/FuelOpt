@@ -10,6 +10,6 @@ urlpatterns = [
     path('temp_admin', views.temp_admin, name="temp_admin"),
     path('home/', views.home, name='home'),  # home page
     path('token/', obtain_auth_token, name='obtain-token'),
-    path('search/', views.search, name='search'),
     path('review/', views.review, name='review'),
+    path('search/', views.search, name='search'),
 ]
