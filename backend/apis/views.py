@@ -209,6 +209,9 @@ def search(request):
         # Default distance range
         if max_radius_km == '':
             max_radius_km = 5
+        
+        if max_radius_km > 15:
+            return JsonResponse({ 'status':'false', 'message': 'Max search radius of 15km exceeded. Please use a distance of 15km or less.'}, status=500)
 
         # (i) Distance Limit: check only for stations that are within user specified radius of the location
         # Convert radius from km to degree [110.574km = 1deg lat/lng]
