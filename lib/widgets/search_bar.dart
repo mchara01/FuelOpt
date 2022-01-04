@@ -6,8 +6,11 @@ import 'package:fuel_opt/model/filter_enums.dart';
 import 'package:fuel_opt/model/search_options.dart';
 import 'package:fuel_opt/model/stations_data_model.dart';
 import 'package:provider/provider.dart';
+import '../screens/home_screen.dart';
 import '../utils/app_colors.dart' as appColors;
 import 'package:fuel_opt/api/api.dart';
+
+final GlobalKey<MapState> mapGlobalKey = GlobalKey<MapState>();
 
 class SearchBar extends StatefulWidget {
   final void Function() searchOnTap;
@@ -52,8 +55,7 @@ class _SearchState extends State<SearchBar> {
                 return TextField(
                   controller: _textEditingController,
                   decoration: const InputDecoration(
-                      hintText: 'Gas stations near...',
-                      border: InputBorder.none),
+                      hintText: 'Current Location', border: InputBorder.none),
                   onTap: widget.searchOnTap,
                   onChanged: (value) {
                     searchQueryModel.setSearchQuery(value);
@@ -69,58 +71,60 @@ class _SearchState extends State<SearchBar> {
                   //     fuelTypePreference.fuelTypePreference.string.isEmpty) {
                   //   Fluttertoast.showToast(msg: "Please select a fuel type");
                   // } else {
-                    FuelStationDataService fuelStationDataService =
-                        FuelStationDataService();
-                    List coordinates = [];
-                    if (searchQuery.searchQuery.isEmpty) {
-                      coordinates = [
-                        currentLocation.getLatLng().latitude,
-                        currentLocation.getLatLng().longitude
-                      ];
-                    } else {
-                      List coordinates1 =
-                          await fuelStationDataService.address2Coordinates(
-                              searchQuery.searchQuery.toString());
-                      List coordinates2 =
-                          await fuelStationDataService.postcode2Coordinates(
-                              searchQuery.searchQuery.toString());
-                      coordinates =
-                          coordinates2.isNotEmpty ? coordinates2 : coordinates1;
-                    }
-                    if (coordinates.isEmpty) {
-                      Fluttertoast.showToast(
-                          msg: "Please input a valid location");
-                    } else {
-                      showDialog(
-                        context: context,
-                        builder: (context) => Center(
-                          child: Container(
-                            width: 60.0,
-                            height: 60.0,
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(4.0),
-                            ),
-                            child: Padding(
-                              padding: const EdgeInsets.all(12.0),
-                              child: CupertinoActivityIndicator(),
-                            ),
+                  FuelStationDataService fuelStationDataService =
+                      FuelStationDataService();
+                  List coordinates = [];
+                  if (searchQuery.searchQuery.isEmpty) {
+                    coordinates = [
+                      currentLocation.getLatLng().latitude,
+                      currentLocation.getLatLng().longitude
+                    ];
+                  } else {
+                    List coordinates1 =
+                        await fuelStationDataService.address2Coordinates(
+                            searchQuery.searchQuery.toString());
+                    List coordinates2 =
+                        await fuelStationDataService.postcode2Coordinates(
+                            searchQuery.searchQuery.toString());
+                    coordinates =
+                        coordinates2.isNotEmpty ? coordinates2 : coordinates1;
+                  }
+                  if (coordinates.isEmpty) {
+                    Fluttertoast.showToast(
+                        msg: "Please input a valid location");
+                  } else {
+                    mapGlobalKey.currentState
+                        ?.moveCamera(coordinates[0], coordinates[1]);
+                    showDialog(
+                      context: context,
+                      builder: (context) => Center(
+                        child: Container(
+                          width: 60.0,
+                          height: 60.0,
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(4.0),
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.all(12.0),
+                            child: CupertinoActivityIndicator(),
                           ),
                         ),
-                      );
-                      List<Station> stations =
-                          await fuelStationDataService.getSearchResults(
-                        "",
-                        sortByPreference.sortByPreference.string,
-                        fuelTypePreference.fuelTypePreference.string,
-                        distancePreference.distancePreference.toString(),
-                        facilitiesPreference.facilitiesPreference.toString(),
-                        coordinates[0].toString(),
-                        coordinates[1].toString(),
-                      );
-                      searchResult.setSearchResult(stations);
-                      Navigator.pop(context);
-                    }
+                      ),
+                    );
+                    List<Station> stations =
+                        await fuelStationDataService.getSearchResults(
+                      "",
+                      sortByPreference.sortByPreference.string,
+                      fuelTypePreference.fuelTypePreference.string,
+                      distancePreference.distancePreference.toString(),
+                      facilitiesPreference.facilitiesPreference.toString(),
+                      coordinates[0].toString(),
+                      coordinates[1].toString(),
+                    );
+                    searchResult.setSearchResult(stations);
+                    Navigator.pop(context);
+                  }
                   // }
                 },
                 icon: const Icon(
