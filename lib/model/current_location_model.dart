@@ -24,7 +24,8 @@ class CurrentLocationModel extends ChangeNotifier {
     return _latLngBounds;
   }
 
-  void setAnimateCameraFunction(Future<void> Function(LatLng latLng) animateCameraFunction) {
+  void setAnimateCameraFunction(
+      Future<void> Function(LatLng latLng) animateCameraFunction) {
     _animateMapCamera = animateCameraFunction;
   }
 

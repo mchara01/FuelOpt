@@ -4,6 +4,7 @@ import 'package:fuel_opt/screens/login_screen.dart';
 import 'package:fuel_opt/screens/review_screen.dart';
 import 'package:fuel_opt/widgets/border_box.dart';
 import 'package:provider/provider.dart';
+import '../model/current_location_model.dart';
 import '../model/search_options.dart';
 import '../utils/appColors.dart' as appColors;
 import '../utils/theme.dart' as appTheme;
@@ -20,6 +21,8 @@ class StationsDetail extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final searchQuery = Provider.of<SearchQueryModel>(context);
+    final currentLocation =
+        Provider.of<CurrentLocationModel>(context, listen: false);
 
     final Size size = MediaQuery.of(context).size;
     final double padding = 25;
@@ -54,8 +57,11 @@ class StationsDetail extends StatelessWidget {
                             )),
                         TextButton.icon(
                           onPressed: () {
-                            _launchMap(searchQuery.searchQuery.toString(),
-                                station.latitude, station.longitude);
+                            _launchMap(
+                                currentLocation.getLatLng().latitude,
+                                currentLocation.getLatLng().longitude,
+                                station.latitude,
+                                station.longitude);
                           },
                           style: ButtonStyle(
                               backgroundColor: MaterialStateProperty.all<Color>(
@@ -311,27 +317,21 @@ class ChoiceOption extends StatelessWidget {
   }
 }
 
-_launchMap(sourceLocation, destinationLatitude, destinationLongitude) async {
-  FuelStationDataService fuelStationDataService = FuelStationDataService();
-  List coordinates =
-      await fuelStationDataService.address2Coordinates(sourceLocation);
-  if (coordinates.length == 2) {
-    String sourceLatitude = coordinates[0];
-    String sourceLongitude = coordinates[1];
-    String mapOptions = [
-      'saddr=$sourceLatitude,$sourceLongitude',
-      'daddr=$destinationLatitude,$destinationLongitude',
-      'travelmode=driving',
-      'dir_action=navigate'
-    ].join('&');
+_launchMap(
+    sourceLat, sourceLong, destinationLatitude, destinationLongitude) async {
+  String sourceLatitude = sourceLat;
+  String sourceLongitude = sourceLong;
+  String mapOptions = [
+    'saddr=$sourceLatitude,$sourceLongitude',
+    'daddr=$destinationLatitude,$destinationLongitude',
+    'travelmode=driving',
+    'dir_action=navigate'
+  ].join('&');
 
-    final url = 'https://www.google.com/maps?$mapOptions';
-    if (await canLaunch(url) != null) {
-      await launch(url);
-    } else {
-      throw 'Could not launch $url';
-    }
+  final url = 'https://www.google.com/maps?$mapOptions';
+  if (await canLaunch(url) != null) {
+    await launch(url);
   } else {
-    throw 'Could not decode $sourceLocation';
+    throw 'Could not launch $url';
   }
 }

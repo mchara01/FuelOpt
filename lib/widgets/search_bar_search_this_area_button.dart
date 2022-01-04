@@ -1,88 +1,40 @@
 import 'package:flutter/material.dart';
 import 'package:fuel_opt/api/api.dart';
 import 'package:fuel_opt/model/current_location_model.dart';
-import 'package:fuel_opt/model/filter_enums.dart';
+import '../utils/app_colors.dart' as appColors;
 import 'package:fuel_opt/model/search_options.dart';
 import 'package:fuel_opt/model/stations_data_model.dart';
 import 'package:provider/provider.dart';
 
-class SearchBarSearchThisAreaButton extends StatefulWidget {
+class SearchBarSearchThisAreaButton extends StatelessWidget {
   const SearchBarSearchThisAreaButton({Key? key}) : super(key: key);
 
   @override
-  State<SearchBarSearchThisAreaButton> createState() =>
-      _SearchBarSearchThisAreaButtonState();
-}
-
-class _SearchBarSearchThisAreaButtonState
-    extends State<SearchBarSearchThisAreaButton> {
-  bool loading = false;
-
-  @override
   Widget build(BuildContext context) {
-    return loading
-        ? const CircularProgressIndicator()
-        : GestureDetector(
-      onTap: () async {
-        final sortByPreference = Provider
-            .of<SortByPreferenceModel>(context, listen: false)
-            .sortByPreference;
-        final fuelTypePreference = Provider
-            .of<FuelTypePreferenceModel>(context, listen: false)
-            .fuelTypePreference;
-        final distancePreference = Provider
-            .of<DistancePreferenceModel>(context, listen: false)
-            .distancePreference;
-        final facilitiesPreference = Provider
-            .of<FacilitiesPreferenceModel>(context, listen: false)
-            .facilitiesPreference;
-
+    return TextButton(
+      style: TextButton.styleFrom(
+        backgroundColor: appColors.PrimaryBlue,
+        primary: Colors.white,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      ),
+      onPressed: () async {
         FuelStationDataService fuelStationDataService =
-        FuelStationDataService();
-
-        setState(() {
-          loading = true;
-        });
+            FuelStationDataService();
 
         List<Station> stations = [];
 
-        if (sortByPreference != SortByPreference.NONE ||
-            fuelTypePreference != FuelTypePreference.NONE ||
-            facilitiesPreference.isNotEmpty) {
+        final currentLatLngBounds =
+            Provider.of<CurrentLocationModel>(context, listen: false)
+                .getLatLngBounds();
 
-          final currentLocationModel = Provider.of<CurrentLocationModel>(
-              context, listen: false).getLatLng();
-
-          stations = await fuelStationDataService.getSearchResults(
-              '',
-              sortByPreference.string,
-              fuelTypePreference.string,
-              distancePreference.toString(),
-              facilitiesPreference.toString(),
-              currentLocationModel.latitude.toString(),
-              currentLocationModel.longitude.toString());
-        }
-        else {
-
-          final currentLatLngBounds =
-          Provider.of<CurrentLocationModel>(context, listen: false).getLatLngBounds();
-
-          stations = await fuelStationDataService.getStations(currentLatLngBounds);
-        }
-
-        setState(() {
-          loading = false;
-        });
+        stations =
+            await fuelStationDataService.getStations(currentLatLngBounds);
 
         final searchResultModel =
-        Provider.of<SearchResultModel>(context, listen: false);
+            Provider.of<SearchResultModel>(context, listen: false);
         searchResultModel.setSearchResult(stations);
       },
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: const [Icon(Icons.my_location), Text('Search area')],
-      ),
+      child: const Text('Search this area'),
     );
   }
 }

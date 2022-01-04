@@ -104,7 +104,6 @@ class _FilterMenuState extends State<FilterMenu>
 
     Future<void> search() async {
       FuelStationDataService fuelStationDataService = FuelStationDataService();
-      print('start');
       List coordinates = [];
       if (searchQuery.searchQuery.isEmpty) {
         coordinates = [
