@@ -168,3 +168,17 @@ MESSAGE_TAGS = {
 
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 TESTING = len(sys.argv) > 1 and sys.argv[1] == 'test'
+
+SWAGGER_SETTINGS = {
+   'SECURITY_DEFINITIONS': {
+      'Basic': {
+            'type': 'basic'
+      },
+      'Bearer': {
+            'type': 'apiKey',
+            'name': 'Authorization',
+            'in': 'header'
+      }
+   },
+   'OPERATIONS_SORTER': 'method',
+}

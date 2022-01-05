@@ -14,14 +14,22 @@ from django.http import JsonResponse
 from django.conf import settings
 from django.shortcuts import render, redirect
 from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework.parsers import MultiPartParser
+from rest_framework.decorators import parser_classes
+from rest_framework.response import Response
 from stations import models
-from .serializers import StationSerializer
+from .serializers import StationSerializer, StationDetailSerializer1, StationDetailSerializer2, StationDetailSerializer3, UserReviewSerializer
 from .utils import geocoding_with_postcode, geocoding_with_name, get_duration_distance, sort_by_price, \
     query_sorted_order, create_response, check_and_update, read_receipt
 from .config import AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY
+from drf_yasg.utils import swagger_auto_schema
+from drf_yasg import openapi
 
 
-class ListStation(generics.ListCreateAPIView):
+class ListStation(generics.ListAPIView):
+    """
+    Return a list of all petrol stations
+    """
     permission_classes = (IsAuthenticated,)
     queryset = models.Station.objects.all()
     serializer_class = StationSerializer
@@ -31,6 +39,7 @@ class DetailStation(generics.RetrieveUpdateDestroyAPIView):
     queryset = models.Station.objects.all()
     serializer_class = StationSerializer
 
+@swagger_auto_schema(method='get', operation_summary="Get detail information for a station", responses={200: StationDetailSerializer3()})
 @api_view(['GET'])
 @permission_classes([AllowAny])
 def detailStation(request, station_id):
@@ -142,7 +151,12 @@ def updateEntries():
 def deleteFuelPrices():
     FuelPrice.objects.all().delete()
 
+lat_max = openapi.Parameter('lat_max', openapi.IN_QUERY, description="Largest latitude", type=openapi.TYPE_STRING, required=True)
+lat_min = openapi.Parameter('lat_min', openapi.IN_QUERY, description="Smallest latitude", type=openapi.TYPE_STRING, required=True)
+lng_max = openapi.Parameter('lng_max', openapi.IN_QUERY, description="Largest longitude", type=openapi.TYPE_STRING, required=True)
+lng_min = openapi.Parameter('lng_min', openapi.IN_QUERY, description="Smallest latitude", type=openapi.TYPE_STRING, required=True)
 
+@swagger_auto_schema(method='get', manual_parameters=[lat_max, lat_min, lng_max, lng_min], operation_summary="List stations in a certain area", responses={200: StationDetailSerializer1()})
 @api_view()
 @permission_classes([AllowAny])
 def home(request):
@@ -176,6 +190,15 @@ def home(request):
     # returns a Json list of stations within that page
     return JsonResponse(response, safe=False)
 
+user_preference = openapi.Parameter('user_preference', openapi.IN_QUERY, description="optimization options", type=openapi.TYPE_STRING)
+location = openapi.Parameter('location', openapi.IN_QUERY, description="destination name", type=openapi.TYPE_STRING)
+lat = openapi.Parameter('lat', openapi.IN_QUERY, description="destination latitude", type=openapi.TYPE_STRING)
+lng = openapi.Parameter('lng', openapi.IN_QUERY, description="destination longitude", type=openapi.TYPE_STRING)
+distance = openapi.Parameter('distance', openapi.IN_QUERY, description="distance filter", type=openapi.TYPE_STRING)
+fuel_type = openapi.Parameter('fuel_type', openapi.IN_QUERY, description="fuel type filter", type=openapi.TYPE_STRING)
+amenities = openapi.Parameter('amenities', openapi.IN_QUERY, description="amenities filter", type=openapi.TYPE_STRING)
+
+@swagger_auto_schema(method='get', manual_parameters=[user_preference, location, lat, lng, distance, fuel_type, amenities], operation_summary="Search and sort stations based on filter and optimisation options", responses={200: StationDetailSerializer2()})
 @api_view(['GET'])
 @permission_classes([AllowAny])
 def search(request):
@@ -350,10 +373,13 @@ def search(request):
 
     return JsonResponse(response, safe=False, status=200)
 
-
+@swagger_auto_schema(method='post', request_body=UserReviewSerializer, operation_summary="Submit review of a station", responses={200: 'Review submitted', 500: 'Internal Server Error', 555: 'Price exceeded threshold'})
 @api_view(['POST'])
+@parser_classes([MultiPartParser])
 def review(request):
-    """API handles all user requests regarding station reviews."""
+    """
+    API handles all user requests regarding station reviews.
+    """
     if request.method == 'POST':
         station_id = request.POST['station']  # pk?
         station = Station.objects.get(pk=station_id)
@@ -394,25 +420,25 @@ def review(request):
 
             user_review.save()
 
-            if request.POST['unleaded_price'] != "":
+            if ('unleaded_price' in request.POST) and request.POST['unleaded_price'] != "":
                 unleaded_price = float(request.POST['unleaded_price'])  # Decimal
                 if not check_and_update('unleaded_price', unleaded_price, fuel_prices, user_review):
                     return JsonResponse({'status': 'false', 'message': 'Exceeded threshold. Please submit receipt.'},
                                         status=555)
 
-            if request.POST['diesel_price'] != "":
+            if ('diesel_price' in request.POST) and request.POST['diesel_price'] != "":
                 diesel_price = float(request.POST['diesel_price'])  # Decimal
                 if not check_and_update('diesel_price', diesel_price, fuel_prices, user_review):
                     return JsonResponse({'status': 'false', 'message': 'Exceeded threshold. Please submit receipt.'},
                                         status=555)
 
-            if request.POST['super_unleaded_price'] != "":
+            if ('super_unleaded_price' in request.POST) and request.POST['super_unleaded_price'] != "":
                 super_unleaded_price = float(request.POST['super_unleaded_price'])  # Decimal
                 if not check_and_update('super_unleaded_price', super_unleaded_price, fuel_prices, user_review):
                     return JsonResponse({'status': 'false', 'message': 'Exceeded threshold. Please submit receipt.'},
                                         status=555)
 
-            if request.POST['premium_diesel_price'] != "":
+            if ('premium_diesel_price' in request.POST) and request.POST['premium_diesel_price'] != "":
                 premium_diesel_price = float(request.POST['premium_diesel_price'])  # Decimal
                 if not check_and_update('premium_diesel_price', premium_diesel_price, fuel_prices, user_review):
                     return JsonResponse({'status': 'false', 'message': 'Exceeded threshold. Please submit receipt.'},

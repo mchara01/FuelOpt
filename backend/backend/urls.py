@@ -29,7 +29,7 @@ schema_view = get_schema_view(
       license=openapi.License(name="BSD License"),
    ),
    public=True,
-   patterns=[path('apis/', include('apis.urls'))]
+   patterns=[path('apis/', include('apis.urls'))],
    permission_classes=(permissions.AllowAny,),
 )
 
