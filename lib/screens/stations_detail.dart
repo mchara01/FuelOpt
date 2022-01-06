@@ -22,7 +22,7 @@ class StationsDetail extends StatelessWidget {
   Widget build(BuildContext context) {
     final searchQuery = Provider.of<SearchQueryModel>(context);
     final currentLocation =
-        Provider.of<CurrentLocationModel>(context, listen: false);
+        Provider.of<CurrentLocationModel>(context);
 
     final Size size = MediaQuery.of(context).size;
     final double padding = 25;
@@ -319,8 +319,8 @@ class ChoiceOption extends StatelessWidget {
 
 _launchMap(
     sourceLat, sourceLong, destinationLatitude, destinationLongitude) async {
-  String sourceLatitude = sourceLat;
-  String sourceLongitude = sourceLong;
+  String sourceLatitude = sourceLat.toString();
+  String sourceLongitude = sourceLong.toString();
   String mapOptions = [
     'saddr=$sourceLatitude,$sourceLongitude',
     'daddr=$destinationLatitude,$destinationLongitude',
