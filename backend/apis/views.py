@@ -17,7 +17,7 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.parsers import MultiPartParser
 from rest_framework.decorators import parser_classes
 from stations import models
-from .serializers import StationSerializer, StationDetailSerializer1, StationDetailSerializer2, StationDetailSerializer3, UserReviewSerializer
+from .serializers import StationSerializer, StationDetailSerializer1, StationDetailSerializer2, StationDetailSerializer3, UserReviewSerializer, SearchInputSerializer
 from .utils import geocoding_with_postcode, geocoding_with_name, get_duration_distance, sort_by_price, \
     query_sorted_order, create_response, check_and_update, read_receipt
 from .config import AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY
@@ -197,7 +197,9 @@ distance = openapi.Parameter('distance', openapi.IN_QUERY, description="distance
 fuel_type = openapi.Parameter('fuel_type', openapi.IN_QUERY, description="fuel type filter", type=openapi.TYPE_STRING)
 amenities = openapi.Parameter('amenities', openapi.IN_QUERY, description="amenities filter", type=openapi.TYPE_STRING)
 
-@swagger_auto_schema(method='get', manual_parameters=[user_preference, location, lat, lng, distance, fuel_type, amenities], operation_summary="Search and sort stations based on filter and optimisation options", responses={200: StationDetailSerializer2()})
+# manual_parameters=[user_preference, location, lat, lng, distance, fuel_type, amenities]
+
+@swagger_auto_schema(method='get', query_serializer=SearchInputSerializer, operation_summary="Search and sort stations based on filter and optimisation options", responses={200: StationDetailSerializer2()})
 @api_view(['GET'])
 @permission_classes([AllowAny])
 def search(request):
@@ -208,18 +210,39 @@ def search(request):
     Example API call: http://18.170.63.134:8000/apis/search/?user_preference=time&location=Imperial%20College%20London&fuel_type=unleaded&distance=30&amenities=&lat=&lng=
     """
     if request.method == 'GET':
-        # Get user specifications/ preferences
-        user_preference = request.GET['user_preference']
-        user_location = request.GET['location']
-        fuel_type = request.GET['fuel_type']
+        # Pass query inputs
         max_radius_km = request.GET['distance']
-        amenities_list = request.GET['amenities'].split(',')
-        if request.GET['lat'] != '':
+        # user preference
+        if 'user_preference' in request.GET:
+            user_preference = request.GET['user_preference']
+        else:
+            user_preference = ""
+
+        # user location
+        if 'location' in request.GET:
+            user_location = request.GET['location']
+        else:
+            user_location = ""
+
+        # fuel type
+        if 'fuel_type' in request.GET:
+            fuel_type = request.GET['fuel_type']
+        else:
+            fuel_type = ""
+
+        # amenities
+        if 'amenities' in request.GET:
+            amenities_list = request.GET['amenities'].split(',')
+        else:
+            amenities_list = [""]
+        
+        # Geocoding - convert addresses into coordinates for processing
+        if 'lat' in request.GET and request.GET['lat'] != '':
             user_lat = float(request.GET['lat'])
             user_lng = float(request.GET['lng'])
         else:
-            user_lat = ''
-            user_lng = ''
+            user_lat = ""
+            user_lng = ""
 
         if not user_lat and not user_lng:
             try:
