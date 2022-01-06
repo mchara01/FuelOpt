@@ -103,9 +103,6 @@ class MapState extends State<Map> {
                       icon: fuelStationIcon));
                 }
               }
-              _markers.add(Marker(
-                  markerId: MarkerId("currentLocation"),
-                  position: currentLocation.getLatLng()));
             } else {
               List<StationResult> top3ResultList =
                   stations.cast<StationResult>();
@@ -123,9 +120,6 @@ class MapState extends State<Map> {
                     },
                     icon: fuelStationIcon));
               }
-              _markers.add(Marker(
-                  markerId: MarkerId("currentLocation"),
-                  position: currentLocation.getLatLng()));
             }
             return GoogleMap(
               mapType: MapType.normal,
@@ -157,6 +151,10 @@ class MapState extends State<Map> {
                   currentLocationModel.setLatLng(
                       LatLng(locationData.latitude!, locationData.longitude!));
                 }
+
+                  // _markers.add(Marker(
+                  //     markerId: MarkerId("currentLocation"),
+                  //     position: currentLocationModel.getLatLng()));
 
                 await Future.delayed(const Duration(seconds: 3));
 
