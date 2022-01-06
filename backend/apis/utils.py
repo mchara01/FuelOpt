@@ -37,7 +37,6 @@ def geocoding_with_postcode(postcode):
     try:
         latitude = float(result['data']['latitude'])
         longitude = float(result['data']['longitude'])
-        print('lat lng found')
         return latitude, longitude
     except KeyError:
         raise ValueError('Unable to geocode')
@@ -85,7 +84,6 @@ def sort_by_price(preferences_list, travel_traffic_durations, travel_duration, t
                                                  preferred_fuel_prices[index]
 
     sorted_weighted_prices = {k: v for k, v in sorted(weighted_prices.items(), key=lambda item: item[1])}
-    print(sorted_weighted_prices)
     sorted_station_pks = list(sorted_weighted_prices.keys())
 
     return sorted_station_pks
