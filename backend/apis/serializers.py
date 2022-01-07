@@ -35,12 +35,12 @@ class UserReviewSerializer(serializers.Serializer):
     diesel_price = serializers.FloatField(required=False)
     super_unleaded_price = serializers.FloatField(required=False)
     premium_diesel_price = serializers.FloatField(required=False)
-    open = serializers.BooleanField(required=False, default=1)
+    open = serializers.IntegerField(required=False, default=1)
     congestion = serializers.IntegerField(required=False, default=0)
     receipt = serializers.ImageField(required=False)
 
 class UserReviewSummarySerializer(serializers.Serializer):
-    open = serializers.BooleanField(required=False, default=1)
+    open = serializers.IntegerField(required=False, default=1)
     congestion = serializers.IntegerField(required=False, default=0)
 
 class FuelPriceSerializer(serializers.Serializer):

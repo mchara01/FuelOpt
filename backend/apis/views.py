@@ -402,7 +402,11 @@ def review(request):
     review API is used to update station information (fuel prices, congestion times and opening times) based on user reviews.
     Query Parameters:
     - station_id: the station's information to be updated
-    - open: true if the station is open, false otherwise
+    - unleaded_price : price for unleaded fuel
+    - diesel_price : price for diesel fuel
+    - super_unleaded_price : price for super unleaded fuel
+    - premium_diesel_price : price for premium diesel price fuel
+    - open: 1 if the station is open, 0 otherwise
     - congestion: the time spent waiting/ queing at the station
     - receipt: an image of the receipt. This is only required if a 500 status code is obtained, indicating input prices have exceeded thresholds
     """
