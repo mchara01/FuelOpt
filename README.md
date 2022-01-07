@@ -27,6 +27,12 @@ Before you begin, ensure you have met the following requirements:
   <img src="drawio/fuelopt_arch_final.jpg">
 </p>
 
+## Testing
+To run the unit tests on our backend API methods, in the terminal:
+1. cd into the FuelOpt directory: `cd FuelOpt`
+2. Execute: `python ../FuelOpt/src/backend/manage.py test ../FuelOpt/test/`
+
+
 ## Contributing to FuelOpt
 To contribute to ***FuelOpt***, follow these steps:
 
@@ -37,11 +43,6 @@ To contribute to ***FuelOpt***, follow these steps:
 5. Create the pull request.
 
 Alternatively see the GitHub documentation on [creating a pull request](https://help.github.com/en/github/collaborating-with-issues-and-pull-requests/creating-a-pull-request).
-
-## Testing
-To run the unit tests on our backend API methods, in the terminal:
-1. cd into the FuelOpt directory: `cd FuelOpt`
-2. Execute: `python ../FuelOpt/src/backend/manage.py test ../FuelOpt/test/`
 
 ## Useful links
 
