@@ -185,7 +185,7 @@ def home(request):
     # returns a Json list of stations within that page
     return JsonResponse(response, safe=False)
 
-@swagger_auto_schema(method='get', query_serializer=SearchInputSerializer, operation_summary="Search and Sort Stations", responses={200: StationDetailSerializer2()})
+@swagger_auto_schema(method='get', query_serializer=SearchInputSerializer, operation_summary="Search and Sort Stations", responses={200: StationDetailSerializer2(), 500: 'Internal Server Error'})
 @api_view(['GET'])
 @permission_classes([AllowAny])
 def search(request):
@@ -196,7 +196,7 @@ def search(request):
         - time
         - price
         - eco-friendliness
-    - location: The address where the user wants to execute the search
+    - location: The address where the user wants to execute the search. This is used if 'lat' and 'lng' are empty.
     - lat: The latitude of the search location. This takes precedence over 'location'.
     - lng: The longitude of the search location. This takes precedence over 'location'.
     - fuel type:
@@ -204,7 +204,7 @@ def search(request):
         - super unleaded
         - diesel
         - premium diesel
-    - distance: The search radius where the search results should fall within
+    - distance: The search radius where the search results should fall within. Max distance is limited to 15km.
     - amenities: Choose from 16 different amenities that the user would like suggested results to have
     """
     if request.method == 'GET':
@@ -226,15 +226,17 @@ def search(request):
         else:
             fuel_type = ""
 
-        # Pass query inputs
-        max_radius_km = request.GET['distance']
+        # search radius
+        if 'distance' in request.GET and request.GET['distance']!='':
+                max_radius_km = int(request.GET['distance'])
+        else:
+            max_radius_km = ""
 
         # amenities
         if 'amenities' in request.GET:
             amenities_list = request.GET['amenities'].split(',')
         else:
             amenities_list = [""]
-        print(amenities_list)
         # Geocoding - convert addresses into coordinates for processing
         if 'lat' in request.GET and request.GET['lat'] != '':
             user_lat = float(request.GET['lat'])
@@ -257,22 +259,21 @@ def search(request):
             max_radius_km = 5
         
         if max_radius_km > 15:
-            return JsonResponse({ 'status':'false', 'message': 'Max search radius of 15km exceeded. Please use a distance of 15km or less.'}, status=500)
+            return JsonResponse({'status':'false', 'message': 'Max search radius of 15km exceeded. Please use a distance of 15km or less.'}, status=500)
 
         # (i) Distance Limit: check only for stations that are within user specified radius of the location
         # Convert radius from km to degree [110.574km = 1deg lat/lng]
         max_radius_degree = float(max_radius_km) / 110.574
         # Filter for stations within the radius
-        try:
-            preferences_list = FuelPrice.objects.filter(
+        preferences_list = FuelPrice.objects.filter(
                 station__lat__lte=user_lat + max_radius_degree,
                 station__lat__gte=user_lat - max_radius_degree,
                 station__lng__lte=user_lng + max_radius_degree,
                 station__lng__gte=user_lng - max_radius_degree
             )
-        # If outside area of coverage (London)
-        except FuelPrice.DoesNotExist:
-            return JsonResponse({'status': 'false', 'message': 'Location not in range!'}, status=500)
+
+        if preferences_list.count() == 0:
+            return JsonResponse({'status': 'false', 'message': 'Location not in range. Please select location within the London region.'}, status=500)
 
         # (ii) Opening Hours: remove stations that are not open from preferences_list
         closed_station = []

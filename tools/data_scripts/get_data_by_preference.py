@@ -9,7 +9,7 @@ bingMapsKey = "Aiiv3MUtA8Fq3gGOuwLYLrzz_FRSm1xXUEgDZxO6-R8wg73PKwV50hxqwSrbBhXY"
 
 
 def get_data_by_preference():
-    df = pd.read_csv("data/db_scripts/stations_all_info.csv")
+    df = pd.read_csv("tools/db_scripts/stations_all_info.csv")
 
     def get_user_location():
         return [51.29550, -0.10291]

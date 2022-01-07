@@ -1,10 +1,15 @@
+'''
+This file is used to run unit testing on all backend API methods, mainly those used for:
+- station search, and
+- user review updates
+'''
+
+import json
 from django.contrib.auth import get_user_model
 from django.test import TestCase, Client
-import json
-import urllib
-import os
+import sys
+sys.path.append("./FuelOpt/src/backend/stations/")
 from stations.models import Station, FuelPrice, UserReview
-
 
 # Create your tests here.
 class APITests(TestCase):
@@ -235,7 +240,7 @@ class APITests(TestCase):
 
     def test_upload_by_receipt(self):
         c = Client(HTTP_AUTHORIZATION='Token ' + self.token)
-        with open('static/reviews/gas-receipt.png', 'rb') as receipt:
+        with open('./src/backend/static/reviews/gas-receipt.png', 'rb') as receipt:
             response = c.post('/apis/review/', {
                 'station': 1,
                 'receipt': receipt,

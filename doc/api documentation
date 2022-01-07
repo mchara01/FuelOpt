@@ -1,0 +1,783 @@
+swagger: '2.0'
+info:
+  title: FuelOpt API
+  description: Test description
+  termsOfService: https://www.google.com/policies/terms/
+  contact:
+    email: contact@snippets.local
+  license:
+    name: BSD License
+  version: v1
+host: 18.170.63.134:8000
+schemes:
+  - http
+basePath: /
+consumes:
+  - application/json
+produces:
+  - application/json
+securityDefinitions:
+  Token:
+    type: apiKey
+    name: Authorization
+    in: header
+security:
+  - Token: []
+paths:
+  /apis/:
+    get:
+      operationId: apis_list
+      description: Return a list of all petrol stations in the database.
+      parameters: []
+      responses:
+        '200':
+          description: ''
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Station'
+      tags:
+        - apis
+    parameters: []
+  /apis/home/:
+    get:
+      operationId: apis_home_list
+      summary: List stations in a certain area
+      description: |-
+        home API (GET Request) returns the client a json list of all petrol stations visible within a user's viewport when the app is first opened (homepage).
+        The bounds of the viewport are given by the following query parameters:
+        Query Parameters: 
+        - lat_max: maximum latitude
+        - lat_min: minimum latititude
+        - lng_max: maximum longitude
+        - lng_min: minimum longitude
+      parameters:
+        - name: lat_max
+          in: query
+          required: true
+          type: number
+        - name: lat_min
+          in: query
+          required: true
+          type: number
+        - name: lng_max
+          in: query
+          required: true
+          type: number
+        - name: lng_min
+          in: query
+          required: true
+          type: number
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/StationDetailSerializer1'
+      tags:
+        - apis
+    parameters: []
+  /apis/review/:
+    post:
+      operationId: apis_review_create
+      summary: Submit Station Review
+      description: |-
+        review API is used to update station information (fuel prices, congestion times and opening times) based on user reviews.
+        Query Parameters:
+        - station_id: the station's information to be updated
+        - unleaded_price : price for unleaded fuel
+        - diesel_price : price for diesel fuel
+        - super_unleaded_price : price for super unleaded fuel
+        - premium_diesel_price : price for premium diesel price fuel
+        - open: 1 if the station is open, 0 otherwise
+        - congestion: the time spent waiting/ queing at the station
+        - receipt: an image of the receipt. This is only required if a 500 status code is obtained, indicating input prices have exceeded thresholds
+      parameters:
+        - name: station
+          in: formData
+          required: true
+          type: integer
+        - name: unleaded_price
+          in: formData
+          required: false
+          type: number
+        - name: diesel_price
+          in: formData
+          required: false
+          type: number
+        - name: super_unleaded_price
+          in: formData
+          required: false
+          type: number
+        - name: premium_diesel_price
+          in: formData
+          required: false
+          type: number
+        - name: open
+          in: formData
+          required: false
+          type: integer
+          default: 1
+        - name: congestion
+          in: formData
+          required: false
+          type: integer
+          default: 0
+        - name: receipt
+          in: formData
+          required: false
+          type: file
+      responses:
+        '200':
+          description: Review submitted
+        '500':
+          description: Internal Server Error
+        '555':
+          description: Price exceeded threshold
+      consumes:
+        - multipart/form-data
+      tags:
+        - apis
+    parameters: []
+  /apis/search/:
+    get:
+      operationId: apis_search_list
+      summary: Search and Sort Stations
+      description: |-
+        search API (GET Request) returns the client a json list of all the petrol stations nearest to the user-specified location.
+        Users can specify the following query parameters to personalise their search results:
+        - user_preference: The method of optimisation
+            - time
+            - price
+            - eco-friendliness
+        - location: The address where the user wants to execute the search
+        - lat: The latitude of the search location. This takes precedence over 'location'.
+        - lng: The longitude of the search location. This takes precedence over 'location'.
+        - fuel type:
+            - unleaded
+            - super unleaded
+            - diesel
+            - premium diesel
+        - distance: The search radius where the search results should fall within
+        - amenities: Choose from 16 different amenities that the user would like suggested results to have
+      parameters:
+        - name: user_preference
+          in: query
+          required: false
+          type: string
+          enum:
+            - price
+            - time
+            - eco
+        - name: location
+          in: query
+          required: false
+          type: string
+          minLength: 1
+        - name: lat
+          in: query
+          required: false
+          type: number
+        - name: lng
+          in: query
+          required: false
+          type: number
+        - name: distance
+          in: query
+          required: false
+          type: integer
+          default: 5
+        - name: fuel_type
+          in: query
+          required: false
+          type: string
+          enum:
+            - unleaded
+            - super_unleaded
+            - diesel
+            - premium_diesel
+        - name: amenities
+          in: query
+          required: false
+          type: array
+          items:
+            type: string
+            enum:
+              - air_and_water
+              - alcohol
+              - atm
+              - car_vacuum
+              - number_24_7_opening_hours
+              - toilet
+              - convenience_store
+              - parking_facilities
+              - disabled_toilet_baby_change
+              - wi_fi
+              - hgv_psv_fueling
+              - fuelservice
+              - payphone
+              - restaurant
+              - electric_car_charging
+              - repair_garage
+              - shower_facilities
+          collectionFormat: multi
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/StationDetailSerializer2'
+      tags:
+        - apis
+    parameters: []
+  /apis/station/{station_id}:
+    get:
+      operationId: apis_station_read
+      summary: Get Detailed Station Info
+      description: Returns information regarding a specific station.
+      parameters: []
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/StationDetailSerializer3'
+      tags:
+        - apis
+    parameters:
+      - name: station_id
+        in: path
+        required: true
+        type: string
+  /apis/token/:
+    post:
+      operationId: apis_token_create
+      description: ''
+      parameters:
+        - name: data
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/AuthToken'
+      responses:
+        '201':
+          description: ''
+          schema:
+            $ref: '#/definitions/AuthToken'
+      tags:
+        - apis
+    parameters: []
+definitions:
+  Station:
+    required:
+      - station_id
+      - name
+      - street
+      - postcode
+      - lat
+      - lng
+    type: object
+    properties:
+      station_id:
+        title: Station id
+        type: integer
+        maximum: 2147483647
+        minimum: -2147483648
+      name:
+        title: Name
+        type: string
+        maxLength: 200
+        minLength: 1
+      street:
+        title: Street
+        type: string
+        maxLength: 200
+        minLength: 1
+      postcode:
+        title: Postcode
+        type: string
+        maxLength: 12
+        minLength: 1
+      lat:
+        title: Lat
+        type: string
+        format: decimal
+      lng:
+        title: Lng
+        type: string
+        format: decimal
+  FuelPrice:
+    required:
+      - station
+    type: object
+    properties:
+      station:
+        title: Station
+        type: integer
+      unleaded_price:
+        title: Unleaded price
+        type: string
+        minLength: 1
+      diesel_price:
+        title: Diesel price
+        type: string
+        minLength: 1
+      super_unleaded_price:
+        title: Super unleaded price
+        type: string
+        minLength: 1
+      premium_diesel_price:
+        title: Premium diesel price
+        type: string
+        minLength: 1
+      unleaded_date:
+        title: Unleaded date
+        type: string
+        minLength: 1
+      diesel_date:
+        title: Diesel date
+        type: string
+        minLength: 1
+      super_unleaded_date:
+        title: Super unleaded date
+        type: string
+        minLength: 1
+      premium_diesel_date:
+        title: Premium diesel date
+        type: string
+        minLength: 1
+  StationDetailSerializer1:
+    required:
+      - station_id
+      - prices
+      - name
+      - street
+      - postcode
+      - lat
+      - lng
+      - number_24_7_opening_hours
+    type: object
+    properties:
+      station_id:
+        title: Station id
+        type: integer
+        maximum: 2147483647
+        minimum: -2147483648
+      prices:
+        $ref: '#/definitions/FuelPrice'
+      name:
+        title: Name
+        type: string
+        maxLength: 200
+        minLength: 1
+      street:
+        title: Street
+        type: string
+        maxLength: 200
+        minLength: 1
+      postcode:
+        title: Postcode
+        type: string
+        maxLength: 12
+        minLength: 1
+      lat:
+        title: Lat
+        type: string
+        format: decimal
+      lng:
+        title: Lng
+        type: string
+        format: decimal
+      car_wash:
+        title: Car wash
+        type: integer
+        maximum: 2147483647
+        minimum: -2147483648
+      air_and_water:
+        title: Air and water
+        type: integer
+        maximum: 2147483647
+        minimum: -2147483648
+      car_vacuum:
+        title: Car vacuum
+        type: integer
+        maximum: 2147483647
+        minimum: -2147483648
+      number_24_7_opening_hours:
+        title: Number 24 7 opening hours
+        type: integer
+        maximum: 2147483647
+        minimum: -2147483648
+      toilet:
+        title: Toilet
+        type: integer
+        maximum: 2147483647
+        minimum: -2147483648
+      convenience_store:
+        title: Convenience store
+        type: integer
+        maximum: 2147483647
+        minimum: -2147483648
+      atm:
+        title: Atm
+        type: integer
+        maximum: 2147483647
+        minimum: -2147483648
+      parking_facilities:
+        title: Parking facilities
+        type: integer
+        maximum: 2147483647
+        minimum: -2147483648
+      disabled_toilet_baby_change:
+        title: Disabled toilet baby change
+        type: integer
+        maximum: 2147483647
+        minimum: -2147483648
+      alcohol:
+        title: Alcohol
+        type: integer
+        maximum: 2147483647
+        minimum: -2147483648
+      wi_fi:
+        title: Wi fi
+        type: integer
+        maximum: 2147483647
+        minimum: -2147483648
+      hgv_psv_fueling:
+        title: Hgv psv fueling
+        type: integer
+        maximum: 2147483647
+        minimum: -2147483648
+      fuelservice:
+        title: Fuelservice
+        type: integer
+        maximum: 2147483647
+        minimum: -2147483648
+      payphone:
+        title: Payphone
+        type: integer
+        maximum: 2147483647
+        minimum: -2147483648
+      restaurant:
+        title: Restaurant
+        type: integer
+        maximum: 2147483647
+        minimum: -2147483648
+      electric_car_charging:
+        title: Electric car charging
+        type: integer
+        maximum: 2147483647
+        minimum: -2147483648
+      repair_garage:
+        title: Repair garage
+        type: integer
+        maximum: 2147483647
+        minimum: -2147483648
+      shower_facilities:
+        title: Shower facilities
+        type: integer
+        maximum: 2147483647
+        minimum: -2147483648
+  StationDetailSerializer2:
+    required:
+      - station_id
+      - prices
+      - name
+      - street
+      - postcode
+      - lat
+      - lng
+      - number_24_7_opening_hours
+    type: object
+    properties:
+      station_id:
+        title: Station id
+        type: integer
+        maximum: 2147483647
+        minimum: -2147483648
+      prices:
+        $ref: '#/definitions/FuelPrice'
+      duration:
+        title: Duration
+        type: number
+      distance:
+        title: Distance
+        type: number
+      emission:
+        title: Emission
+        type: number
+      name:
+        title: Name
+        type: string
+        maxLength: 200
+        minLength: 1
+      street:
+        title: Street
+        type: string
+        maxLength: 200
+        minLength: 1
+      postcode:
+        title: Postcode
+        type: string
+        maxLength: 12
+        minLength: 1
+      lat:
+        title: Lat
+        type: string
+        format: decimal
+      lng:
+        title: Lng
+        type: string
+        format: decimal
+      car_wash:
+        title: Car wash
+        type: integer
+        maximum: 2147483647
+        minimum: -2147483648
+      air_and_water:
+        title: Air and water
+        type: integer
+        maximum: 2147483647
+        minimum: -2147483648
+      car_vacuum:
+        title: Car vacuum
+        type: integer
+        maximum: 2147483647
+        minimum: -2147483648
+      number_24_7_opening_hours:
+        title: Number 24 7 opening hours
+        type: integer
+        maximum: 2147483647
+        minimum: -2147483648
+      toilet:
+        title: Toilet
+        type: integer
+        maximum: 2147483647
+        minimum: -2147483648
+      convenience_store:
+        title: Convenience store
+        type: integer
+        maximum: 2147483647
+        minimum: -2147483648
+      atm:
+        title: Atm
+        type: integer
+        maximum: 2147483647
+        minimum: -2147483648
+      parking_facilities:
+        title: Parking facilities
+        type: integer
+        maximum: 2147483647
+        minimum: -2147483648
+      disabled_toilet_baby_change:
+        title: Disabled toilet baby change
+        type: integer
+        maximum: 2147483647
+        minimum: -2147483648
+      alcohol:
+        title: Alcohol
+        type: integer
+        maximum: 2147483647
+        minimum: -2147483648
+      wi_fi:
+        title: Wi fi
+        type: integer
+        maximum: 2147483647
+        minimum: -2147483648
+      hgv_psv_fueling:
+        title: Hgv psv fueling
+        type: integer
+        maximum: 2147483647
+        minimum: -2147483648
+      fuelservice:
+        title: Fuelservice
+        type: integer
+        maximum: 2147483647
+        minimum: -2147483648
+      payphone:
+        title: Payphone
+        type: integer
+        maximum: 2147483647
+        minimum: -2147483648
+      restaurant:
+        title: Restaurant
+        type: integer
+        maximum: 2147483647
+        minimum: -2147483648
+      electric_car_charging:
+        title: Electric car charging
+        type: integer
+        maximum: 2147483647
+        minimum: -2147483648
+      repair_garage:
+        title: Repair garage
+        type: integer
+        maximum: 2147483647
+        minimum: -2147483648
+      shower_facilities:
+        title: Shower facilities
+        type: integer
+        maximum: 2147483647
+        minimum: -2147483648
+  UserReviewSummary:
+    type: object
+    properties:
+      open:
+        title: Open
+        type: boolean
+        default: true
+      congestion:
+        title: Congestion
+        type: integer
+        default: 0
+  StationDetailSerializer3:
+    required:
+      - station_id
+      - prices
+      - user_review
+      - name
+      - street
+      - postcode
+      - lat
+      - lng
+      - number_24_7_opening_hours
+    type: object
+    properties:
+      station_id:
+        title: Station id
+        type: integer
+        maximum: 2147483647
+        minimum: -2147483648
+      prices:
+        $ref: '#/definitions/FuelPrice'
+      user_review:
+        $ref: '#/definitions/UserReviewSummary'
+      name:
+        title: Name
+        type: string
+        maxLength: 200
+        minLength: 1
+      street:
+        title: Street
+        type: string
+        maxLength: 200
+        minLength: 1
+      postcode:
+        title: Postcode
+        type: string
+        maxLength: 12
+        minLength: 1
+      lat:
+        title: Lat
+        type: string
+        format: decimal
+      lng:
+        title: Lng
+        type: string
+        format: decimal
+      car_wash:
+        title: Car wash
+        type: integer
+        maximum: 2147483647
+        minimum: -2147483648
+      air_and_water:
+        title: Air and water
+        type: integer
+        maximum: 2147483647
+        minimum: -2147483648
+      car_vacuum:
+        title: Car vacuum
+        type: integer
+        maximum: 2147483647
+        minimum: -2147483648
+      number_24_7_opening_hours:
+        title: Number 24 7 opening hours
+        type: integer
+        maximum: 2147483647
+        minimum: -2147483648
+      toilet:
+        title: Toilet
+        type: integer
+        maximum: 2147483647
+        minimum: -2147483648
+      convenience_store:
+        title: Convenience store
+        type: integer
+        maximum: 2147483647
+        minimum: -2147483648
+      atm:
+        title: Atm
+        type: integer
+        maximum: 2147483647
+        minimum: -2147483648
+      parking_facilities:
+        title: Parking facilities
+        type: integer
+        maximum: 2147483647
+        minimum: -2147483648
+      disabled_toilet_baby_change:
+        title: Disabled toilet baby change
+        type: integer
+        maximum: 2147483647
+        minimum: -2147483648
+      alcohol:
+        title: Alcohol
+        type: integer
+        maximum: 2147483647
+        minimum: -2147483648
+      wi_fi:
+        title: Wi fi
+        type: integer
+        maximum: 2147483647
+        minimum: -2147483648
+      hgv_psv_fueling:
+        title: Hgv psv fueling
+        type: integer
+        maximum: 2147483647
+        minimum: -2147483648
+      fuelservice:
+        title: Fuelservice
+        type: integer
+        maximum: 2147483647
+        minimum: -2147483648
+      payphone:
+        title: Payphone
+        type: integer
+        maximum: 2147483647
+        minimum: -2147483648
+      restaurant:
+        title: Restaurant
+        type: integer
+        maximum: 2147483647
+        minimum: -2147483648
+      electric_car_charging:
+        title: Electric car charging
+        type: integer
+        maximum: 2147483647
+        minimum: -2147483648
+      repair_garage:
+        title: Repair garage
+        type: integer
+        maximum: 2147483647
+        minimum: -2147483648
+      shower_facilities:
+        title: Shower facilities
+        type: integer
+        maximum: 2147483647
+        minimum: -2147483648
+  AuthToken:
+    required:
+      - username
+      - password
+    type: object
+    properties:
+      username:
+        title: Username
+        type: string
+        minLength: 1
+      password:
+        title: Password
+        type: string
+        minLength: 1
+      token:
+        title: Token
+        type: string
+        readOnly: true
+        minLength: 1

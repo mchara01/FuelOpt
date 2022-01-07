@@ -1,15 +1,16 @@
+import os
+import pandas as pd
+
 from selenium import webdriver
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
 from selenium.common.exceptions import TimeoutException
 from selenium.common.exceptions import NoSuchElementException
-
-from time import time
-import pandas as pd
-
 from dotenv import load_dotenv
-import os 
+from time import time
+
+
 load_dotenv()
 
 start = time()
@@ -38,7 +39,6 @@ while True:
         break
     except TimeoutException:
         print("Page took too long to load. Reloading")
-
 
 # fill the account info and click sign in
 browser.find_element(By.NAME, "email").send_keys(data['email'])
@@ -69,9 +69,8 @@ counter = 0
 for latitude in [51.3, 51.3, 51.4, 51.5, 51.6, 51.7]:
     for longitude in [-0.4, -0.3, -0.2, -0.1, 0.0, 0.1, 0.2]:
 
-        
-# for latitude in [51.3]:
-#     for longitude in [-0.4]:
+        # for latitude in [51.3]:
+        #     for longitude in [-0.4]:
 
         # arguments to put in the url
         # distance is in miles
@@ -84,10 +83,10 @@ for latitude in [51.3, 51.3, 51.4, 51.5, 51.6, 51.7]:
             "longitude": str(longitude)
         }
         browser.get('https://app.petrolprices.com/map?' +
-                    arguments['fuelType']+'=2&brandType=0&resultLimit=0&offset=0&sortType=' +
-                    arguments['sortType']+'&lat=' +
-                    arguments['latitude']+'&lng=' +
-                    arguments['longitude']+'&z=11&d=' +
+                    arguments['fuelType'] + '=2&brandType=0&resultLimit=0&offset=0&sortType=' +
+                    arguments['sortType'] + '&lat=' +
+                    arguments['latitude'] + '&lng=' +
+                    arguments['longitude'] + '&z=11&d=' +
                     arguments['distance']
                     )
 
@@ -103,7 +102,7 @@ for latitude in [51.3, 51.3, 51.4, 51.5, 51.6, 51.7]:
 
         # browser.find_element(By.ID, 'continue-button').click()
 
-        print("For location with latitude:",arguments["latitude"], "longitude:",arguments["longitude"])
+        print("For location with latitude:", arguments["latitude"], "longitude:", arguments["longitude"])
 
         for station in stations_results:
             print(counter, end=" ")
@@ -142,14 +141,13 @@ for latitude in [51.3, 51.3, 51.4, 51.5, 51.6, 51.7]:
             # if there are no facilities
             except NoSuchElementException:
                 pass
-            
+
             # add the station information to the to be dataframe
             stationDF.append(station_information)
 
             # switch focus back to main window
             browser.switch_to.window(browser.window_handles[0])
             counter += 1
-
 
 # convert the list to a pandas dataframe
 stationDF = pd.DataFrame(stationDF)
@@ -161,7 +159,7 @@ stationDF.to_csv("stations.csv")
 # ...dev
 # makes it so the window is not closed
 
-print("Run in ",time()-start,"seconds.")
+print("Run in ", time() - start, "seconds.")
 
 # if not in headless mode
 # don't close the window after running everything
