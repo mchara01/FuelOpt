@@ -37,8 +37,8 @@ Alternatively see the GitHub documentation on [creating a pull request](https://
 
 ## Testing
 To run the unit tests on our backend API methods, in the terminal:
-1. cd into the FuelOpt directory: 'cd FuelOpt'
-2. run `python ../FuelOpt/src/backend/manage.py test ../FuelOpt/test/`
+1. cd into the FuelOpt directory: `cd FuelOpt`
+2. Execute: `python ../FuelOpt/src/backend/manage.py test ../FuelOpt/test/`
 
 ## Useful links
 
