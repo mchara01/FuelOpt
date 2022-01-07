@@ -1,4 +1,4 @@
-## Deploying the MariaDB container
+## Deploying the MariaDB container locally
 
 0. Install docker (preferably for CLI) and docker-compose.
 1. After cloning this repository, execute `cd build` and `sudo docker-compose up -d`.
@@ -23,8 +23,5 @@ You can connect directly to MariaDB with the following steps:
 2.	The following credentials should be used to connect to the database from the application <br/>
   ***Hostnam***e:  ec2-3-8-3-44.eu-west-2.compute.amazonaws.com <br/>
   ***IPv4***: 3.8.3.44 <br/>
-  ***DB Use***r: user <br/>
-  ***DB password***: password <br/>
-
-Don’t hesitate to message Marcos if you are having any issues.
-
+  ***DB Use***r: <user> <br/>
+  ***DB password***: <password> <br/>
