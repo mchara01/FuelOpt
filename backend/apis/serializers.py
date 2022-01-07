@@ -40,7 +40,7 @@ class UserReviewSerializer(serializers.Serializer):
     receipt = serializers.ImageField(required=False)
 
 class UserReviewSummarySerializer(serializers.Serializer):
-    open = serializers.IntegerField(required=False, default=1)
+    open = serializers.BooleanField(required=False, default=True)
     congestion = serializers.IntegerField(required=False, default=0)
 
 class FuelPriceSerializer(serializers.Serializer):
