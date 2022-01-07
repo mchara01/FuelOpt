@@ -14,14 +14,21 @@ from django.http import JsonResponse
 from django.conf import settings
 from django.shortcuts import render, redirect
 from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework.parsers import MultiPartParser
+from rest_framework.decorators import parser_classes
 from stations import models
-from .serializers import StationSerializer
+from .serializers import StationSerializer, StationDetailSerializer1, StationDetailSerializer2, StationDetailSerializer3, UserReviewSerializer, SearchInputSerializer, HomeSerializer
 from .utils import geocoding_with_postcode, geocoding_with_name, get_duration_distance, sort_by_price, \
     query_sorted_order, create_response, check_and_update, read_receipt
 from .config import AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY
+from drf_yasg.utils import swagger_auto_schema
+from drf_yasg import openapi
 
 
-class ListStation(generics.ListCreateAPIView):
+class ListStation(generics.ListAPIView):
+    """
+    Return a list of all petrol stations in the database.
+    """
     permission_classes = (IsAuthenticated,)
     queryset = models.Station.objects.all()
     serializer_class = StationSerializer
@@ -31,7 +38,9 @@ class DetailStation(generics.RetrieveUpdateDestroyAPIView):
     queryset = models.Station.objects.all()
     serializer_class = StationSerializer
 
-
+@swagger_auto_schema(method='get', operation_summary="Get Detailed Station Info", responses={200: StationDetailSerializer3()})
+@api_view(['GET'])
+@permission_classes([AllowAny])
 def detailStation(request, station_id):
     """Returns information regarding a specific station."""
     if request.method == 'GET':
@@ -137,21 +146,22 @@ def updateEntries():
 
     return
 
-
 def deleteFuelPrices():
     FuelPrice.objects.all().delete()
 
-
+@swagger_auto_schema(method='get', query_serializer=HomeSerializer, operation_summary="List stations in a certain area", responses={200: StationDetailSerializer1()})
 @api_view()
 @permission_classes([AllowAny])
 def home(request):
     """
-    home API returns the client a json list of all petrol stations visible within a user's viewport when the 
-    app is first opened (homepage).
-    API called via a GET Request.
-    Example API call: http://18.170.63.134:8000/apis/home/?lat_max=51.5&lat_min=51.4&lng_max=-0.06&lng_min=-0.09
+    home API (GET Request) returns the client a json list of all petrol stations visible within a user's viewport when the app is first opened (homepage).
+    The bounds of the viewport are given by the following query parameters:
+    Query Parameters: 
+    - lat_max: maximum latitude
+    - lat_min: minimum latititude
+    - lng_max: maximum longitude
+    - lng_min: minimum longitude
     """
-
     # permission_classes = (IsAuthenticated,) #Uncomment this later
 
     if request.method == 'GET':
@@ -175,27 +185,63 @@ def home(request):
     # returns a Json list of stations within that page
     return JsonResponse(response, safe=False)
 
-
+@swagger_auto_schema(method='get', query_serializer=SearchInputSerializer, operation_summary="Search and Sort Stations", responses={200: StationDetailSerializer2()})
+@api_view(['GET'])
+@permission_classes([AllowAny])
 def search(request):
     """
-    nearestStation API returns the client a json list of all the petrol stations nearest to the user-specified location
-    according to user preference selection.
-    API called via a GET Request.
-    Example API call: http://18.170.63.134:8000/apis/search/?user_preference=time&location=Imperial%20College%20London&fuel_type=unleaded&distance=30&amenities=&lat=&lng=
+    search API (GET Request) returns the client a json list of all the petrol stations nearest to the user-specified location.
+    Users can specify the following query parameters to personalise their search results:
+    - user_preference: The method of optimisation
+        - time
+        - price
+        - eco-friendliness
+    - location: The address where the user wants to execute the search
+    - lat: The latitude of the search location. This takes precedence over 'location'.
+    - lng: The longitude of the search location. This takes precedence over 'location'.
+    - fuel type:
+        - unleaded
+        - super unleaded
+        - diesel
+        - premium diesel
+    - distance: The search radius where the search results should fall within
+    - amenities: Choose from 16 different amenities that the user would like suggested results to have
     """
     if request.method == 'GET':
-        # Get user specifications/ preferences
-        user_preference = request.GET['user_preference']
-        user_location = request.GET['location']
-        fuel_type = request.GET['fuel_type']
+        # user preference
+        if 'user_preference' in request.GET:
+            user_preference = request.GET['user_preference']
+        else:
+            user_preference = ""
+
+        # user location
+        if 'location' in request.GET:
+            user_location = request.GET['location']
+        else:
+            user_location = ""
+
+        # fuel type
+        if 'fuel_type' in request.GET:
+            fuel_type = request.GET['fuel_type']
+        else:
+            fuel_type = ""
+
+        # Pass query inputs
         max_radius_km = request.GET['distance']
-        amenities_list = request.GET['amenities'].split(',')
-        if request.GET['lat'] != '':
+
+        # amenities
+        if 'amenities' in request.GET:
+            amenities_list = request.GET['amenities'].split(',')
+        else:
+            amenities_list = [""]
+        print(amenities_list)
+        # Geocoding - convert addresses into coordinates for processing
+        if 'lat' in request.GET and request.GET['lat'] != '':
             user_lat = float(request.GET['lat'])
             user_lng = float(request.GET['lng'])
         else:
-            user_lat = ''
-            user_lng = ''
+            user_lat = ""
+            user_lng = ""
 
         if not user_lat and not user_lng:
             try:
@@ -351,12 +397,24 @@ def search(request):
 
     return JsonResponse(response, safe=False, status=200)
 
-
+@swagger_auto_schema(method='post', request_body=UserReviewSerializer, operation_summary="Submit Station Review", responses={200: 'Review submitted', 500: 'Internal Server Error', 555: 'Price exceeded threshold'})
 @api_view(['POST'])
+@parser_classes([MultiPartParser])
 def review(request):
-    """API handles all user requests regarding station reviews."""
+    """
+    review API is used to update station information (fuel prices, congestion times and opening times) based on user reviews.
+    Query Parameters:
+    - station_id: the station's information to be updated
+    - unleaded_price : price for unleaded fuel
+    - diesel_price : price for diesel fuel
+    - super_unleaded_price : price for super unleaded fuel
+    - premium_diesel_price : price for premium diesel price fuel
+    - open: 1 if the station is open, 0 otherwise
+    - congestion: the time spent waiting/ queing at the station
+    - receipt: an image of the receipt. This is only required if a 500 status code is obtained, indicating input prices have exceeded thresholds
+    """
     if request.method == 'POST':
-        station_id = request.POST['station']  # pk?
+        station_id = request.POST['station']  
         station = Station.objects.get(pk=station_id)
         fuel_prices = FuelPrice.objects.get(station=station)
         user_review, _ = UserReview.objects.get_or_create(station=station)
@@ -395,25 +453,25 @@ def review(request):
 
             user_review.save()
 
-            if request.POST['unleaded_price'] != "":
+            if ('unleaded_price' in request.POST) and request.POST['unleaded_price'] != "":
                 unleaded_price = float(request.POST['unleaded_price'])  # Decimal
                 if not check_and_update('unleaded_price', unleaded_price, fuel_prices, user_review):
                     return JsonResponse({'status': 'false', 'message': 'Exceeded threshold. Please submit receipt.'},
                                         status=555)
 
-            if request.POST['diesel_price'] != "":
+            if ('diesel_price' in request.POST) and request.POST['diesel_price'] != "":
                 diesel_price = float(request.POST['diesel_price'])  # Decimal
                 if not check_and_update('diesel_price', diesel_price, fuel_prices, user_review):
                     return JsonResponse({'status': 'false', 'message': 'Exceeded threshold. Please submit receipt.'},
                                         status=555)
 
-            if request.POST['super_unleaded_price'] != "":
+            if ('super_unleaded_price' in request.POST) and request.POST['super_unleaded_price'] != "":
                 super_unleaded_price = float(request.POST['super_unleaded_price'])  # Decimal
                 if not check_and_update('super_unleaded_price', super_unleaded_price, fuel_prices, user_review):
                     return JsonResponse({'status': 'false', 'message': 'Exceeded threshold. Please submit receipt.'},
                                         status=555)
 
-            if request.POST['premium_diesel_price'] != "":
+            if ('premium_diesel_price' in request.POST) and request.POST['premium_diesel_price'] != "":
                 premium_diesel_price = float(request.POST['premium_diesel_price'])  # Decimal
                 if not check_and_update('premium_diesel_price', premium_diesel_price, fuel_prices, user_review):
                     return JsonResponse({'status': 'false', 'message': 'Exceeded threshold. Please submit receipt.'},

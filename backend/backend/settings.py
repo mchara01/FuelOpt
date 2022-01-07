@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework.authtoken',
     'rest_auth',
+    'drf_yasg',
     'apis.apps.ApisConfig',
     'stations.apps.StationsConfig',
 
@@ -167,3 +168,14 @@ MESSAGE_TAGS = {
 
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 TESTING = len(sys.argv) > 1 and sys.argv[1] == 'test'
+
+SWAGGER_SETTINGS = {
+   'SECURITY_DEFINITIONS': {
+      'Token': {
+            'type': 'apiKey',
+            'name': 'Authorization',
+            'in': 'header'
+      }
+   },
+   'OPERATIONS_SORTER': 'method',
+}
