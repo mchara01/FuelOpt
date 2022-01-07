@@ -188,21 +188,24 @@ class FuelStationDataService {
 
     final url = Uri.parse(urlstring);
 
-    final response = await http.post(
-      url,
-      body: {
-        "station": stationId.toString(),
-        'open': info['open'],
-        'congestion': info['congestion'],
-        'unleaded_price': info['unleaded'],
-        'diesel_price': info['diesel'],
-        'super_unleaded_price': info['superUnleaded'],
-        'premium_diesel_price': info['premiumDiesel'],
-      },
-      headers: {"Authorization": 'Token ' + token},
-    );
+    var request = http.MultipartRequest('POST', url);
+    request.fields.addAll({
+      "station": stationId.toString(),
+      'open': info['open'],
+      'congestion': info['congestion'],
+      'unleaded_price': info['unleaded'],
+      'diesel_price': info['diesel'],
+      'super_unleaded_price': info['superUnleaded'],
+      'premium_diesel_price': info['premiumDiesel'],
+    });
+    var headers = {
+      "Authorization": 'Token ' + token,
+    };
+    request.headers.addAll(headers);
+    http.StreamedResponse response = await request.send();
 
     print(response.statusCode);
+
     // if the receipt got accepted
     if (response.statusCode == 200) {
       return 1;
