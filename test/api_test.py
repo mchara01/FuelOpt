@@ -1,8 +1,7 @@
+import json
+
 from django.contrib.auth import get_user_model
 from django.test import TestCase, Client
-import json
-import urllib
-import os
 from stations.models import Station, FuelPrice, UserReview
 
 

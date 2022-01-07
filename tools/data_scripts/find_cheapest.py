@@ -32,7 +32,7 @@ def check_price_station(data, fuel, station_id):
         return False, 0.2
     return None, None
 
-data = pd.read_csv("data/data_scripts/stations_fuel_prices.csv")
+data = pd.read_csv("tools/data_scripts/stations_fuel_prices.csv")
 fuel = 'diesel'
 station_id = 12511
 cheap , perc = check_price_station(data, fuel, station_id)
