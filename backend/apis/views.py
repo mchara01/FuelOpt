@@ -17,7 +17,7 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.parsers import MultiPartParser
 from rest_framework.decorators import parser_classes
 from stations import models
-from .serializers import StationSerializer, StationDetailSerializer1, StationDetailSerializer2, StationDetailSerializer3, UserReviewSerializer, SearchInputSerializer
+from .serializers import StationSerializer, StationDetailSerializer1, StationDetailSerializer2, StationDetailSerializer3, UserReviewSerializer, SearchInputSerializer, HomeSerializer
 from .utils import geocoding_with_postcode, geocoding_with_name, get_duration_distance, sort_by_price, \
     query_sorted_order, create_response, check_and_update, read_receipt
 from .config import AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY
@@ -27,7 +27,7 @@ from drf_yasg import openapi
 
 class ListStation(generics.ListAPIView):
     """
-    Return a list of all petrol stations
+    Return a list of all petrol stations in the database.
     """
     permission_classes = (IsAuthenticated,)
     queryset = models.Station.objects.all()
@@ -38,7 +38,7 @@ class DetailStation(generics.RetrieveUpdateDestroyAPIView):
     queryset = models.Station.objects.all()
     serializer_class = StationSerializer
 
-@swagger_auto_schema(method='get', operation_summary="Get detail information for a station", responses={200: StationDetailSerializer3()})
+@swagger_auto_schema(method='get', operation_summary="Get Detailed Station Info", responses={200: StationDetailSerializer3()})
 @api_view(['GET'])
 @permission_classes([AllowAny])
 def detailStation(request, station_id):
@@ -146,26 +146,22 @@ def updateEntries():
 
     return
 
-
 def deleteFuelPrices():
     FuelPrice.objects.all().delete()
 
-lat_max = openapi.Parameter('lat_max', openapi.IN_QUERY, description="Largest latitude", type=openapi.TYPE_STRING, required=True)
-lat_min = openapi.Parameter('lat_min', openapi.IN_QUERY, description="Smallest latitude", type=openapi.TYPE_STRING, required=True)
-lng_max = openapi.Parameter('lng_max', openapi.IN_QUERY, description="Largest longitude", type=openapi.TYPE_STRING, required=True)
-lng_min = openapi.Parameter('lng_min', openapi.IN_QUERY, description="Smallest latitude", type=openapi.TYPE_STRING, required=True)
-
-@swagger_auto_schema(method='get', manual_parameters=[lat_max, lat_min, lng_max, lng_min], operation_summary="List stations in a certain area", responses={200: StationDetailSerializer1()})
+@swagger_auto_schema(method='get', query_serializer=HomeSerializer, operation_summary="List stations in a certain area", responses={200: StationDetailSerializer1()})
 @api_view()
 @permission_classes([AllowAny])
 def home(request):
     """
-    home API returns the client a json list of all petrol stations visible within a user's viewport when the 
-    app is first opened (homepage).
-    API called via a GET Request.
-    Example API call: http://18.170.63.134:8000/apis/home/?lat_max=51.5&lat_min=51.4&lng_max=-0.06&lng_min=-0.09
+    home API (GET Request) returns the client a json list of all petrol stations visible within a user's viewport when the app is first opened (homepage).
+    The bounds of the viewport are given by the following query parameters:
+    Query Parameters: 
+    - lat_max: maximum latitude
+    - lat_min: minimum latititude
+    - lng_max: maximum longitude
+    - lng_min: minimum longitude
     """
-
     # permission_classes = (IsAuthenticated,) #Uncomment this later
 
     if request.method == 'GET':
@@ -189,29 +185,29 @@ def home(request):
     # returns a Json list of stations within that page
     return JsonResponse(response, safe=False)
 
-user_preference = openapi.Parameter('user_preference', openapi.IN_QUERY, description="optimization options", type=openapi.TYPE_STRING)
-location = openapi.Parameter('location', openapi.IN_QUERY, description="destination name", type=openapi.TYPE_STRING)
-lat = openapi.Parameter('lat', openapi.IN_QUERY, description="destination latitude", type=openapi.TYPE_STRING)
-lng = openapi.Parameter('lng', openapi.IN_QUERY, description="destination longitude", type=openapi.TYPE_STRING)
-distance = openapi.Parameter('distance', openapi.IN_QUERY, description="distance filter", type=openapi.TYPE_STRING)
-fuel_type = openapi.Parameter('fuel_type', openapi.IN_QUERY, description="fuel type filter", type=openapi.TYPE_STRING)
-amenities = openapi.Parameter('amenities', openapi.IN_QUERY, description="amenities filter", type=openapi.TYPE_STRING)
-
-# manual_parameters=[user_preference, location, lat, lng, distance, fuel_type, amenities]
-
-@swagger_auto_schema(method='get', query_serializer=SearchInputSerializer, operation_summary="Search and sort stations based on filter and optimisation options", responses={200: StationDetailSerializer2()})
+@swagger_auto_schema(method='get', query_serializer=SearchInputSerializer, operation_summary="Search and Sort Stations", responses={200: StationDetailSerializer2()})
 @api_view(['GET'])
 @permission_classes([AllowAny])
 def search(request):
     """
-    nearestStation API returns the client a json list of all the petrol stations nearest to the user-specified location
-    according to user preference selection.
-    API called via a GET Request.
-    Example API call: http://18.170.63.134:8000/apis/search/?user_preference=time&location=Imperial%20College%20London&fuel_type=unleaded&distance=30&amenities=&lat=&lng=
+    search API (GET Request) returns the client a json list of all the petrol stations nearest to the user-specified location.
+    Users can specify the following query parameters to personalise their search results:
+    - user_preference: The method of optimisation
+        - time
+        - price
+        - eco-friendliness
+    - location: The address where the user wants to execute the search
+    - lat: The latitude of the search location. This takes precedence over 'location'.
+    - lng: The longitude of the search location. This takes precedence over 'location'.
+    - fuel type:
+        - unleaded
+        - super unleaded
+        - diesel
+        - premium diesel
+    - distance: The search radius where the search results should fall within
+    - amenities: Choose from 16 different amenities that the user would like suggested results to have
     """
     if request.method == 'GET':
-        # Pass query inputs
-        max_radius_km = request.GET['distance']
         # user preference
         if 'user_preference' in request.GET:
             user_preference = request.GET['user_preference']
@@ -230,12 +226,15 @@ def search(request):
         else:
             fuel_type = ""
 
+        # Pass query inputs
+        max_radius_km = request.GET['distance']
+
         # amenities
         if 'amenities' in request.GET:
             amenities_list = request.GET['amenities'].split(',')
         else:
             amenities_list = [""]
-        
+        print(amenities_list)
         # Geocoding - convert addresses into coordinates for processing
         if 'lat' in request.GET and request.GET['lat'] != '':
             user_lat = float(request.GET['lat'])
@@ -395,15 +394,20 @@ def search(request):
 
     return JsonResponse(response, safe=False, status=200)
 
-@swagger_auto_schema(method='post', request_body=UserReviewSerializer, operation_summary="Submit review of a station", responses={200: 'Review submitted', 500: 'Internal Server Error', 555: 'Price exceeded threshold'})
+@swagger_auto_schema(method='post', request_body=UserReviewSerializer, operation_summary="Submit Station Review", responses={200: 'Review submitted', 500: 'Internal Server Error', 555: 'Price exceeded threshold'})
 @api_view(['POST'])
 @parser_classes([MultiPartParser])
 def review(request):
     """
-    API handles all user requests regarding station reviews.
+    review API is used to update station information (fuel prices, congestion times and opening times) based on user reviews.
+    Query Parameters:
+    - station_id: the station's information to be updated
+    - open: true if the station is open, false otherwise
+    - congestion: the time spent waiting/ queing at the station
+    - receipt: an image of the receipt. This is only required if a 500 status code is obtained, indicating input prices have exceeded thresholds
     """
     if request.method == 'POST':
-        station_id = request.POST['station']  # pk?
+        station_id = request.POST['station']  
         station = Station.objects.get(pk=station_id)
         fuel_prices = FuelPrice.objects.get(station=station)
         user_review, _ = UserReview.objects.get_or_create(station=station)
