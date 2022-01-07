@@ -35,6 +35,11 @@ To contribute to ***FuelOpt***, follow these steps:
 
 Alternatively see the GitHub documentation on [creating a pull request](https://help.github.com/en/github/collaborating-with-issues-and-pull-requests/creating-a-pull-request).
 
+## Testing
+To run the unit tests on our backend API methods, in the terminal:
+1. cd into the FuelOpt directory: 'cd FuelOpt'
+2. run `python ../FuelOpt/src/backend/manage.py test ../FuelOpt/test/`
+
 ## Useful links
 
 - [Flutter documentation](https://flutter.dev/docs)

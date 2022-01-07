@@ -227,8 +227,8 @@ def search(request):
             fuel_type = ""
 
         # search radius
-        if 'distance' in request.GET:
-            max_radius_km = int(request.GET['distance'])
+        if 'distance' in request.GET and request.GET['distance']!='':
+                max_radius_km = int(request.GET['distance'])
         else:
             max_radius_km = ""
 
