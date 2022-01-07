@@ -20,7 +20,7 @@ Before you begin, ensure you have met the following requirements:
 
 * You installed of all the required Python modules with:  `pip install -r backend/requirements.txt`
 * You are using Python >= 3.8.
-* You have entered your API keys (e.g AWS, Google) where necessary. The config_sample.py in the backend directory illustrates how the API key should be in the config.py file you will must create. 
+* You have entered your API keys (e.g AWS, Google) where necessary. The [config_sample.py]() in the **sample** directory illustrates how the API key should be in the config.py file you will must create. 
 
 ## Architecture
 <p align="center">
