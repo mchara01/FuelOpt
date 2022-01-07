@@ -21,7 +21,7 @@ Before you begin, ensure you have met the following requirements:
 
 ## Architecture
 <p align="center">
-  <img src="./fuelopt_arch_final.jpg">
+  <img src="drawio/fuelopt_arch_final.jpg">
 </p>
 
 ## Contributing to FuelOpt
