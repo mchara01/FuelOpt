@@ -73,7 +73,7 @@ class MapState extends State<Map> {
   @override
   Widget build(BuildContext context) {
     final Size size = MediaQuery.of(context).size;
-    final currentLocation = Provider.of<CurrentLocationModel>(context);
+    // final currentLocation = Provider.of<CurrentLocationModel>(context);
 
     return Scaffold(
       drawer: NavigationDrawerWidget(),
@@ -103,9 +103,9 @@ class MapState extends State<Map> {
                       icon: fuelStationIcon));
                 }
               }
-              _markers.add(Marker(
-                  markerId: MarkerId("currentLocation"),
-                  position: currentLocation.getLatLng()));
+              // _markers.add(Marker(
+              //     markerId: MarkerId("currentLocation"),
+              //     position: currentLocation.getLatLng()));
             } else {
               List<StationResult> top3ResultList =
                   stations.cast<StationResult>();
@@ -123,9 +123,9 @@ class MapState extends State<Map> {
                     },
                     icon: fuelStationIcon));
               }
-              _markers.add(Marker(
-                  markerId: MarkerId("currentLocation"),
-                  position: currentLocation.getLatLng()));
+              // _markers.add(Marker(
+              //     markerId: MarkerId("currentLocation"),
+              //     position: currentLocation.getLatLng()));
             }
             return GoogleMap(
               mapType: MapType.normal,
@@ -188,22 +188,26 @@ class MapState extends State<Map> {
             );
           }),
           const FuelStationsBottomSheet(),
-          Positioned(
-            top: 20,
-            width: size.width * 0.2,
-            child: TextButton(
-              style: TextButton.styleFrom(
-                backgroundColor: appColors.PrimaryBlue,
-                shape: const CircleBorder(),
-              ),
-              child: const Icon(
-                Icons.menu,
-                color: Colors.white,
-              ),
-              onPressed: () {
-                Scaffold.of(context).openDrawer();
-              },
-            ),
+          Builder(
+            builder: (context) {
+              return Positioned(
+                top: 30,
+                width: size.width * 0.2,
+                child: TextButton(
+                  style: TextButton.styleFrom(
+                    backgroundColor: appColors.PrimaryBlue,
+                    shape: const CircleBorder(),
+                  ),
+                  child: const Icon(
+                    Icons.menu,
+                    color: Colors.white,
+                  ),
+                  onPressed: () {
+                    Scaffold.of(context).openDrawer();
+                  },
+                ),
+              );
+            }
           ),
           // Positioned(
           //   top: 30,
@@ -223,11 +227,10 @@ class MapState extends State<Map> {
           Positioned(
             top: 30,
             left: 130,
-            width: 130,
             child: const SearchBarSearchThisAreaButton(),
           ),
           Positioned(
-            top: 70,
+            top: 80,
             width: size.width * 0.2,
             child: TextButton(
               style: TextButton.styleFrom(

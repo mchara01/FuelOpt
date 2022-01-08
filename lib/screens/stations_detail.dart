@@ -5,7 +5,6 @@ import 'package:fuel_opt/screens/review_screen.dart';
 import 'package:fuel_opt/widgets/border_box.dart';
 import 'package:provider/provider.dart';
 import '../model/current_location_model.dart';
-import '../model/search_options.dart';
 import '../utils/appColors.dart' as appColors;
 import '../utils/theme.dart' as appTheme;
 import 'package:fuel_opt/api/api.dart';
@@ -20,7 +19,6 @@ class StationsDetail extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final searchQuery = Provider.of<SearchQueryModel>(context);
     final currentLocation =
         Provider.of<CurrentLocationModel>(context, listen: false);
 
@@ -319,8 +317,8 @@ class ChoiceOption extends StatelessWidget {
 
 _launchMap(
     sourceLat, sourceLong, destinationLatitude, destinationLongitude) async {
-  String sourceLatitude = sourceLat;
-  String sourceLongitude = sourceLong;
+  String sourceLatitude = sourceLat.toString();
+  String sourceLongitude = sourceLong.toString();
   String mapOptions = [
     'saddr=$sourceLatitude,$sourceLongitude',
     'daddr=$destinationLatitude,$destinationLongitude',
