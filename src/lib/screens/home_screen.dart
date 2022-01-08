@@ -73,7 +73,6 @@ class MapState extends State<Map> {
   @override
   Widget build(BuildContext context) {
     final Size size = MediaQuery.of(context).size;
-    final currentLocation = Provider.of<CurrentLocationModel>(context);
 
     return Scaffold(
       drawer: NavigationDrawerWidget(),
@@ -142,14 +141,13 @@ class MapState extends State<Map> {
                 LocationData? locationData =
                     await _locationManager.getLocation();
                 if (locationData != null) {
+                  currentLocationModel.setUserLocation(LatLng(locationData.latitude!, locationData.longitude!));
+
                   await mapController.animateCamera(
                       CameraUpdate.newCameraPosition(CameraPosition(
                           target: LatLng(locationData.latitude as double,
                               locationData.longitude as double),
                           zoom: 13)));
-
-                  currentLocationModel.setLatLng(
-                      LatLng(locationData.latitude!, locationData.longitude!));
                 }
 
                 await Future.delayed(const Duration(seconds: 3));

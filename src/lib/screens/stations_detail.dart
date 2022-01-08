@@ -3,6 +3,7 @@ import 'package:fuel_opt/model/search_result.dart';
 import 'package:fuel_opt/screens/login_screen.dart';
 import 'package:fuel_opt/screens/review_screen.dart';
 import 'package:fuel_opt/widgets/border_box.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:provider/provider.dart';
 import '../model/current_location_model.dart';
 import '../utils/appColors.dart' as appColors;
@@ -19,8 +20,6 @@ class StationsDetail extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final currentLocation =
-        Provider.of<CurrentLocationModel>(context);
 
     final Size size = MediaQuery.of(context).size;
     final double padding = 25;
@@ -55,9 +54,12 @@ class StationsDetail extends StatelessWidget {
                             )),
                         TextButton.icon(
                           onPressed: () {
+                            final currentLocation =
+                            Provider.of<CurrentLocationModel>(context, listen: false);
+                            LatLng currentUserLocation = currentLocation.getCurrentUserLocation();
                             _launchMap(
-                                currentLocation.getLatLng().latitude,
-                                currentLocation.getLatLng().longitude,
+                                currentUserLocation.latitude,
+                                currentUserLocation.longitude,
                                 station.latitude,
                                 station.longitude);
                           },
