@@ -11,18 +11,27 @@ open-source, platform-independent and socially helpful app to assist motorists i
 their fuel-filling journeys in terms of cost, time, and fuel efficiency. Currently, the application
 focuses on the geographic area of London, UK, where the shortage was mostly felt.
 
+## Documentation
+The FuelOpt project documentation is located at [doc/api documentation](https://github.com/mchara01/FuelOpt/blob/main/doc/api%20documentation). Alternatively, you can find it here: http://18.170.63.134:8000/api-docs/
+
 ## Prerequisites
 
 Before you begin, ensure you have met the following requirements:
 
 * You installed of all the required Python modules with:  `pip install -r backend/requirements.txt`
 * You are using Python >= 3.8.
-* You have entered your API keys (e.g AWS, Google) where necessary. The config_sample.py in the backend directory illustrates how the API key should be in the config.py file you will must create. 
+* You have entered your API keys (e.g AWS, Google) where necessary. The [config_sample.py](https://github.com/mchara01/FuelOpt/blob/main/sample/config_sample.py) in the **sample** directory illustrates how the API key should be in the config.py file you will must create. 
 
 ## Architecture
 <p align="center">
-  <img src="./fuelopt_arch_final.jpg">
+  <img src="drawio/fuelopt_arch_final.jpg">
 </p>
+
+## Testing
+To run the unit tests on our backend API methods, in the terminal:
+1. cd into the FuelOpt directory: `cd FuelOpt`
+2. Execute: `python ../FuelOpt/src/backend/manage.py test ../FuelOpt/test/`
+
 
 ## Contributing to FuelOpt
 To contribute to ***FuelOpt***, follow these steps:
