@@ -228,9 +228,9 @@ def search(request):
 
         # search radius
         if 'distance' in request.GET and request.GET['distance']!='':
-                max_radius_km = int(request.GET['distance'])
+                max_radius_km = int(float(request.GET['distance']))
         else:
-            max_radius_km = ""
+            max_radius_km = 5
 
         # amenities
         if 'amenities' in request.GET:
@@ -254,10 +254,6 @@ def search(request):
                 except ValueError as e:
                     return JsonResponse({ 'status':'false', 'message': str(e) }, status=500)
 
-        # Default distance range
-        if max_radius_km == '':
-            max_radius_km = 5
-        
         if max_radius_km > 15:
             return JsonResponse({'status':'false', 'message': 'Max search radius of 15km exceeded. Please use a distance of 15km or less.'}, status=500)
 
