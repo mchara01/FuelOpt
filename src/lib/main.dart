@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:fuel_opt/screens/home_screen.dart';
-import 'package:fuel_opt/screens/login_screen.dart';
 import 'package:provider/provider.dart';
 
 import 'model/current_location_model.dart';
@@ -30,6 +29,18 @@ class MyApp extends StatelessWidget {
         ),
         ChangeNotifierProvider(
           create: (context) => CurrentLocationModel(),
+        ),
+        ChangeNotifierProvider(
+          create: (context) => SortByPreferenceModel(),
+        ),
+        ChangeNotifierProvider(
+          create: (context) => FuelTypePreferenceModel(),
+        ),
+        ChangeNotifierProvider(
+          create: (context) => DistancePreferenceModel(),
+        ),
+        ChangeNotifierProvider(
+          create: (context) => FacilitiesPreferenceModel(),
         ),
       ],
       child: MaterialApp(

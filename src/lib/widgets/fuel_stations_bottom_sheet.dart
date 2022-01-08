@@ -2,13 +2,9 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
-import 'package:fuel_opt/model/search_options.dart';
-import 'package:fuel_opt/widgets/filter/filter_menu.dart';
 import 'package:fuel_opt/widgets/search_bar.dart';
 import 'package:fuel_opt/widgets/station_sheet_below.dart';
-import 'package:provider/provider.dart';
 import 'package:snapping_sheet/snapping_sheet.dart';
-import 'package:fuel_opt/widgets/search_result_list.dart';
 
 class FuelStationsBottomSheet extends StatefulWidget {
   const FuelStationsBottomSheet({Key? key}) : super(key: key);
@@ -44,71 +40,49 @@ class _FuelStationsBottomSheetState extends State<FuelStationsBottomSheet> {
 
   @override
   Widget build(BuildContext context) {
-    return MultiProvider(
-      providers: [
-        // ChangeNotifierProvider(
-        //   create: (context) => SearchQueryModel(),
-        // ),
-        ChangeNotifierProvider(
-          create: (context) => SortByPreferenceModel(),
+    return SnappingSheet(
+      controller: snappingSheetController,
+      grabbing: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          boxShadow: <BoxShadow>[
+            BoxShadow(blurRadius: 20.0, color: Colors.black.withOpacity(0.2))
+          ],
         ),
-        ChangeNotifierProvider(
-          create: (context) => FuelTypePreferenceModel(),
+        child: SearchBar(
+          searchOnTap: () {
+            programmaticBottomSheetMovement = true;
+            snappingSheetController
+                .snapToPosition(
+                    const SnappingPosition.factor(positionFactor: 0.7))
+                .then((value) {
+              bottomSheetPosition = snappingSheetController.currentPosition;
+              programmaticBottomSheetMovement = false;
+            });
+          },
         ),
-        ChangeNotifierProvider(
-          create: (context) => DistancePreferenceModel(),
-        ),
-        ChangeNotifierProvider(
-          create: (context) => FacilitiesPreferenceModel(),
-        ),
-        // ChangeNotifierProvider(
-        //   create: (context) => SearchResultModel(),
-        // )
-      ],
-      child: SnappingSheet(
-        controller: snappingSheetController,
-        grabbing: Container(
-          decoration: BoxDecoration(
-            color: Colors.white,
-            boxShadow: <BoxShadow>[
-              BoxShadow(blurRadius: 20.0, color: Colors.black.withOpacity(0.2))
-            ],
-          ),
-          child: SearchBar(
-            searchOnTap: () {
-              programmaticBottomSheetMovement = true;
-              snappingSheetController
-                  .snapToPosition(
-                      const SnappingPosition.factor(positionFactor: 0.7))
-                  .then((value) {
-                bottomSheetPosition = snappingSheetController.currentPosition;
-                programmaticBottomSheetMovement = false;
-              });
-            },
-          ),
-        ),
-        grabbingHeight: 80,
-        sheetBelow: SnappingSheetContent(
-            child: const StationSheetBelow(),
-            draggable: true),
-        initialSnappingPosition: const SnappingPosition.factor(
+      ),
+      grabbingHeight: 80,
+      sheetBelow: SnappingSheetContent(
+          child: const StationSheetBelow(),
+          draggable: true),
+      initialSnappingPosition: const SnappingPosition.factor(
+          positionFactor: 0.0,
+          grabbingContentOffset: GrabbingContentOffset.top),
+      snappingPositions: const [
+        SnappingPosition.factor(
             positionFactor: 0.0,
             grabbingContentOffset: GrabbingContentOffset.top),
-        snappingPositions: const [
-          SnappingPosition.factor(
-              positionFactor: 0.0,
-              grabbingContentOffset: GrabbingContentOffset.top),
-          SnappingPosition.factor(positionFactor: 0.4),
-          SnappingPosition.factor(positionFactor: 0.7)
-        ],
-        onSheetMoved: (sheetPositionData) {
-          if (!programmaticBottomSheetMovement && isKeyboardVisible) {
-            if ((sheetPositionData.pixels - bottomSheetPosition!).abs() > 30) {
-              FocusScope.of(context).unfocus();
-            }
+        SnappingPosition.factor(positionFactor: 0.4),
+        SnappingPosition.factor(positionFactor: 0.7)
+      ],
+      onSheetMoved: (sheetPositionData) {
+        if (!programmaticBottomSheetMovement && isKeyboardVisible) {
+          if ((sheetPositionData.pixels - bottomSheetPosition!).abs() > 30) {
+            FocusScope.of(context).unfocus();
           }
-        },
-      ),
+        }
+      },
     );
   }
 
