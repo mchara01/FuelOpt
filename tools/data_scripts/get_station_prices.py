@@ -8,7 +8,7 @@ from time import time
 import pandas as pd
 
 from dotenv import load_dotenv
-import os 
+from os import getenv 
 load_dotenv()
 
 # start = time()
@@ -19,8 +19,8 @@ options.add_argument("--headless")
 
 # signing in
 data = {
-    "email": os.getenv("PETROL_USERNAME"),
-    "password": os.getenv("PETROL_PASSWORD"),
+    "email": getenv("PETROL_USERNAME"),
+    "password": getenv("PETROL_PASSWORD"),
     "url_login": "https://app.petrolprices.com/login",
     "url_station": "https://app.petrolprices.com/petrolstation"
 }
