@@ -426,10 +426,7 @@ def review(request):
                 )
                 s3.upload_fileobj(receipt, "fuelopt-s3-main", receipt.name)
 
-                if settings.TESTING:
-                    receipt_path = "static/reviews/" + receipt.name
-                else:
-                    receipt_path = "backend/static/reviews/" + receipt.name
+                receipt_path = "./src/backend/static/reviews/" + receipt.name
                 s3.download_file("fuelopt-s3-main", receipt.name, receipt_path)
                 price, type_of_fuel, date = read_receipt(receipt_path)
 
