@@ -39,13 +39,16 @@ https://install.appcenter.ms/users/gmnapster/apps/fuelopt/distribution_groups/fu
 
 ### iOS
 
-Due to Apple's strict distribution guidlines, only the developmental build can be accessed for now. To run this build, **an Apple machine with Xcode is required**.
+Due to Apple's strict distribution guidelines, only the developmental build can be accessed for now. To run this build, **an Apple machine with Xcode is required**.
 
 1. [Setup the development environment](#setting-up-the-development-environment)
-2. [Configure your iOS device for testing](#configure-an-ios-device-for-testing)
-3. Open the src/ios/Runner.xcworkspace folder in Xcode.
-4. Make sure your iOS device is connected, on, and unlocked.
-5. Press the play button in the top menu bar of Xcode.
+2. Clone this repository.
+3. Generate your own Google Maps API key from [here](https://developers.google.com/maps/documentation/ios-sdk/get-api-key) and supply it in the ***src/ios/Runner/keys.strings*** file by replacing "API_KEY_HERE".
+4. Generate your own LocationIQ key from [here](https://locationiq.com/geocoding) supply it in the ***src/keys.env*** file by replacing "API_KEY_HERE".
+5. [Configure your iOS device for testing](#configure-an-ios-device-for-testing)
+6. Open the src/ios/Runner.xcworkspace folder in Xcode.
+7. Make sure your iOS device is connected, on, and unlocked.
+8. Press the play button in the top menu bar of Xcode.
 
 
 ### Setting up the development environment
