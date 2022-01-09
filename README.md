@@ -27,6 +27,50 @@ Before you begin, ensure you have met the following requirements:
   <img src="drawio/fuelopt_arch_final.jpg">
 </p>
 
+## Running the app
+
+### Android
+
+To try this app on an Android device, scan the QR code or use the link below on that device.
+
+<img src="drawio/fuelopt_android_distribution.png" alt="QR code" width=100 height=100 />
+
+https://install.appcenter.ms/users/gmnapster/apps/fuelopt/distribution_groups/fuelopt%20app%20testers
+
+### iOS
+
+Due to Apple's strict distribution guidlines, only the developmental build can be accessed for now. To run this build, **an Apple machine with Xcode is required**.
+
+1. [Setup the development environment](#setting-up-the-development-environment)
+2. [Configure your iOS device for testing](#configure-an-ios-device-for-testing)
+3. Open the src/ios/Runner.xcworkspace folder in Xcode.
+4. Make sure your iOS device is connected, on, and unlocked.
+5. Press the play button in the top menu bar of Xcode.
+
+
+### Setting up the development environment
+
+1. Install the Flutter SDK from here: [https://flutter.dev/docs/get-started/install](https://flutter.dev/docs/get-started/install).
+2. Make sure to set the PATH variable as mentioned to access the Flutter command-line interface.
+3. Install Cocoapods from here: [https://cocoapods.org](https://cocoapods.org)
+4. Make sure Cocoapods is accessible from the command line.
+5. Run `flutter doctor` in the command line to make sure the Flutter SDK properly installed.
+6. Navigate to the ***src*** directory of this project.
+7. Run `flutter packages get` to get the necessary Flutter dependencies.
+8. Navigate to the ***src/ios*** folder
+9. Run `pod install` to get the necessary ios dependencies.
+
+### Configure an iOS device for testing
+
+#### Simulator
+1. Open iOS/Runner.xcworkspace file in Xcode.
+2. At the top menu bar of Xcode, there is button "Runner > *some ios device*"
+3. Click on it, and choose any device you like.
+
+#### Real device
+
+Please refer to this article: [iOS Device Setup](https://medium.com/front-end-weekly/how-to-test-your-flutter-ios-app-on-your-ios-device-75924bfd75a8)
+
 ## Testing
 To run the unit tests on our backend API methods, in the terminal:
 1. cd into the FuelOpt directory: `cd FuelOpt`
