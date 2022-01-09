@@ -60,6 +60,7 @@ Alternatively see the GitHub documentation on [creating a pull request](https://
 * **Dennis Duka** - *dn321@ic.ac.uk*
 * **Ye Liu** - *yl10321@ic.ac.uk*
 * **Maxim Fishman** - *maf221@ic.ac.uk*
+* **Wei Sin Loo** - *wl2121@ic.ac.uk*
 
 ## License
 [GNU GPLv3](https://choosealicense.com/licenses/gpl-3.0/)

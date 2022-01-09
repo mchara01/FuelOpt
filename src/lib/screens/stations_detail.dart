@@ -104,7 +104,7 @@ class StationsDetail extends StatelessWidget {
                         if (station.number_24_7_opening_hours == 1) "24/7",
                         if (station.toilet == 1) "Toilet",
                         if (station.convenience_store == 1)
-                          "Cconvenience Store",
+                          "Convenience Store",
                         if (station.atm == 1) "ATM",
                         if (station.parking_facilities == 1) "Parking",
                         if (station.disabled_toilet_baby_change == 1)

@@ -109,10 +109,6 @@ class _SearchState extends State<SearchBar> {
                                 Fluttertoast.showToast(
                                     msg: "Please input a valid location");
                               } else {
-                                currentLocation.setLatLng(LatLng(
-                                    double.parse(coordinates[0]),
-                                    double.parse(coordinates[1])));
-
                                 showDialog(
                                   context: context,
                                   builder: (context) => Center(
