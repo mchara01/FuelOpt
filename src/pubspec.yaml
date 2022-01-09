@@ -40,6 +40,7 @@ dependencies:
   provider: ^6.0.1
   snapping_sheet: ^3.1.0
   url_launcher: ^6.0.17
+  flutter_dotenv: ^4.0.0-nullsafety.0
 
 dev_dependencies:
   flutter_lints: ^1.0.0
@@ -52,6 +53,7 @@ dev_dependencies:
 flutter:
   assets:
     - assets/
+    - keys.env
 
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in

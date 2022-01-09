@@ -5,8 +5,10 @@ import 'package:provider/provider.dart';
 import 'model/current_location_model.dart';
 import 'model/search_options.dart';
 import 'model/user_model.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart' as DotEnv;
 
 Future<void> main() async {
+  await DotEnv.load(fileName: 'keys.env');
   runApp(const MyApp());
 }
 

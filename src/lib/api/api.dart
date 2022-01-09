@@ -6,6 +6,7 @@ import 'package:fuel_opt/model/stations_data_model.dart';
 import 'package:fuel_opt/model/top_3_station_result.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart' as http;
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 /*
 Test
@@ -19,8 +20,9 @@ class FuelStationDataService {
   }
 
   Future<List> address2Coordinates(String location) async {
+    String apiKey = env['address_to_coordinates_key']!;
     String urlstring =
-        "https://eu1.locationiq.com/v1/search.php?key=pk.bd315221041f3e0a99e6464f9de0157a" +
+        "https://eu1.locationiq.com/v1/search.php?key=" + apiKey +
             "&q=" +
             location.replaceAll(' ', '%20') +
             "&format=json";
