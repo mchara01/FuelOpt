@@ -1,8 +1,7 @@
 # FuelOpt
 ![GitHub repo size](https://img.shields.io/github/repo-size/mchara01/FuelOpt)
 ![GitHub contributors](https://img.shields.io/github/contributors/mchara01/FuelOpt)
-![GitHub stars](https://img.shields.io/github/stars/mchara01/FuelOpt?style=social)
-![GitHub forks](https://img.shields.io/github/forks/mchara01/FuelOpt?style=social)
+![GitHub stars](https://img.shields.io/github/stars/mchara01/FuelOpt)
 ![example workflow](https://github.com/mchara01/FuelOpt/actions/workflows/aws.yml/badge.svg)
 
 With the energy crisis hitting Britain in September 2021 and worries of a fuel shortage, we 

@@ -21,7 +21,7 @@ on:
 
 env:
   AWS_REGION: eu-west-2                       # set this to your preferred AWS region, e.g. us-west-1
-  ECR_REPOSITORY: fueltoptapi                 # set this to your Amazon ECR repository name
+  ECR_REPOSITORY: fueloptapi                  # set this to your Amazon ECR repository name
 
 jobs:
   deploy:
@@ -57,6 +57,6 @@ jobs:
         # Build a docker container and
         # push it to ECR so that it can
         # be deployed to ECS.
-        docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG backend/
+        docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG src/backend/
         docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
         echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
