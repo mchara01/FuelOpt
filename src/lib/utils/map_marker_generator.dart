@@ -7,6 +7,9 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 import 'image_loader.dart';
 
+// inspired by jbxbergdev
+// https://gist.github.com/jbxbergdev/5238bb78b03a2a4e6f24e55f442d2b70
+
 Future<BitmapDescriptor> createFuelStationIcon(String imagePath, Color backgroundColor) async {
   double degToRad(double deg) => deg * (pi / 180.0);
 

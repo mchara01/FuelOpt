@@ -7,9 +7,7 @@
 
 With the energy crisis hitting Britain in September 2021 and worries of a fuel shortage, we 
 devised an app to help people avoid queues and save the environment. FuelOpt is a user-friendly,
-open-source, platform-independent and socially helpful app to assist motorists in planning and optimising 
-their fuel-filling journeys in terms of cost, time, and fuel efficiency. Currently, the application
-focuses on the geographic area of London, UK, where the shortage was mostly felt.
+open-source, platform-independent and socially-helpful app that assists motorists in planning and optimising their fuel-filling journeys in terms of cost, time, and fuel efficiency. Currently, the application focuses on the geographic area of London, UK, where the shortage was most prominent.
 
 ## Documentation
 The FuelOpt project documentation is located at [doc/api documentation](https://github.com/mchara01/FuelOpt/blob/main/doc/api%20documentation). Alternatively, you can find it here: http://18.170.63.134:8000/api-docs/
@@ -44,7 +42,7 @@ Due to Apple's strict distribution guidelines, only the developmental build can 
 1. [Setup the development environment](#setting-up-the-development-environment)
 2. Clone this repository.
 3. Generate your own Google Maps API key from [here](https://developers.google.com/maps/documentation/ios-sdk/get-api-key) and supply it in the ***src/ios/Runner/keys.strings*** file by replacing "API_KEY_HERE".
-4. Generate your own LocationIQ key from [here](https://locationiq.com/geocoding) supply it in the ***src/keys.env*** file by replacing "API_KEY_HERE".
+4. Generate your own LocationIQ key from [here](https://locationiq.com/geocoding) and supply it in the ***src/keys.env*** file by replacing "API_KEY_HERE".
 5. [Configure your iOS device for testing](#configure-an-ios-device-for-testing)
 6. Open the src/ios/Runner.xcworkspace folder in Xcode.
 7. Make sure your iOS device is connected, on, and unlocked.
@@ -54,7 +52,7 @@ Due to Apple's strict distribution guidelines, only the developmental build can 
 ### Setting up the development environment
 
 1. Install the Flutter SDK from here: [https://flutter.dev/docs/get-started/install](https://flutter.dev/docs/get-started/install).
-2. Make sure to set the PATH variable as mentioned to access the Flutter command-line interface.
+2. Make sure to set the PATH variable as mentioned in the installation link to access the Flutter command-line interface.
 3. Install Cocoapods from here: [https://cocoapods.org](https://cocoapods.org)
 4. Make sure Cocoapods is accessible from the command line.
 5. Run `flutter doctor` in the command line to make sure the Flutter SDK properly installed.
