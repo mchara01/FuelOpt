@@ -11,6 +11,7 @@ open-source, platform-independent and socially helpful app to assist motorists i
 their fuel-filling journeys in terms of cost, time, and fuel efficiency. Currently, the application
 focuses on the geographic area of London, UK, where the shortage was mostly felt.
 
+Check out our presentation video [here.](https://www.youtube.com/watch?v=NGsksgoK-4Q&ab_channel=NadimRahman)
 ## Documentation
 The FuelOpt project documentation is located at [doc/api documentation](https://github.com/mchara01/FuelOpt/blob/main/doc/api%20documentation). Alternatively, you can find it here: http://18.170.63.134:8000/api-docs/
 
