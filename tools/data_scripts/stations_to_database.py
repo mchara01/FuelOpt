@@ -3,13 +3,16 @@ import pymysql
 import pandas as pd
 import numpy as np
 
+from dotenv import load_dotenv
+load_dotenv()
+from os import getenv
 
 # Connect to MariaDB database
 connection = pymysql.connect(
-    user="fuelopt_main",
-    password="N;vZu!93Gh",
+    user=getenv("DB_USERNAME"),
+    password=getenv("DB_PASSWORD"),
     host="127.0.0.1",
-    port=3306,
+    port=3333,
     database="db_fuelopt"
 )
 

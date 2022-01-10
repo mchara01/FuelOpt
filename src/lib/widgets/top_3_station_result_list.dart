@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:fuel_opt/model/fuelprice_model.dart';
 import 'package:fuel_opt/model/search_result.dart';
@@ -57,10 +58,12 @@ class Top3StationResultList extends StatelessWidget {
                                       Text(stationResult.name,
                                         overflow: TextOverflow.ellipsis,),
                                       const SizedBox(height: 5,),
-                                      Row(children: [
+                                      Row(
+                                          children: [
                                         const Icon(Icons.location_pin),
-                                        Text(stationResult.street + ' · ' +
-                                            stationResult.distance!,)
+                                        Flexible(child: Text(stationResult.street, overflow: TextOverflow.ellipsis,)),
+                                        const Text(' · '),
+                                        Text(stationResult.distance!)
                                       ]),
                                       const SizedBox(height: 5,),
                                       Row(

@@ -3,9 +3,9 @@ import 'package:fuel_opt/model/search_result.dart';
 import 'package:fuel_opt/screens/login_screen.dart';
 import 'package:fuel_opt/screens/review_screen.dart';
 import 'package:fuel_opt/widgets/border_box.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:provider/provider.dart';
 import '../model/current_location_model.dart';
-import '../model/search_options.dart';
 import '../utils/appColors.dart' as appColors;
 import '../utils/theme.dart' as appTheme;
 import 'package:fuel_opt/api/api.dart';
@@ -20,9 +20,6 @@ class StationsDetail extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final searchQuery = Provider.of<SearchQueryModel>(context);
-    final currentLocation =
-        Provider.of<CurrentLocationModel>(context);
 
     final Size size = MediaQuery.of(context).size;
     final double padding = 25;
@@ -57,9 +54,12 @@ class StationsDetail extends StatelessWidget {
                             )),
                         TextButton.icon(
                           onPressed: () {
+                            final currentLocation =
+                            Provider.of<CurrentLocationModel>(context, listen: false);
+                            LatLng currentUserLocation = currentLocation.getCurrentUserLocation();
                             _launchMap(
-                                currentLocation.getLatLng().latitude,
-                                currentLocation.getLatLng().longitude,
+                                currentUserLocation.latitude,
+                                currentUserLocation.longitude,
                                 station.latitude,
                                 station.longitude);
                           },
@@ -104,7 +104,7 @@ class StationsDetail extends StatelessWidget {
                         if (station.number_24_7_opening_hours == 1) "24/7",
                         if (station.toilet == 1) "Toilet",
                         if (station.convenience_store == 1)
-                          "Cconvenience Store",
+                          "Convenience Store",
                         if (station.atm == 1) "ATM",
                         if (station.parking_facilities == 1) "Parking",
                         if (station.disabled_toilet_baby_change == 1)

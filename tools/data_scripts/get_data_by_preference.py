@@ -4,9 +4,12 @@ from math import sin, cos, sqrt
 import urllib.request
 import json
 
-# bing maps key
-bingMapsKey = "Aiiv3MUtA8Fq3gGOuwLYLrzz_FRSm1xXUEgDZxO6-R8wg73PKwV50hxqwSrbBhXY"
+from dotenv import load_dotenv
+load_dotenv()
+from os import getenv
 
+# bing maps key
+bingMapsKey = getenv("BING_MAPS_KEY")
 
 def get_data_by_preference():
     df = pd.read_csv("tools/db_scripts/stations_all_info.csv")

@@ -1,4 +1,4 @@
-import os
+from os import getenv
 import pandas as pd
 
 from selenium import webdriver
@@ -21,8 +21,8 @@ options.add_argument("--headless")
 
 # signing in
 data = {
-    "email": os.getenv("PETROL_USERNAME"),
-    "password": os.getenv("PETROL_PASSWORD"),
+    "email": getenv("PETROL_USERNAME"),
+    "password": getenv("PETROL_PASSWORD"),
     "url": "https://app.petrolprices.com/login"
 }
 # initialise browser and go to sign in url

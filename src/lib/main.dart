@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:fuel_opt/screens/home_screen.dart';
-import 'package:fuel_opt/screens/login_screen.dart';
 import 'package:provider/provider.dart';
 
 import 'model/current_location_model.dart';
 import 'model/search_options.dart';
 import 'model/user_model.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart' as DotEnv;
 
 Future<void> main() async {
+  await DotEnv.load(fileName: 'keys.env');
   runApp(const MyApp());
 }
 
@@ -30,6 +31,18 @@ class MyApp extends StatelessWidget {
         ),
         ChangeNotifierProvider(
           create: (context) => CurrentLocationModel(),
+        ),
+        ChangeNotifierProvider(
+          create: (context) => SortByPreferenceModel(),
+        ),
+        ChangeNotifierProvider(
+          create: (context) => FuelTypePreferenceModel(),
+        ),
+        ChangeNotifierProvider(
+          create: (context) => DistancePreferenceModel(),
+        ),
+        ChangeNotifierProvider(
+          create: (context) => FacilitiesPreferenceModel(),
         ),
       ],
       child: MaterialApp(
